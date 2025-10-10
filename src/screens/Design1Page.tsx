@@ -7,10 +7,51 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 type Props = { onBack: () => void };
 
-const DATA = [
-  { id: 'left', color: '#f2f2f2', label: '' },
-  { id: 'center', color: '#62a8e5', label: '50%\nCashback\nup to ₹100' },
-  { id: 'right', color: '#e5732b', label: '' },
+type BrandCard = { id: string; color: string; label: string; logo: string; textColor?: string };
+
+const DATA: BrandCard[] = [
+  {
+    id: 'airtel',
+    color: '#e71d36',
+    label: 'Airtel Voucher',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Airtel_logo.svg/512px-Airtel_logo.svg.png',
+    textColor: '#ffffff',
+  },
+  {
+    id: 'swiggy',
+    color: '#fc8019',
+    label: 'Swiggy Voucher',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Swiggy_logo.png/512px-Swiggy_logo.png',
+    textColor: '#ffffff',
+  },
+  {
+    id: 'zomato',
+    color: '#e23744',
+    label: 'Zomato Voucher',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Zomato_logo.png/512px-Zomato_logo.png',
+    textColor: '#ffffff',
+  },
+  {
+    id: 'doordash',
+    color: '#ff3008',
+    label: 'DoorDash Voucher',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/DoorDash_Logo.png/512px-DoorDash_Logo.png',
+    textColor: '#ffffff',
+  },
+  {
+    id: 'ubereats',
+    color: '#1A1A1A',
+    label: 'Uber Eats Voucher',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Uber_Eats_2020_logo.svg/512px-Uber_Eats_2020_logo.svg.png',
+    textColor: '#2ebd59',
+  },
+  {
+    id: 'amazonpay',
+    color: '#ff9900',
+    label: 'Amazon Pay Voucher',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Amazon_Pay_logo.svg/512px-Amazon_Pay_logo.svg.png',
+    textColor: '#111111',
+  },
 ];
 
 const CARD_WIDTH = Math.round(SCREEN_WIDTH * 0.54);
@@ -44,7 +85,7 @@ export default function Design1Page({ onBack }: Props) {
 
       <View style={styles.titleWrap}>
         <Image
-          source={{ uri: 'https://img.freepik.com/free-psd/birthday-colorful-present-box-design_23-2150318126.jpg' }}
+          source={{ uri: 'https://cdnjs.cloudflare.com/ajax/libs/twemoji/14.0.2/72x72/1f381.png' }}
           style={styles.giftImg}
           resizeMode="cover"
         />
@@ -110,12 +151,8 @@ export default function Design1Page({ onBack }: Props) {
                 ]}
               >
                 <View style={[styles.card, { backgroundColor: item.color }]}> 
-                  {index === 1 ? (
-                    <>
-                      <Text style={styles.centerBig}>50%</Text>
-                      <Text style={styles.centerSmall}>Cashback{"\n"}up to ₹100</Text>
-                    </>
-                  ) : null}
+                  <Image source={{ uri: item.logo }} style={styles.brandLogo} resizeMode="contain" />
+                  <Text style={[styles.brandLabel, { color: item.textColor || 'white' }]}>{item.label}</Text>
                 </View>
               </Animated.View>
             </View>
@@ -196,6 +233,16 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  brandLogo: {
+    width: Math.round(CARD_WIDTH * 0.5),
+    height: Math.round(CARD_HEIGHT * 0.28),
+    marginBottom: 10,
+  },
+  brandLabel: {
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
   },
   centerBig: {
     color: 'white',
