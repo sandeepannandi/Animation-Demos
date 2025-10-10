@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Dimensions, Animated, Pressable, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,83 +11,85 @@ type BrandCard = {
   id: string;
   color: string;
   label: string;
-  logo: string; // PNG URL
-  heroImage: string; // product image URL
+  logo: any; // local asset module
+  heroImage: string; 
   percent: string; // e.g., '50%'
-  amountText: string; // e.g., 'cashback\nup to ₹100'
+  amountText: string;
   textColor?: string;
 };
 
 const DATA: BrandCard[] = [
   {
     id: 'airtel',
-    color: '#e71d36',
+    color: '#FF4949',
     label: 'Airtel Voucher',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Airtel_logo.svg/512px-Airtel_logo.svg.png',
+    logo: require('../../assets/airtel.svg'),
     heroImage: 'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=512&q=60',
-    percent: '50%',
+    percent: '30%',
     amountText: 'cashback\nup to ₹100',
     textColor: '#ffffff',
   },
   {
     id: 'swiggy',
-    color: '#fc8019',
+    color: '#FD9139',
     label: 'Swiggy Voucher',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/13/Swiggy_logo.png/512px-Swiggy_logo.png',
+    logo: require('../../assets/swiggy.svg'),
     heroImage: 'https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=512&q=60',
     percent: '50%',
     amountText: 'cashback\nup to ₹100',
-    textColor: '#ffffff',
+    textColor: '#000',
   },
   {
     id: 'zomato',
-    color: '#e23744',
+    color: '#D94148',
     label: 'Zomato Voucher',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Zomato_logo.png/512px-Zomato_logo.png',
+    logo: require('../../assets/zomato.svg'),
     heroImage: 'https://images.unsplash.com/photo-1542444459-db63c8b4f763?auto=format&fit=crop&w=512&q=60',
-    percent: '50%',
+    percent: '40%',
     amountText: 'cashback\nup to ₹100',
     textColor: '#ffffff',
   },
   {
-    id: 'doordash',
-    color: '#ff3008',
-    label: 'DoorDash Voucher',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/DoorDash_Logo.png/512px-DoorDash_Logo.png',
+    id: 'flipkart',
+    color: '#1C41D6',
+    label: 'Flipkart Voucher',
+    logo: require('../../assets/flipkart.svg'),
     heroImage: 'https://images.unsplash.com/photo-1548365328-9f547fb09530?auto=format&fit=crop&w=512&q=60',
-    percent: '50%',
+    percent: '10%',
     amountText: 'cashback\nup to ₹100',
     textColor: '#ffffff',
   },
   {
     id: 'ubereats',
-    color: '#1A1A1A',
+    color: '#06C167',
     label: 'Uber Eats Voucher',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Uber_Eats_2020_logo.svg/512px-Uber_Eats_2020_logo.svg.png',
+    logo: require('../../assets/uber.svg'),
     heroImage: 'https://images.unsplash.com/photo-1543352634-8730b1eb30cf?auto=format&fit=crop&w=512&q=60',
-    percent: '50%',
+    percent: '40%',
     amountText: 'cashback\nup to ₹100',
-    textColor: '#2ebd59',
+    textColor: '#FFFFFF',
   },
   {
     id: 'amazonpay',
-    color: '#ff9900',
+    color: '#FF9900',
     label: 'Amazon Pay Voucher',
-    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Amazon_Pay_logo.svg/512px-Amazon_Pay_logo.svg.png',
+    logo: require('../../assets/amazon.svg'),
     heroImage: 'https://images.unsplash.com/photo-1523473827534-86c5f8e3d8b2?auto=format&fit=crop&w=512&q=60',
     percent: '50%',
     amountText: 'cashback\nup to ₹100',
-    textColor: '#111111',
+    textColor: '#000000',
   },
 ];
 
-const CARD_WIDTH = Math.round(SCREEN_WIDTH * 0.50);
+const CARD_WIDTH = Math.round(SCREEN_WIDTH * 0.52);
 const CARD_HEIGHT = Math.round(CARD_WIDTH * 1.3);
-const SPACING = 40; // increased spacing so angled cards don't visually overlap
+const SPACING =0; 
 const SNAP = CARD_WIDTH + SPACING;
 
 export default function Design1Page({ onBack }: Props) {
   const scrollX = useRef(new Animated.Value(0)).current;
+  const cardScale = useRef(new Animated.Value(1)).current;
+  const [isLongPressing, setIsLongPressing] = useState(false);
 
   const contentPad = useMemo(() => (SCREEN_WIDTH - CARD_WIDTH) / 2, []);
 
@@ -142,7 +144,7 @@ export default function Design1Page({ onBack }: Props) {
 
           const scale = scrollX.interpolate({
             inputRange,
-            outputRange: [0.92, 1, 0.92],
+            outputRange: [1, 1, 1],
             extrapolate: 'clamp',
           });
 
@@ -155,50 +157,82 @@ export default function Design1Page({ onBack }: Props) {
           // Tilt side cards to mimic arc; middle stays straight
           const rotate = scrollX.interpolate({
             inputRange,
-            outputRange: ['-18deg', '0deg', '18deg'],
+            outputRange: ['-20deg', '0deg', '20deg'],
             extrapolate: 'clamp',
           });
 
           // Arc: center lifted slightly; sides drop more so all appear on a circle
           const translateY = scrollX.interpolate({
             inputRange,
-            outputRange: [-46, 0, -46],
+            outputRange: [-40, 0, -40],
             extrapolate: 'clamp',
           });
 
+          const isActive = index === 1; // Center card is active
+
+          const handleLongPress = () => {
+            console.log('Long press detected on card:', index);
+            if (isActive) {
+              setIsLongPressing(true);
+              Animated.spring(cardScale, {
+                toValue: 1.05,
+                useNativeDriver: true,
+                tension: 150,
+                friction: 7,
+              }).start();
+            }
+          };
+
+          const handlePressOut = () => {
+            console.log('Press ended on card:', index);
+            if (isActive) {
+              setIsLongPressing(false);
+              Animated.spring(cardScale, {
+                toValue: 1,
+                useNativeDriver: true,
+                tension: 150,
+                friction: 7,
+              }).start();
+            }
+          };
+
           return (
             <View style={{ width: SNAP, alignItems: 'center' }}>
-              <Animated.View
-                style={[
-                  styles.cardShadow,
-                  {
-                    transform: [{ translateY }, { rotate }, { scale }],
-                    opacity,
-                  },
-                ]}
+              <Pressable
+                onLongPress={handleLongPress}
+                onPressOut={handlePressOut}
+                delayLongPress={200}
+                style={{ flex: 1 }}
               >
-                <View style={[styles.card, { backgroundColor: item.color }]}> 
-                  {/* Top brand logo */}
-                  <Image source={{ uri: item.logo }} style={styles.brandLogo} resizeMode="contain" />
-                  {/* Offer text */}
-                  <Text style={[styles.percentText, { color: item.textColor || 'white' }]}>{item.percent}</Text>
-                  <Text style={[styles.amountText, { color: item.textColor || 'white' }]}>{item.amountText}</Text>
-                  {/* Bottom hero image */}
-                  <Image source={{ uri: item.heroImage }} style={styles.heroImage} resizeMode="cover" />
-                </View>
-              </Animated.View>
+                <Animated.View
+                  style={[
+                    styles.cardShadow,
+                    {
+                      transform: [{ translateY }, { rotate }, { scale: isActive ? cardScale : scale }],
+                      opacity,
+                    },
+                  ]}
+                >
+                  <View style={[styles.card, { backgroundColor: item.color }]}> 
+                    {/* Top brand logo (local asset) */}
+                    <Image source={item.logo} style={styles.brandLogo} />
+                    {/* Offer text */}
+                    <Text style={[styles.percentText, { color: item.textColor || 'white' }]}>{item.percent}</Text>
+                    <Text style={[styles.amountText, { color: item.textColor || 'white' }]}>{item.amountText}</Text>
+                    {/* Bottom hero image */}
+                    <Image source={{ uri: item.heroImage }} style={styles.heroImage} resizeMode="cover" />
+                  </View>
+                </Animated.View>
+              </Pressable>
             </View>
           );
         }}
       />
 
-      <View style={styles.chevrons}>
-        <Ionicons name="chevron-down" size={20} color="#d6d0c4" />
-        <Ionicons name="chevron-down" size={20} color="#d6d0c4" style={{ marginTop: -6 }} />
-      </View>
+      {/* Active card highlight rectangle - fixed on screen */}
+      <View style={styles.activeHighlight} />
 
-      <View style={styles.bottomShelf} />
-      <Text style={styles.hint}>Drag down to activate offer</Text>
+      
     </View>
   );
 }
@@ -253,12 +287,13 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
     marginTop:80,
+    zIndex: 100,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.45,
-    shadowRadius: 16,
+    shadowColor: '#999',
+    shadowOpacity: 1,
+    shadowRadius: 10,
     shadowOffset: { width: 0, height: 8 },
-    elevation: 8,
+    elevation: 10,
   },
   card: {
     flex: 1,
@@ -267,9 +302,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   brandLogo: {
-    width: Math.round(CARD_WIDTH * 0.5),
-    height: Math.round(CARD_HEIGHT * 0.28),
-    marginBottom: 10,
+    width: Math.round(CARD_WIDTH * 0.4),
+    height: Math.round(CARD_HEIGHT * 0.2),
+    marginBottom: 8,
+    tintColor: 'white',
   },
   brandLabel: {
     fontSize: 18,
@@ -327,6 +363,27 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#d6d0c4',
     fontSize: 12,
+  },
+  activeHighlight: {
+    position: 'absolute',
+    top: '52%',
+    left: '50%',
+    width: CARD_WIDTH + 16,
+    height: CARD_HEIGHT + 16,
+    marginTop: -(CARD_HEIGHT + 16) / 2,
+    marginLeft: -(CARD_WIDTH + 16) / 2,
+    borderRadius: 20,
+    borderWidth: 3,
+    borderColor: '#ffcc4d',
+    backgroundColor: 'transparent',
+    shadowColor: '#ffcc4d',
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 0,
+    pointerEvents: 'none',
+    // Force shadow outside
+    overflow: 'visible',
   },
 });
 
