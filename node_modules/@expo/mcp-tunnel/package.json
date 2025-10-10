@@ -1,0 +1,43 @@
+{
+  "name": "@expo/mcp-tunnel",
+  "version": "0.0.8",
+  "description": "Expo MCP tunnel client",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/expo/expo-mcp.git",
+    "directory": "packages/mcp-tunnel"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "650 Industries, Inc.",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.3",
+    "zod-to-json-schema": "^3.24.6",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "@types/node": "^22.18.0",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.34.0",
+    "eslint-config-universe": "^15.0.3",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "peerDependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.2"
+  },
+  "peerDependenciesMeta": {
+    "@modelcontextprotocol/sdk": {
+      "optional": true
+    }
+  }
+}
