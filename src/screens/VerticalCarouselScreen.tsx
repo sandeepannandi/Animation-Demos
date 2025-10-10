@@ -1,5 +1,6 @@
 import React, { useMemo, useRef } from 'react';
-import { View, Text, StyleSheet, Dimensions, Animated, Platform } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Animated, Platform, Pressable } from 'react-native';
+import Design1Page from './Design1Page';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -19,6 +20,7 @@ const ITEM_SIZE = ACTIVE_CARD_HEIGHT; // logical size used for snap interval
 
 export default function VerticalCarouselScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [showDesign1, setShowDesign1] = React.useState(false);
 
   const snapToInterval = useMemo(() => ITEM_SIZE + CARD_SPACING, []);
 
@@ -65,6 +67,8 @@ export default function VerticalCarouselScreen() {
             extrapolate: 'clamp',
           });
 
+          const isFirst = index === 0;
+
           return (
             <Animated.View
               style={[
@@ -76,6 +80,13 @@ export default function VerticalCarouselScreen() {
                 },
               ]}
             >
+              <Pressable
+                onPress={() => {
+                  if (isFirst) setShowDesign1(true);
+                }}
+                android_ripple={{ color: 'rgba(255,255,255,0.06)' }}
+                style={{ flex: 1, borderRadius: 24, overflow: 'hidden' }}
+              >
               <Animated.View
                 style={[
                   styles.card,
@@ -92,11 +103,17 @@ export default function VerticalCarouselScreen() {
                 <Text style={styles.title}>{item.title}</Text>
                 <Text style={styles.subtitle}>{item.subtitle}</Text>
               </Animated.View>
+              </Pressable>
             </Animated.View>
           );
         }}
         ItemSeparatorComponent={() => <View style={{ height: CARD_SPACING }} />}
       />
+      {showDesign1 ? (
+        <View style={styles.pageOverlay}>
+          <Design1Page onBack={() => setShowDesign1(false)} />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -125,6 +142,10 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     fontSize: 16,
     marginTop: 8,
+  },
+  pageOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 100,
   },
 });
 
