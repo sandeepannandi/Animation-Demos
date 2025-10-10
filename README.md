@@ -1,6 +1,6 @@
-# DesignExperiments (Expo SDK 54)
+# Design Experiments (Expo SDK 54)
 
-A minimal Expo + React Native app demonstrating a vertically snapping carousel where the active card is centered and highlighted, with previous/next cards peeking above/below in a smaller, inactive state.
+A minimal Expo + React Native app demonstrating a lot of design experiments with the new SDK54.
 
 ## Features
 - Vertical carousel with snap-to-item behavior
