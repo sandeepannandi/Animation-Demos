@@ -15,6 +15,9 @@
     ],
     "plugins": [
       "expo-asset"
-    ]
+    ],
+    "android": {
+      "package": "com.sandeepannandi.designexp"
+    }
   }
 }
