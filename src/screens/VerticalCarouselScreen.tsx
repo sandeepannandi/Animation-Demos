@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Pressable, FlatList, SafeAreaView } from 'react-native';
+import TransactionsPage from './TransactionsPage';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -16,10 +17,14 @@ const DATA = Array.from({ length: 8 }).map((_, i) => ({
 }));
 
 export default function VerticalCarouselScreen() {
+  const [showTx, setShowTx] = React.useState(false);
   const keyExtractor = (item: typeof DATA[number]) => item.id;
 
   return (
     <SafeAreaView style={styles.container}>
+      {showTx ? (
+        <TransactionsPage onBack={() => setShowTx(false)} />
+      ) : (
       <FlatList
         data={DATA}
         keyExtractor={keyExtractor}
@@ -30,7 +35,7 @@ export default function VerticalCarouselScreen() {
         renderItem={({ item, index }) => (
           <Pressable
             onPress={() => {
-              // handle press as needed
+              if (index === 0) setShowTx(true);
             }}
             android_ripple={{ color: 'rgba(255,255,255,0.06)' }}
             style={styles.cardWrapper}
@@ -41,7 +46,7 @@ export default function VerticalCarouselScreen() {
             </View>
           </Pressable>
         )}
-      />
+      />)}
     </SafeAreaView>
   );
 }
