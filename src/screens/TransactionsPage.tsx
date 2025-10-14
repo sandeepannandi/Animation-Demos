@@ -22,7 +22,7 @@ export default function TransactionsPage({ onBack }: Props) {
       toValue: 1,
       useNativeDriver: true,
       tension: 220,
-      friction: 18,
+      friction: 9,
     }).start();
   };
 
@@ -31,7 +31,7 @@ export default function TransactionsPage({ onBack }: Props) {
       toValue: 0,
       useNativeDriver: true,
       tension: 220,
-      friction: 18,
+      friction: 30,
     }).start(({ finished }) => {
       if (finished) setSelected(null);
     });
