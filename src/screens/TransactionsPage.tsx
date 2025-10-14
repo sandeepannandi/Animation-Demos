@@ -21,8 +21,8 @@ export default function TransactionsPage({ onBack }: Props) {
     Animated.spring(progress, {
       toValue: 1,
       useNativeDriver: true,
-      speed: 16,
-      bounciness: 8,
+      tension: 220,
+      friction: 18,
     }).start();
   };
 
@@ -30,17 +30,19 @@ export default function TransactionsPage({ onBack }: Props) {
     Animated.spring(progress, {
       toValue: 0,
       useNativeDriver: true,
-      speed: 16,
-      bounciness: 8,
+      tension: 220,
+      friction: 18,
     }).start(({ finished }) => {
       if (finished) setSelected(null);
     });
   };
 
   const listOpacity = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
-  const listTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -16] });
+  const listTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -10] });
+  const listScale = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.96] });
   const detailOpacity = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
-  const detailTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [16, 0] });
+  const detailTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [12, 0] });
+  const detailScale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });
 
   return (
     <SafeAreaView style={styles.root}>
@@ -49,11 +51,18 @@ export default function TransactionsPage({ onBack }: Props) {
       </Pressable>
 
       <View style={styles.card}>
-        <Text style={styles.heading}>Transactions</Text>
+        {!selected && (
+          <>
+            <Text style={styles.heading}>Transactions</Text>
+            <View style={{ height: 4 }} />
+          </>
+        )}
 
-        <View style={{ height: 4 }} />
-
-        <Animated.View style={{ opacity: listOpacity, transform: [{ translateY: listTranslateY }] }}>
+        {!selected && (
+        <Animated.View
+          pointerEvents={selected ? 'none' : 'auto'}
+          style={{ opacity: listOpacity, transform: [{ translateY: listTranslateY }, { scale: listScale }] }}
+        >
           {ITEMS.map((it) => (
             <Pressable key={it.id} onPress={() => openDetail(it)} android_ripple={{ color: 'rgba(0,0,0,0.05)' }}>
               <View style={styles.row}>
@@ -77,9 +86,13 @@ export default function TransactionsPage({ onBack }: Props) {
             <Ionicons name="arrow-forward" size={18} color="#111" />
           </Pressable>
         </Animated.View>
+        )}
 
         {selected ? (
-          <Animated.View style={{ opacity: detailOpacity, transform: [{ translateY: detailTranslateY }] }}>
+          <Animated.View
+            pointerEvents={selected ? 'auto' : 'none'}
+            style={{ opacity: detailOpacity, transform: [{ translateY: detailTranslateY }, { scale: detailScale }] }}
+          >
             <View style={styles.detailHeader}>
               <View style={styles.detailIconWrap}>
                 <View style={styles.circle}>
@@ -88,7 +101,7 @@ export default function TransactionsPage({ onBack }: Props) {
               </View>
               <View style={{ flex: 1 }} />
               <Pressable onPress={closeDetail} hitSlop={8}>
-                <Ionicons name="close" size={20} color="#9CA3AF" />
+                <Ionicons name="close" size={20} color="#111" style={{ backgroundColor: '#e7e0d8', borderRadius: 999, padding: 5 }} />
               </Pressable>
             </View>
 
@@ -154,7 +167,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#E5E7EB',
-    marginVertical: 12,
+    marginVertical: 16,
     opacity: 0.8,
   },
   row: {
@@ -174,9 +187,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   detailIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 10,
+    width: 48,
+    height: 48,
+    borderRadius: 999,
     backgroundColor: '#111',
     alignItems: 'center',
     justifyContent: 'center',
@@ -210,7 +223,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     color: '#6B7280',
-    fontSize: 13,
+    fontSize: 14,
   },
   metaTitle: {
     color: '#6B7280',
