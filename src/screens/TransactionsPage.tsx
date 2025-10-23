@@ -18,20 +18,18 @@ export default function TransactionsPage({ onBack }: Props) {
 
   const openDetail = (item: typeof ITEMS[number]) => {
     setSelected(item);
-    Animated.spring(progress, {
+    Animated.timing(progress, {
       toValue: 1,
+      duration: 300,
       useNativeDriver: true,
-      tension: 220,
-      friction: 9,
     }).start();
   };
 
   const closeDetail = () => {
-    Animated.spring(progress, {
+    Animated.timing(progress, {
       toValue: 0,
+      duration: 300,
       useNativeDriver: true,
-      tension: 220,
-      friction: 30,
     }).start(({ finished }) => {
       if (finished) setSelected(null);
     });
