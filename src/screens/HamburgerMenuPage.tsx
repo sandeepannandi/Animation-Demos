@@ -12,31 +12,24 @@ export default function HamburgerMenuPage({ onBack }: Props) {
 
   const toggleMenu = () => {
     if (isMenuOpen) {
-      // Closing animation - items disappear to top
       Animated.timing(menuAnimation, {
         toValue: 0,
-        duration: 800, // Same duration as opening for consistency
+        duration: 600, // Faster closing
         useNativeDriver: true,
       }).start(() => {
         setIsMenuOpen(false);
       });
     } else {
-      // Opening animation - items appear from top to bottom (roll effect)
       setIsMenuOpen(true);
       Animated.timing(menuAnimation, {
         toValue: 1,
-        duration: 800, // Slower for smoother effect
+        duration: 500, // Faster opening
         useNativeDriver: true,
       }).start();
     }
   };
 
-  // Individual animations for each menu item with staggered delays
-  // Top items appear first (index 0, 1, 2, 3) creating a roll effect
-  // Bottom items disappear first (index 3, 2, 1, 0) creating reverse roll effect
   const getItemAnimation = (index: number) => {
-    // For appearing: top to bottom (0, 1, 2, 3)
-    // For disappearing: bottom to top (3, 2, 1, 0)
     const reverseIndex = 3 - index;
     
     const itemProgress = menuAnimation.interpolate({
@@ -44,7 +37,6 @@ export default function HamburgerMenuPage({ onBack }: Props) {
       outputRange: [0, 0, 0, 1],
     });
 
-    // Disappearing animation - bottom items disappear first
     const disappearProgress = menuAnimation.interpolate({
       inputRange: [0, 0.05 + (reverseIndex * 0.2), 0.3 + (reverseIndex * 0.2), 1],
       outputRange: [1, 1, 1, 0],
