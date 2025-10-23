@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions, Pressable, FlatList, SafeAreaView } from 'react-native';
 import TransactionsPage from './TransactionsPage';
 import WalletPage from './WalletPage';
+import HamburgerMenuPage from './HamburgerMenuPage';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -20,6 +21,7 @@ const DATA = Array.from({ length: 8 }).map((_, i) => ({
 export default function VerticalCarouselScreen() {
   const [showTx, setShowTx] = React.useState(false);
   const [showWallet, setShowWallet] = React.useState(false);
+  const [showHamburger, setShowHamburger] = React.useState(false);
   const keyExtractor = (item: typeof DATA[number]) => item.id;
 
   return (
@@ -28,6 +30,8 @@ export default function VerticalCarouselScreen() {
         <TransactionsPage onBack={() => setShowTx(false)} />
       ) : showWallet ? (
         <WalletPage onBack={() => setShowWallet(false)} />
+      ) : showHamburger ? (
+        <HamburgerMenuPage onBack={() => setShowHamburger(false)} />
       ) : (
       <FlatList
         data={DATA}
@@ -41,6 +45,7 @@ export default function VerticalCarouselScreen() {
             onPress={() => {
               if (index === 0) setShowTx(true);
               if (index === 1) setShowWallet(true);
+              if (index === 2) setShowHamburger(true);
             }}
             android_ripple={{ color: 'rgba(255,255,255,0.06)' }}
             style={styles.cardWrapper}

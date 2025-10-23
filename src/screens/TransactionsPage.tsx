@@ -20,7 +20,7 @@ export default function TransactionsPage({ onBack }: Props) {
     setSelected(item);
     Animated.timing(progress, {
       toValue: 1,
-      duration: 300,
+      duration: 250,
       useNativeDriver: true,
     }).start();
   };
@@ -28,7 +28,7 @@ export default function TransactionsPage({ onBack }: Props) {
   const closeDetail = () => {
     Animated.timing(progress, {
       toValue: 0,
-      duration: 300,
+      duration: 250,
       useNativeDriver: true,
     }).start(({ finished }) => {
       if (finished) setSelected(null);
@@ -36,11 +36,17 @@ export default function TransactionsPage({ onBack }: Props) {
   };
 
   const listOpacity = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
-  const listTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -10] });
-  const listScale = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.96] });
+  const listTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -8] });
+  const listScale = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0.98] });
   const detailOpacity = progress.interpolate({ inputRange: [0, 1], outputRange: [0, 1] });
-  const detailTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [12, 0] });
-  const detailScale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.96, 1] });
+  const detailTranslateY = progress.interpolate({ inputRange: [0, 1], outputRange: [8, 0] });
+  const detailScale = progress.interpolate({ inputRange: [0, 1], outputRange: [0.98, 1] });
+  
+  // Icon border radius animation
+  const iconBorderRadius = progress.interpolate({ 
+    inputRange: [0, 1], 
+    outputRange: [19, 12] // 38/2 = 19, 24/2 = 12
+  });
 
   return (
     <SafeAreaView style={styles.root}>
@@ -65,9 +71,9 @@ export default function TransactionsPage({ onBack }: Props) {
             <Pressable key={it.id} onPress={() => openDetail(it)} android_ripple={{ color: 'rgba(0,0,0,0.05)' }}>
               <View style={styles.row}>
                 <View style={styles.leftGroup}>
-                  <View style={styles.circle}>
+                  <Animated.View style={[styles.circle, { borderRadius: iconBorderRadius }]}>
                     <Ionicons name={it.icon as any} size={18} color="#fff" />
-                  </View>
+                  </Animated.View>
                   <View style={{ marginLeft: 10 }}>
                     <Text style={styles.title}>{it.title}</Text>
                     <Text style={styles.subtitle}>{it.subtitle}</Text>
@@ -93,9 +99,9 @@ export default function TransactionsPage({ onBack }: Props) {
           >
             <View style={styles.detailHeader}>
               <View style={styles.detailIconWrap}>
-                <View style={styles.circle}>
+                <Animated.View style={[styles.circle, { borderRadius: iconBorderRadius }]}>
                   <Ionicons name={selected.icon as any} size={18} color="#fff" />
-                </View>
+                </Animated.View>
               </View>
               <View style={{ flex: 1 }} />
               <Pressable onPress={closeDetail} hitSlop={8}>
