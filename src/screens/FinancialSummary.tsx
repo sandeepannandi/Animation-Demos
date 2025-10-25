@@ -16,6 +16,8 @@ export default function FinancialSummary() {
   const [isExpanded, setIsExpanded] = useState(false);
   const rotationValue = useRef(new Animated.Value(0)).current;
   const expandValue = useRef(new Animated.Value(0)).current;
+  const itemAnimations = useRef(EXPANDABLE_ITEMS.map(() => new Animated.Value(0))).current;
+  const progressAnimations = useRef(EXPANDABLE_ITEMS.map(() => new Animated.Value(0))).current;
 
   const handleArrowPress = () => {
     const toValue = isExpanded ? 0 : 1;
@@ -26,11 +28,62 @@ export default function FinancialSummary() {
       useNativeDriver: true,
     }).start();
 
-    Animated.timing(expandValue, {
-      toValue,
-      duration: 800,
-      useNativeDriver: false,
-    }).start();
+    if (toValue === 1) {
+      // Opening: animate container immediately
+      Animated.timing(expandValue, {
+        toValue,
+        duration: 500,
+        useNativeDriver: false,
+      }).start();
+    } else {
+      // Closing: delay container animation until tabs finish
+      const totalTabAnimationTime = (EXPANDABLE_ITEMS.length - 0) * 100; // Last tab delay + duration
+      Animated.timing(expandValue, {
+        toValue,
+        duration: 200,
+        delay: totalTabAnimationTime,
+        useNativeDriver: false,
+      }).start();
+    }
+
+    if (toValue === 1) {
+      // Opening: animate items one by one
+      EXPANDABLE_ITEMS.forEach((_, index) => {
+        Animated.timing(itemAnimations[index], {
+          toValue: 1,
+          duration: 300,
+          delay: index * 130,
+          useNativeDriver: true,
+        }).start(() => {
+          // After items are shown, animate progress bars
+          if (index === EXPANDABLE_ITEMS.length - 1) {
+            EXPANDABLE_ITEMS.forEach((_, progressIndex) => {
+              Animated.timing(progressAnimations[progressIndex], {
+                toValue: 1,
+                duration: 800,
+                delay: progressIndex * 1,
+                useNativeDriver: false,
+              }).start();
+            });
+          }
+        });
+      });
+    } else {
+      // Closing: animate items in reverse order (bottom to top)
+      // First reset progress bars
+      progressAnimations.forEach(anim => anim.setValue(0));
+      
+      // Then animate items in reverse order
+      EXPANDABLE_ITEMS.forEach((_, index) => {
+        const reverseIndex = EXPANDABLE_ITEMS.length - 1 - index;
+        Animated.timing(itemAnimations[reverseIndex], {
+          toValue: 0,
+          duration: 120,
+          delay: index * 90,
+          useNativeDriver: true,
+        }).start();
+      });
+    }
     
     setIsExpanded(!isExpanded);
   };
@@ -39,67 +92,6 @@ export default function FinancialSummary() {
     inputRange: [0, 1],
     outputRange: ['0deg', '180deg'],
   });
-
-  const getItemAnimation = (index: number) => {
-    const reverseIndex = 4 - index;
-    
-    const startDelay = Math.min(0.3 + (index * 0.15), 0.8);
-    const endDelay = Math.min(0.4 + (index * 0.25), 0.9);
-    
-    const itemProgress = expandValue.interpolate({
-      inputRange: [0, startDelay, endDelay, 1],
-      outputRange: [0, 0, 0, 1],
-    });
-
-    const disappearStartDelay = Math.min(0.05 + (reverseIndex * 0.15), 0.8);
-    const disappearEndDelay = Math.min(0.3 + (reverseIndex * 0.15), 0.9);
-    
-    const disappearProgress = expandValue.interpolate({
-      inputRange: [0, disappearStartDelay, disappearEndDelay, 1],
-      outputRange: [1, 1, 1, 0],
-    });
-
-    return {
-      translateY: itemProgress.interpolate({
-        inputRange: [0, 0.3, 1],
-        outputRange: [60, 60, 0],
-      }),
-      opacity: itemProgress.interpolate({
-        inputRange: [0, 0.1, 0.4, 1],
-        outputRange: [0, 0, 0, 1],
-      }),
-      scale: itemProgress.interpolate({
-        inputRange: [0, 0.2, 0.6, 1],
-        outputRange: [0.6, 0.6, 1.05, 1],
-      }),
-      // Disappearing animations - smoother and matching appearing
-      disappearTranslateY: disappearProgress.interpolate({
-        inputRange: [0, 0.3, 1],
-        outputRange: [0, 0, -60],
-      }),
-      disappearOpacity: disappearProgress.interpolate({
-        inputRange: [0, 0.1, 0.4, 1],
-        outputRange: [1, 1, 1, 0],
-      }),
-      disappearScale: disappearProgress.interpolate({
-        inputRange: [0, 0.2, 0.6, 1],
-        outputRange: [1, 1, 1.05, 0.6],
-      }),
-    };
-  };
-
-  const getProgressAnimation = (index: number) => {
-    // Progress bars appear one by one after all items are shown with much more delay
-    const progressStartDelay = Math.min(0.9 + (index * 0.01), 0.95);
-    const progressEndDelay = Math.min(1 + (index * 0.01), 0.95);
-    
-    const progressValue = expandValue.interpolate({
-      inputRange: [0, progressStartDelay, progressEndDelay, 1],
-      outputRange: [0, 0, 0, 1],
-    });
-
-    return progressValue;
-  };
 
   return (
     <View style={styles.container}>
@@ -143,8 +135,6 @@ export default function FinancialSummary() {
           }),
         }]}>
           {EXPANDABLE_ITEMS.map((item, index) => {
-            const animation = getItemAnimation(index);
-            const progressAnimation = getProgressAnimation(index);
             const percentage = parseInt(item.percentage.replace('%', ''));
             
             return (
@@ -154,10 +144,20 @@ export default function FinancialSummary() {
                   styles.expandableItem,
                   {
                     transform: [
-                      { translateY: animation.translateY },
-                      { scale: animation.scale }
+                      { 
+                        translateY: itemAnimations[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [60, 0],
+                        })
+                      },
+                      { 
+                        scale: itemAnimations[index].interpolate({
+                          inputRange: [0, 0.5, 1],
+                          outputRange: [0.6, 1.05, 1],
+                        })
+                      }
                     ],
-                    opacity: animation.opacity,
+                    opacity: itemAnimations[index],
                   }
                 ]}
               >
@@ -176,18 +176,15 @@ export default function FinancialSummary() {
                   style={[
                     styles.progressFill,
                     {
-                      width: progressAnimation.interpolate({
-                        inputRange: [0, 0.3, 0.7, 1],
-                        outputRange: ['0%', '0%', '0%', `${percentage}%`],
+                      width: progressAnimations[index].interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0%', `${percentage}%`],
                       }),
-                      opacity: progressAnimation.interpolate({
-                        inputRange: [0, 0.3, 0.7, 1],
-                        outputRange: [0, 0, 0, 1],
-                      }),
+                      opacity: progressAnimations[index],
                       transform: [{
-                        translateX: progressAnimation.interpolate({
-                          inputRange: [0, 0.3, 0.7, 1],
-                          outputRange: [-400, -400, -200, 0],
+                        translateX: progressAnimations[index].interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [-200, 0],
                         })
                       }]
                     }
