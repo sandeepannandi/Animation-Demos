@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions, Pressable, FlatList, SafeAreaView }
 import TransactionsPage from './TransactionsPage';
 import HamburgerMenuPage from './HamburgerMenuPage';
 import FinancialSummaryPage from './FinancialSummaryPage';
+import CallInterfacePage from './CallInterfacePage';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -22,6 +23,7 @@ export default function VerticalCarouselScreen() {
   const [showTx, setShowTx] = React.useState(false);
   const [showFinancialSummary, setShowFinancialSummary] = React.useState(false);
   const [showHamburger, setShowHamburger] = React.useState(false);
+  const [showCallInterface, setShowCallInterface] = React.useState(false);
   const keyExtractor = (item: typeof DATA[number]) => item.id;
 
   return (
@@ -32,6 +34,8 @@ export default function VerticalCarouselScreen() {
         <FinancialSummaryPage onBack={() => setShowFinancialSummary(false)} />
       ) : showHamburger ? (
         <HamburgerMenuPage onBack={() => setShowHamburger(false)} />
+      ) : showCallInterface ? (
+        <CallInterfacePage onBack={() => setShowCallInterface(false)} />
       ) : (
       <FlatList
         data={DATA}
@@ -46,6 +50,7 @@ export default function VerticalCarouselScreen() {
               if (index === 0) setShowTx(true);
               if (index === 1) setShowFinancialSummary(true);
               if (index === 2) setShowHamburger(true);
+              if (index === 3) setShowCallInterface(true);
             }}
             android_ripple={{ color: 'rgba(255,255,255,0.06)' }}
             style={styles.cardWrapper}
