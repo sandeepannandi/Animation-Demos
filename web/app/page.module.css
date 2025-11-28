@@ -35,7 +35,8 @@
 .gridItem:nth-child(n+7) {
   border-bottom: none;
 }
-.gridItem:first-child {
+.gridItem:first-child,
+.gridItem:nth-child(2) {
   background: transparent;
   border: none;
   display: flex;
@@ -92,4 +93,86 @@
   letter-spacing: 1px;
   z-index: 2;
   margin-left: 75px;
+}
+
+.navBar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 12px 18px;
+  background: #fff;
+  border-radius: 90px;
+  border-color: #aeaeae;
+  border-width: 2px;
+  border-style: solid;
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.35);
+}
+
+.navButtonWrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.navButton {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 20px;
+  background: #e8e8e8;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background-color 0.3s ease;
+}
+
+.navButton:hover {
+  background: #ededed;
+}
+
+.navButtonSelected {
+  background: #f5f5f5;
+}
+
+.navIconContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2d2d2d;
+  position: relative;
+}
+
+.navIconContainer svg {
+  width: 24px;
+  height: 24px;
+  stroke: #2d2d2d;
+  transition: stroke-width 0.3s ease;
+}
+
+.navDot {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9a9a9a;
+}
+
+.notificationDot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2d2d2d;
+  border: 2px solid #f5f5f5;
 }

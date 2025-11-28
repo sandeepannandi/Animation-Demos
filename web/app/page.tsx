@@ -3,6 +3,7 @@ import { useState } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
 import { motion } from 'framer-motion'
+import { Search, FileText, Plus, MessageSquare, Settings } from 'lucide-react'
 
 const accentVariants = {
   initial: { width: 86 },
@@ -67,6 +68,89 @@ export const DemoButton = () => {
   )
 }
 
+const NavigationBar = () => {
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const [selectedIndex, setSelectedIndex] = useState(2)
+
+  const navItems = [
+    { icon: Search, label: 'Search' },
+    { icon: FileText, label: 'Documents' },
+    { icon: Plus, label: 'Add', isSelected: true },
+    { icon: MessageSquare, label: 'Messages', hasNotification: true },
+    { icon: Settings, label: 'Settings' },
+  ]
+
+  const buttonVariants = {
+    initial: { y: 0, scale: 1 },
+    hover: { 
+      y: -18, 
+      scale: 1.2,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 12,
+        mass: 0.8
+      }
+    },
+  }
+
+  const dotVariants = {
+    hidden: { scale: 0, opacity: 0, y: 4 },
+    visible: { 
+      scale: 1, 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 500,
+        damping: 15,
+        mass: 0.5
+      }
+    },
+  }
+
+  return (
+    <nav className={styles.navBar}>
+      {navItems.map((item, idx) => {
+        const isHovered = hoveredIndex === idx
+        const isSelected = selectedIndex === idx
+        const IconComponent = item.icon
+
+        return (
+          <div key={idx} className={styles.navButtonWrapper}>
+            <motion.button
+              className={`${styles.navButton} ${isSelected ? styles.navButtonSelected : ''}`}
+              variants={buttonVariants}
+              initial="initial"
+              whileHover="hover"
+              animate={isHovered ? 'hover' : 'initial'}
+              onHoverStart={() => setHoveredIndex(idx)}
+              onHoverEnd={() => setHoveredIndex(null)}
+              onClick={() => setSelectedIndex(idx)}
+            >
+              <div className={styles.navIconContainer}>
+                {item.hasNotification && (
+                  <span className={styles.notificationDot} />
+                )}
+                <IconComponent 
+                  size={24} 
+                  strokeWidth={isSelected ? 2.5 : 2}
+                />
+              </div>
+            </motion.button>
+            <motion.div
+              className={styles.navDot}
+              variants={dotVariants}
+              initial="hidden"
+              animate={isHovered ? 'visible' : 'hidden'}
+            />
+          </div>
+        )
+      })}
+    </nav>
+  )
+}
+
 export default function Home() {
   return (
     <main className={styles.main}>
@@ -74,7 +158,9 @@ export default function Home() {
         <div className={styles.gridItem}>
           <DemoButton />
         </div>
-        <div className={styles.gridItem}>2</div>
+        <div className={styles.gridItem}>
+          <NavigationBar />
+        </div>
         <div className={styles.gridItem}>3</div>
         <div className={styles.gridItem}>4</div>
         <div className={styles.gridItem}>5</div>
