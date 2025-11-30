@@ -2,8 +2,8 @@
 import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
-import { motion } from 'framer-motion'
-import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
 
 const accentVariants = {
   initial: { width: 86 },
@@ -440,6 +440,181 @@ const Pagination = () => {
   )
 }
 
+const Carousel = () => {
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [liked, setLiked] = useState<boolean[]>(new Array(5).fill(false))
+  const totalImages = 5
+
+  // Sample images - using Unsplash for variety
+  const images = [
+    'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80',
+    'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80',
+    'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&q=80',
+    'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=800&q=80',
+    'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=800&q=80',
+  ]
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % totalImages)
+  }
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages)
+  }
+
+  const handleDotClick = (index: number) => {
+    setDirection(index > currentIndex ? 1 : -1)
+    setCurrentIndex(index)
+  }
+
+  const toggleLike = (index: number) => {
+    setLiked((prev) => {
+      const newLiked = [...prev]
+      newLiked[index] = !newLiked[index]
+      return newLiked
+    })
+  }
+
+  const cardVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? 350 : -350,
+      opacity: 0,
+      rotate: direction > 0 ? 10 : -10,
+      scale: 0.88,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      rotate: -8,
+      scale: 1,
+    },
+    exit: (direction: number) => ({
+      x: direction > 0 ? -350 : 350,
+      opacity: 0,
+      rotate: direction > 0 ? -10 : 10,
+      scale: 0.88,
+      transition: {
+        duration: 0.15,
+        ease: "easeIn"
+      }
+    }),
+  }
+
+  const [direction, setDirection] = useState(0)
+  const [dragX, setDragX] = useState(0)
+
+  const handleDragEnd = (event: any, info: any) => {
+    const threshold = 50
+    if (Math.abs(info.offset.x) > threshold) {
+      if (info.offset.x > 0) {
+        setDirection(-1)
+        handlePrev()
+      } else {
+        setDirection(1)
+        handleNext()
+      }
+    }
+    setDragX(0)
+  }
+
+  return (
+    <div className={styles.carouselContainer}>
+      <div className={styles.carouselWrapper}>
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={cardVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              x: { type: "spring", stiffness: 500, damping: 30, mass: 0.7 },
+              opacity: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+              rotate: { type: "spring", stiffness: 400, damping: 25, mass: 0.6 },
+              scale: { type: "spring", stiffness: 500, damping: 30, mass: 0.7 },
+            }}
+            
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.8}
+            onDrag={(event, info) => setDragX(info.offset.x)}
+            onDragEnd={handleDragEnd}
+            className={styles.carouselCard}
+          >
+            <div className={styles.carouselImageWrapper}>
+              <Image
+                src={images[currentIndex]}
+                alt={`Slide ${currentIndex + 1}`}
+                fill
+                className={styles.carouselImage}
+                sizes="(max-width: 768px) 100vw, 600px"
+                draggable={false}
+              />
+              <motion.button
+                className={styles.heartButton}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  toggleLike(currentIndex)
+                }}
+                whileTap={{ scale: 0.85 }}
+                initial={false}
+                animate={{
+                  scale: liked[currentIndex] ? [1, 1.3, 1.1, 1] : 1,
+                  rotate: liked[currentIndex] ? [0, -10, 10, -5, 0] : 0,
+                }}
+                transition={{ 
+                  duration: 0.6,
+                  times: [0, 0.2, 0.4, 0.6, 1],
+                  ease: "easeOut"
+                }}
+              >
+                <motion.div
+                  animate={{
+                    scale: liked[currentIndex] ? [1, 1, 1] : 1,
+                  }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Heart
+                    size={22}
+                    fill={liked[currentIndex] ? '#ef4444' : 'none'}
+                    color={liked[currentIndex] ? '#ef4444' : '#000'}
+                    strokeWidth={2}
+                  />
+                </motion.div>
+              </motion.button>
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
+
+      <motion.div 
+        className={styles.carouselDots}
+        animate={{ rotate: -8 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+      >
+        {Array.from({ length: totalImages }).map((_, index) => (
+          <motion.button
+            key={index}
+            className={`${styles.carouselDot} ${index === currentIndex ? styles.carouselDotActive : ''}`}
+            onClick={() => {
+              setDirection(index > currentIndex ? 1 : -1)
+              handleDotClick(index)
+            }}
+            whileHover={{ scale: 1.2 }}
+            whileTap={{ scale: 0.9 }}
+            animate={{
+              scale: index === currentIndex ? 1.3 : 1,
+              opacity: index === currentIndex ? 1 : 0.4,
+            }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
+          />
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main className={styles.main}>
@@ -456,11 +631,9 @@ export default function Home() {
         <div className={styles.gridItem}>
           <Pagination />
         </div>
-        <div className={styles.gridItem}>5</div>
-        <div className={styles.gridItem}>6</div>
-        <div className={styles.gridItem}>7</div>
-        <div className={styles.gridItem}>8</div>
-        <div className={styles.gridItem}>9</div>
+        <div className={styles.gridItem}>
+          <Carousel />
+        </div>
       </div>
     </main>
   )
