@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart } from 'lucide-react'
+import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart, X } from 'lucide-react'
 
 const accentVariants = {
   initial: { width: 86 },
@@ -615,6 +615,145 @@ const Carousel = () => {
   )
 }
 
+export const Tags = () => {
+  const [selectedTags, setSelectedTags] = useState<string[]>(['Node'])
+  const [inputValue, setInputValue] = useState('')
+
+  const allSuggestedTags = [
+    'Chai', 'Coffee', 'Mutton', 'Chicken',
+    'Soup', 'Rice', 'Bread', 'Butter',
+    'Eggs', 'Omelette', 'Pizza', 'Burger',
+    'Chocolate', 'Lollipop'
+  ]
+
+  const suggestedTags = allSuggestedTags.filter(tag => !selectedTags.includes(tag))
+
+  const handleAddTag = (tag: string) => {
+    if (!selectedTags.includes(tag)) {
+      setSelectedTags([...selectedTags, tag])
+    }
+  }
+
+  const handleRemoveTag = (tag: string) => {
+    setSelectedTags(selectedTags.filter(t => t !== tag))
+  }
+
+  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      if (!selectedTags.includes(inputValue.trim())) {
+        setSelectedTags([...selectedTags, inputValue.trim()])
+        setInputValue('')
+      }
+    }
+  }
+
+  const chipVariants = {
+    initial: { scale: 0.8, opacity: 0 },
+    animate: { 
+      scale: 1, 
+      opacity: 1,
+      transition: { type: "spring", stiffness: 400, damping: 17 }
+    }
+  }
+
+  const selectedChipVariants = {
+    initial: { 
+      scale: 0.8, 
+      opacity: 0
+    },
+    animate: { 
+      scale: 1, 
+      opacity: 1
+    },
+    exit: { 
+      scale: 0.8, 
+      opacity: 0,
+      transition: { duration: 0.3 }
+    }
+  }
+
+  return (
+    <div className={styles.tagsContainer}>
+      <h2 className={styles.tagsHeading}>TAGS</h2>
+      
+      <div className={styles.tagsInputContainer}>
+        <div className={styles.selectedTags}>
+          <AnimatePresence mode="popLayout">
+            {selectedTags.map((tag) => (
+              <motion.div
+                key={tag}
+                layoutId={tag}
+                className={styles.selectedTag}
+                variants={selectedChipVariants}
+                initial="initial"
+                animate={{
+                  ...selectedChipVariants.animate,
+                  rotate: [0, 8, 0]
+                }}
+                exit="exit"
+                layout
+                transition={{
+                  layout: {
+                    duration: 0.6,
+                    ease: [0.4, 0, 0.2, 1]
+                  },
+                  rotate: {
+                    duration: 0.6,
+                    times: [0, 0.5, 1],
+                    ease: [0.4, 0, 0.2, 1]
+                  }
+                }}
+              >
+                <span>{tag}</span>
+                <button
+                  className={styles.removeTagButton}
+                  onClick={() => handleRemoveTag(tag)}
+                >
+                  <X size={14} />
+                </button>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          <input
+            type="text"
+            className={styles.tagsInput}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            placeholder={selectedTags.length === 0 ? "Add tags..." : ""}
+          />
+        </div>
+      </div>
+
+      <div className={styles.suggestedTags}>
+        <AnimatePresence>
+          {suggestedTags.map((tag, index) => (
+            <motion.button
+              key={tag}
+              layoutId={tag}
+              className={styles.suggestedTag}
+              onClick={() => handleAddTag(tag)}
+              variants={chipVariants}
+              initial="initial"
+              animate="animate"
+              layout
+              transition={{
+                layout: {
+                  duration: 0.6,
+                  ease: [0.4, 0, 0.2, 1]
+                }
+              }}
+              style={{ animationDelay: `${index * 0.05}s` }}
+            >
+              {tag}
+            </motion.button>
+          ))}
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main className={styles.main}>
@@ -633,6 +772,9 @@ export default function Home() {
         </div>
         <div className={styles.gridItem}>
           <Carousel />
+        </div>
+        <div className={styles.gridItem}>
+          <Tags />
         </div>
       </div>
     </main>
