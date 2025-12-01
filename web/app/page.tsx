@@ -754,6 +754,137 @@ export const Tags = () => {
   )
 }
 
+const RadialCarousel = () => {
+  const radialImages = [
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1454496522488-7a8e488e8606?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1468818438311-4bab781ab9b8?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?auto=format&fit=crop&w=400&q=80',
+    'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=400&q=80'
+  ]
+  const wheelRef = useRef<HTMLDivElement | null>(null)
+  const dragState = useRef({
+    startAngle: 0,
+    startRotation: 0,
+    active: false,
+  })
+  const [rotation, setRotation] = useState(0)
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null)
+  const radius = 170
+
+  useEffect(() => {
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+    }
+  }, [])
+
+  const getAngle = (clientX: number, clientY: number) => {
+    const rect = wheelRef.current?.getBoundingClientRect()
+    if (!rect) return 0
+    const centerX = rect.left + rect.width / 2
+    const centerY = rect.top + rect.height / 2
+    return Math.atan2(clientY - centerY, clientX - centerX)
+  }
+
+  const handlePointerMove = (event: PointerEvent) => {
+    if (!dragState.current.active) return
+    const currentAngle = getAngle(event.clientX, event.clientY)
+    const delta = currentAngle - dragState.current.startAngle
+    setRotation(dragState.current.startRotation + (delta * 180) / Math.PI)
+  }
+
+  const handlePointerUp = () => {
+    dragState.current.active = false
+    window.removeEventListener('pointermove', handlePointerMove)
+    window.removeEventListener('pointerup', handlePointerUp)
+  }
+
+  const handlePointerDown = (event: React.PointerEvent) => {
+    event.preventDefault()
+    dragState.current = {
+      startAngle: getAngle(event.clientX, event.clientY),
+      startRotation: rotation,
+      active: true,
+    }
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
+  }
+
+  return (
+    <div className={styles.radialContainer}>
+      <AnimatePresence mode="wait">
+        {selectedIndex === null ? (
+          <motion.div
+            key="wheel"
+            className={styles.radialWheelWrap}
+            onPointerDown={handlePointerDown}
+            ref={wheelRef}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.4, ease: [0.65, 0, 0.35, 1] }}
+          >
+            <motion.div
+              className={styles.radialWheel}
+              style={{ transform: `translate(-50%, -50%) rotate(${rotation}deg)` }}
+            >
+              {radialImages.map((src, index) => {
+                const angle = (360 / radialImages.length) * index
+                return (
+                  <motion.button
+                    key={`${src}-${index}`}
+                    className={styles.radialCard}
+                    style={{
+                      transform: `translate(-50%, -50%) rotate(${angle}deg) translate(${radius}px)`,
+                    }}
+                    onClick={() => setSelectedIndex(index)}
+                  >
+                    <Image
+                      src={src}
+                      alt={`carousel-${index}`}
+                      width={96}
+                      height={96}
+                      className={styles.radialImage}
+                    />
+                  </motion.button>
+                )
+              })}
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="viewer"
+            className={styles.radialSelected}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ duration: 0.4, ease: [0.65, 0, 0.35, 1] }}
+          >
+            <button className={styles.radialClose} onClick={() => setSelectedIndex(null)}>
+              <X size={18} />
+            </button>
+            <Image
+              src={radialImages[selectedIndex]}
+              alt="selected card"
+              width={320}
+              height={320}
+              className={styles.radialSelectedImage}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main className={styles.main}>
@@ -775,6 +906,9 @@ export default function Home() {
         </div>
         <div className={styles.gridItem}>
           <Tags />
+        </div>
+        <div className={styles.gridItem}>
+          <RadialCarousel />
         </div>
       </div>
     </main>
