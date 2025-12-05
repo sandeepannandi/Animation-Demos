@@ -9,11 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/leaflet": "^1.9.21",
+    "framer-motion": "^10.16.4",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.294.0",
+    "next": "^14.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "next": "^14.0.0",
-    "framer-motion": "^10.16.4",
-    "lucide-react": "^0.294.0"
+    "react-leaflet": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

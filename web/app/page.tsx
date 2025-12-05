@@ -3,7 +3,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart, X } from 'lucide-react'
+import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart, X, Flame } from 'lucide-react'
 
 const accentVariants = {
   initial: { width: 86 },
@@ -885,6 +885,245 @@ const RadialCarousel = () => {
   )
 }
 
+export const SegmentControl = () => {
+  const [selectedTab, setSelectedTab] = useState<'popular' | 'favorites'>('favorites')
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    if (isSearchExpanded && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isSearchExpanded])
+
+  const handleSearchClick = () => {
+    setIsSearchExpanded(true)
+  }
+
+  const handleClose = () => {
+    setIsSearchExpanded(false)
+    setSearchValue('')
+  }
+
+  const backgroundVariants = {
+    popular: {
+      x: 0,
+      transition: {
+        type: 'spring',
+        stiffness: 500,
+        damping: 30,
+        mass: 0.8,
+      },
+    },
+    favorites: {
+      x: '100%',
+      transition: {
+        type: 'spring',
+        stiffness: 500,
+        damping: 30,
+        mass: 0.8,
+      },
+    },
+  }
+
+  const segmentControlVariants = {
+    visible: {
+      opacity: 1,
+      width: 'auto',
+      marginLeft: 12,
+      transition: {
+        type: 'linear',
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+    hidden: {
+      opacity: 0,
+      width: 0,
+      marginLeft: 0,
+      overflow: 'hidden',
+      transition: {
+        type: 'linear',
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  }
+
+  const closeButtonVariants = {
+    initial: {
+      opacity: 0,
+      scale: 0.8,
+      x: -20,
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      x: 0,
+      transition: {
+        type: 'linear',
+        duration: 0.3,
+        ease: [0.4, 0, 0.2, 1],
+        delay: 0.2,
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.8,
+      x: -20,
+      transition: {
+        type: 'linear',
+        duration: 0.2,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  }
+
+  return (
+    <div className={styles.segmentControlContainer}>
+      <AnimatePresence mode="wait" initial={false}>
+        {!isSearchExpanded ? (
+          <motion.div
+            key="collapsed"
+            className={styles.collapsedContainer}
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.button
+              layoutId="search-button"
+              className={styles.searchButtonCircle}
+              onClick={handleSearchClick}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              animate={{ borderRadius: '50%' }}
+              transition={{ 
+                type: 'linear',
+                duration: 0.4,
+                ease: [0.4, 0, 0.2, 1],
+                layout: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                borderRadius: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+              }}
+              layout
+            >
+              <Search size={20} />
+            </motion.button>
+            
+            <AnimatePresence>
+              <motion.div
+                className={styles.segmentControl}
+                variants={segmentControlVariants}
+                initial="visible"
+                animate="visible"
+                exit="hidden"
+              >
+              <motion.div
+                className={styles.segmentBackground}
+                variants={backgroundVariants}
+                animate={selectedTab}
+                initial={false}
+              />
+              
+              <button
+                className={`${styles.segmentButton} ${selectedTab === 'popular' ? styles.segmentButtonActive : ''}`}
+                onClick={() => setSelectedTab('popular')}
+              >
+                <Flame size={18} className={styles.segmentIcon} />
+                <span className={styles.segmentText}>Popular</span>
+              </button>
+              
+              <button
+                className={`${styles.segmentButton} ${selectedTab === 'favorites' ? styles.segmentButtonActive : ''}`}
+                onClick={() => setSelectedTab('favorites')}
+              >
+                <Heart 
+                  size={18} 
+                  className={styles.segmentIcon}
+                  fill={selectedTab === 'favorites' ? '#ef4444' : 'none'}
+                  color={selectedTab === 'favorites' ? '#ef4444' : '#000'}
+                />
+                <span className={styles.segmentText}>Favorites</span>
+              </button>
+              </motion.div>
+            </AnimatePresence>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="expanded"
+            className={styles.expandedContainer}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              layoutId="search-button"
+              className={styles.searchBarExpanded}
+              animate={{ borderRadius: '28px' }}
+              transition={{
+                type: 'linear',
+                duration: 0.4,
+                ease: [0.4, 0, 0.2, 1],
+                layout: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+                borderRadius: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+              }}
+              layout
+            >
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  type: 'linear',
+                  duration: 0.15,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+              >
+                <Search size={20} className={styles.searchBarIcon} />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{
+                  type: 'linear',
+                  duration: 0.15,
+                  ease: [0.4, 0, 0.2, 1],
+                }}
+                style={{ flex: 1, minWidth: 0 }}
+              >
+                <input
+                  ref={inputRef}
+                  type="text"
+                  className={styles.searchBarInput}
+                  placeholder="Search"
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                />
+              </motion.div>
+            </motion.div>
+            
+            <motion.button
+              className={styles.searchBarClose}
+              onClick={handleClose}
+              variants={closeButtonVariants}
+              initial="initial"
+              animate="visible"
+              exit="exit"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              <X size={20} />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 export default function Home() {
   return (
     <main className={styles.main}>
@@ -910,6 +1149,7 @@ export default function Home() {
         <div className={styles.gridItem}>
           <RadialCarousel />
         </div>
+        <div className={styles.gridItem}> <SegmentControl /> </div>
       </div>
     </main>
   )

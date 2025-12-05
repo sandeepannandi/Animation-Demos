@@ -4,7 +4,7 @@
 .main {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   min-height: 100vh;
   padding: 60px 0 80px;
   margin: 0;
@@ -679,5 +679,182 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.segmentControlContainer {
+  display: flex;
+  align-items: center;
+  position: relative;
+  max-width: 320px;
+  width: 100%;
+}
+
+.collapsedContainer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.expandedContainer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.searchButtonCircle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.searchButtonCircle:hover {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.segmentControl {
+  position: relative;
+  display: flex;
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 4px;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.segmentBackground {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: #fce7f3;
+  border-radius: 24px;
+  z-index: 0;
+}
+
+.segmentButton {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  z-index: 1;
+  transition: all 0.2s ease;
+  border-radius: 24px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.segmentButton:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.segmentIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  stroke-width: 2;
+}
+
+.segmentText {
+  font-size: 16px;
+  font-weight: 600;
+  color: #000;
+  transition: color 0.2s ease;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.segmentButtonActive .segmentText {
+  color: #ef4444;
+}
+
+.segmentButton:not(.segmentButtonActive) .segmentIcon {
+  color: #000;
+  fill: none;
+}
+
+.searchBarExpanded {
+  flex: 1;
+  height: 44px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  position: relative;
+  min-width: 0;
+}
+
+.searchBarIcon {
+  color: #000;
+  flex-shrink: 0;
+  stroke-width: 2;
+}
+
+.searchBarInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+  font-weight: 500;
+  color: #000;
+  font-family: 'Space Grotesk', sans-serif;
+  padding: 0;
+  min-width: 0;
+}
+
+.searchBarInput::placeholder {
+  color: #9ca3af;
+  font-weight: 500;
+}
+
+.searchBarClose {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: #ffffff;
+  color: #000;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.searchBarClose:hover {
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
