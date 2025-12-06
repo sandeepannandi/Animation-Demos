@@ -963,9 +963,9 @@ export const SegmentControl = () => {
       x: 0,
       transition: {
         type: 'linear',
-        duration: 0.3,
+        duration: 0.15,
         ease: [0.4, 0, 0.2, 1],
-        delay: 0.2,
+        delay: 0.1,
       },
     },
     exit: {
@@ -974,7 +974,7 @@ export const SegmentControl = () => {
       x: -20,
       transition: {
         type: 'linear',
-        duration: 0.2,
+        duration: 0.15,
         ease: [0.4, 0, 0.2, 1],
       },
     },
@@ -989,7 +989,7 @@ export const SegmentControl = () => {
             className={styles.collapsedContainer}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: 'linear', duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
             <motion.button
               layoutId="search-button"
@@ -997,15 +997,33 @@ export const SegmentControl = () => {
               onClick={handleSearchClick}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              animate={{ borderRadius: '50%' }}
+              initial={{ borderRadius: '50%', width: '48px', height: '48px' }}
+              animate={{ borderRadius: '50%', width: '48px', height: '48px' }}
               transition={{ 
                 type: 'linear',
-                duration: 0.4,
+                duration: 0.25,
                 ease: [0.4, 0, 0.2, 1],
-                layout: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-                borderRadius: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+                layout: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                borderRadius: { 
+                  type: 'linear', 
+                  duration: 0.25, 
+                  ease: [0.4, 0, 0.2, 1] 
+                },
+                width: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                height: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
               }}
-              layout
             >
               <Search size={20} />
             </motion.button>
@@ -1029,7 +1047,12 @@ export const SegmentControl = () => {
                 className={`${styles.segmentButton} ${selectedTab === 'popular' ? styles.segmentButtonActive : ''}`}
                 onClick={() => setSelectedTab('popular')}
               >
-                <Flame size={18} className={styles.segmentIcon} />
+                <Flame 
+                  size={18} 
+                  className={styles.segmentIcon}
+                  fill={selectedTab === 'popular' ? '#ef4444' : 'none'}
+                  color={selectedTab === 'popular' ? '#ef4444' : '#000'}
+                />
                 <span className={styles.segmentText}>Popular</span>
               </button>
               
@@ -1055,53 +1078,51 @@ export const SegmentControl = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ type: 'linear', duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
           >
             <motion.div
               layoutId="search-button"
               className={styles.searchBarExpanded}
-              animate={{ borderRadius: '28px' }}
+              initial={{ borderRadius: '50%', width: '48px', height: '48px' }}
+              animate={{ borderRadius: '28px', width: '100%', height: '44px' }}
+              exit={{ borderRadius: '50%', width: '48px', height: '48px' }}
               transition={{
                 type: 'linear',
-                duration: 0.4,
+                duration: 0.25,
                 ease: [0.4, 0, 0.2, 1],
-                layout: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] },
-                borderRadius: { type: 'linear', duration: 0.4, ease: [0.4, 0, 0.2, 1] }
+                layout: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                borderRadius: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                width: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                height: {
+                  type: 'linear',
+                  duration: 0.25,
+                  ease: [0.4, 0, 0.2, 1],
+                },
               }}
-              layout
             >
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  type: 'linear',
-                  duration: 0.15,
-                  ease: [0.4, 0, 0.2, 1],
-                }}
-              >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Search size={20} className={styles.searchBarIcon} />
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{
-                  type: 'linear',
-                  duration: 0.15,
-                  ease: [0.4, 0, 0.2, 1],
-                }}
-                style={{ flex: 1, minWidth: 0 }}
-              >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className={styles.searchBarInput}
-                  placeholder="Search"
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                />
-              </motion.div>
+              </div>
+              <input
+                ref={inputRef}
+                type="text"
+                className={styles.searchBarInput}
+                placeholder="Search"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
             </motion.div>
             
             <motion.button
@@ -1111,9 +1132,8 @@ export const SegmentControl = () => {
               initial="initial"
               animate="visible"
               exit="exit"
-              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              transition={{ type: 'linear', duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
             >
               <X size={20} />
             </motion.button>
@@ -1128,7 +1148,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <div className={styles.grid}>
-        <div className={styles.gridItem}>
+         <div className={styles.gridItem}>
           <DemoButton />
         </div>
         <div className={styles.gridItem}>
@@ -1148,7 +1168,7 @@ export default function Home() {
         </div>
         <div className={styles.gridItem}>
           <RadialCarousel />
-        </div>
+        </div> 
         <div className={styles.gridItem}> <SegmentControl /> </div>
       </div>
     </main>

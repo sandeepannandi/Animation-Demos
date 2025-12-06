@@ -716,8 +716,11 @@
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.1),
     0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: all 0.2s ease;
   flex-shrink: 0;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 48px;
+  max-height: 48px;
 }
 
 .searchButtonCircle:hover {
@@ -801,7 +804,7 @@
   background: #ffffff;
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 16px;
   gap: 12px;
   box-shadow: 
     0 2px 8px rgba(0, 0, 0, 0.1),
@@ -814,6 +817,9 @@
   color: #000;
   flex-shrink: 0;
   stroke-width: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .searchBarInput {
@@ -827,6 +833,9 @@
   font-family: 'Space Grotesk', sans-serif;
   padding: 0;
   min-width: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
 }
 
 .searchBarInput::placeholder {
