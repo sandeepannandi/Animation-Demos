@@ -885,6 +885,83 @@ const RadialCarousel = () => {
   )
 }
 
+const TodoList = () => {
+  const [items, setItems] = useState([
+    { id: 1, label: 'Organize a user testing session', done: false },
+    { id: 2, label: 'Prepare designs for client review', done: false },
+    { id: 3, label: '15-minute meditation', done: false },
+  ])
+  const reorderTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  const handleToggle = (id: number) => {
+    if (reorderTimer.current) clearTimeout(reorderTimer.current)
+
+    setItems((prev) => {
+      const updated = prev.map((item) =>
+        item.id === id ? { ...item, done: !item.done } : item
+      )
+      return updated
+    })
+
+    // delay the reorder so the right-shift animation is visible first
+    reorderTimer.current = setTimeout(() => {
+      setItems((prev) => [...prev].sort((a, b) => Number(a.done) - Number(b.done)))
+    }, 260)
+  }
+
+  return (
+    <div className={styles.todoWrapper}>
+      <ul className={styles.todoList}>
+        {items.map((item) => (
+          <motion.li
+            key={item.id}
+            layout
+            className={`${styles.todoItem} ${item.done ? styles.todoItemDone : ''}`}
+            transition={{
+              layout: { type: 'spring', stiffness: 180, damping: 24, mass: 1.2 },
+              type: 'spring',
+              stiffness: 180,
+              damping: 24,
+              mass: 1.2,
+            }}
+            animate={
+              item.done
+                ? {
+                    x: [0, 14, 0],
+                    transition: { duration: 0.5, ease: [0.42, 0, 0.58, 1] },
+                  }
+                : { x: 0 }
+            }
+          >
+            <motion.button
+              className={`${styles.todoCheckbox} ${item.done ? styles.todoCheckboxChecked : ''}`}
+              onClick={() => handleToggle(item.id)}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 220, damping: 20 }}
+            >
+              <AnimatePresence>
+                {item.done && (
+                  <motion.span
+                    key="check"
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+                    className={styles.todoCheckMark}
+                  >
+                    <Check size={14} />
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+            <span className={styles.todoLabel}>{item.label}</span>
+          </motion.li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 export const SegmentControl = () => {
   const [selectedTab, setSelectedTab] = useState<'popular' | 'favorites'>('favorites')
   const [isSearchExpanded, setIsSearchExpanded] = useState(false)
@@ -1169,7 +1246,12 @@ export default function Home() {
         <div className={styles.gridItem}>
           <RadialCarousel />
         </div> 
-        <div className={styles.gridItem}> <SegmentControl /> </div>
+        <div className={styles.gridItem}>
+          <SegmentControl />
+        </div>
+        <div className={styles.gridItem}>
+          <TodoList />
+        </div>
       </div>
     </main>
   )
