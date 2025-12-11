@@ -14,7 +14,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(3, auto);
+  grid-template-rows: repeat(4, auto);
   gap: 80px 0px;
   width: min(1200px, 100%);
   height: auto;
@@ -45,6 +45,55 @@
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.submitButton {
+  position: relative;
+  width: 240px;
+  height: 70px;
+  border-radius: 999px;
+  border: 2px solid #0c0c0c;
+  background: #ffffff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 12px 22px rgba(12, 12, 12, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.submitButton:hover {
+  box-shadow:
+    0 16px 28px rgba(12, 12, 12, 0.2),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+}
+
+.submitLabel {
+  position: relative;
+  z-index: 2;
+  font-size: 18px;
+}
+
+.submitBlobLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.submitBlob {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  background: #0c0c0c;
+  border-radius: 50%;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.28));
 }
 
 .demoButton {

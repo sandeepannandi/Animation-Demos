@@ -5,64 +5,64 @@ import styles from './page.module.css'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart, X, Flame } from 'lucide-react'
 
-const accentVariants = {
-  initial: { width: 86 },
-  hover: { width: '100%' },
-}
+const SubmitButton = () => {
+  const [hovered, setHovered] = useState(false)
 
-const labelVariants = {
-  initial: { color: '#f4f6fb', opacity: 1 },
-  hover: { color: '#0c0d10', opacity: 0 },
-}
-
-export const DemoButton = () => {
-  const [isHovering, setIsHovering] = useState(false)
+  const blobs = [
+    { left: '-20%', top: '-26%', delay: 0, toX: 34, toY: 36 },
+    { left: '8%', top: '-30%', delay: 0.08, toX: 16, toY: 30 },
+    { left: '46%', top: '-28%', delay: 0.14, toX: 0, toY: 26 },
+    { left: '88%', top: '-20%', delay: 0.2, toX: -26, toY: 24 },
+    { left: '-24%', bottom: '-28%', delay: 0.26, toX: 38, toY: -34 },
+    { left: '10%', bottom: '-26%', delay: 0.32, toX: 18, toY: -30 },
+    { left: '52%', bottom: '-30%', delay: 0.38, toX: 0, toY: -28 },
+    { right: '-18%', bottom: '-24%', delay: 0.44, toX: -30, toY: -26 },
+  ]
 
   return (
     <motion.button
-      className={styles.demoButton}
-      initial="initial"
-      whileHover="hover"
-      animate="initial"
-      onHoverStart={() => setIsHovering(true)}
-      onHoverEnd={() => setIsHovering(false)}
+      className={styles.submitButton}
+      onHoverStart={() => setHovered(true)}
+      onHoverEnd={() => setHovered(false)}
+      whileTap={{ scale: 0.97 }}
+      animate={hovered ? 'hover' : 'rest'}
+      variants={{
+        rest: { backgroundColor: '#ffffff' },
+        hover: { backgroundColor: '#0c0c0c' },
+      }}
+      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
     >
-      <motion.div
-        className={styles.demoAccent}
-        variants={accentVariants}
-        transition={{ duration: 0.5, ease: [1, 0.4, 1, 1.6] }}
-      >
-        <div className={styles.arrowTrack}>
-          {Array.from({ length: 6 }).map((_, idx) => (
-            <motion.div
-              className={styles.arrowIcon}
-              key={idx}
-              animate={
-                isHovering
-                  ? {
-                      opacity: [0.5, 1, 0.5],
-                      scale: [1, 1, 1],
-                      transition: {
-                        duration: 1.2,
-                        repeat: Infinity,
-                        delay: idx * 0.5,
-                        ease: 'easeInOut',
-                      },
-                    }
-                  : { opacity: 1}
-              }
-            >
-              <Image src="/dotarrow.svg" alt="dot arrow" width={52} height={52} />
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+      <div className={styles.submitBlobLayer}>
+        {blobs.map((blob, idx) => (
+          <motion.span
+            key={idx}
+            className={styles.submitBlob}
+            style={{
+              left: blob.left,
+              top: blob.top,
+              bottom: blob.bottom,
+            }}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={
+              hovered
+                ? { scale: 2.4, opacity: 1, x: blob.toX, y: blob.toY }
+                : { scale: 0, opacity: 0, x: 0, y: 0 }
+            }
+            transition={{
+              type: 'spring',
+              stiffness: 220,
+              damping: 26,
+              delay: blob.delay,
+            }}
+          />
+        ))}
+      </div>
       <motion.span
-        className={styles.buttonLabel}
-        variants={labelVariants}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
+        className={styles.submitLabel}
+        animate={hovered ? { color: '#f6f7fb' } : { color: '#0f1115' }}
+        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
       >
-        Book a Demo
+        Submit
       </motion.span>
     </motion.button>
   )
@@ -1225,8 +1225,8 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <div className={styles.grid}>
-         <div className={styles.gridItem}>
-          <DemoButton />
+        <div className={styles.gridItem}>
+          <SubmitButton />
         </div>
         <div className={styles.gridItem}>
           <NavigationBar />
@@ -1251,6 +1251,9 @@ export default function Home() {
         </div>
         <div className={styles.gridItem}>
           <TodoList />
+        </div>
+        <div className={styles.gridItem}>
+          <SubmitButton />
         </div>
       </div>
     </main>
