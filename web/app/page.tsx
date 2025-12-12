@@ -68,6 +68,80 @@ const SubmitButton = () => {
   )
 }
 
+const InlineToast = () => {
+  const [copied, setCopied] = useState(false)
+
+  useEffect(() => {
+    if (!copied) return
+    const timer = setTimeout(() => setCopied(false), 1200)
+    return () => clearTimeout(timer)
+  }, [copied])
+
+  return (
+    <motion.div
+      className={styles.toastWrap}
+      initial={{ opacity: 0, y: 16, scale: 0.96 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+    >
+      <motion.div
+        className={styles.toastBody}
+        layout
+        transition={{ layout: { duration: 0.24, ease: [0.4, 0, 0.2, 1] } }}
+      >
+        <AnimatePresence initial={false} mode="wait">
+          {!copied ? (
+            <motion.div
+              key="idle"
+              className={styles.toastContent}
+              initial={{ opacity: 0, scale: 0.9, y: -6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 6 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <span className={styles.toastCode}>B3E45S7T</span>
+              <motion.button
+                className={styles.toastCopyBtn}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => setCopied(true)}
+              >
+                Copy
+              </motion.button>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="copied"
+              className={styles.toastContentCopied}
+              initial={{ opacity: 0, scale: 0.9, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: -6 }}
+              transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            >
+              <div className={styles.toastCheck}>
+                <Check size={18} />
+              </div>
+              <span className={styles.toastCopiedText}>Code Copied!</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence initial={false}>
+          {copied && (
+            <motion.div
+              key="progress"
+              className={styles.toastProgress}
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1.5, ease: 'easeInOut' }}
+            />
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 const SaveButton = () => {
   const [state, setState] = useState<'initial' | 'loading' | 'saved'>('initial')
 
@@ -1254,6 +1328,9 @@ export default function Home() {
         </div>
         <div className={styles.gridItem}>
           <SubmitButton />
+        </div>
+        <div className={styles.gridItem}>
+          <InlineToast />
         </div>
       </div>
     </main>
