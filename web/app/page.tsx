@@ -3,7 +3,29 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import styles from './page.module.css'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart, X, Flame } from 'lucide-react'
+import { Search, FileText, Plus, MessageSquare, Settings, Loader2, Check, ChevronLeft, ChevronRight, Heart, X, Flame, ArrowDown, ArrowUp, Target, CheckCircle } from 'lucide-react'
+
+const DemoButton = () => {
+  return (
+    <motion.button
+      className={styles.demoButton}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+    >
+      <div className={styles.demoAccent}>
+        <div className={styles.arrowTrack}>
+          <div className={styles.arrowIcon}>
+            <svg width="44" height="32" viewBox="0 0 44 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2 16H42M42 16L30 4M42 16L30 28" stroke="#0c0d11" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <span className={styles.buttonLabel}>Demo</span>
+    </motion.button>
+  )
+}
 
 const SubmitButton = () => {
   const [hovered, setHovered] = useState(false)
@@ -139,6 +161,105 @@ const InlineToast = () => {
         </AnimatePresence>
       </motion.div>
     </motion.div>
+  )
+}
+
+const StepIndicator = () => {
+  const [hoveredStep, setHoveredStep] = useState<number | null>(null)
+  const barRefs = useRef<(HTMLDivElement | null)[]>([])
+
+  const categories = [
+    { label: 'Income', icon: ArrowDown },
+    { label: 'Expense', icon: ArrowUp },
+    { label: 'Goals', icon: Target },
+    { label: 'Review', icon: CheckCircle },
+  ]
+
+  const getButtonPosition = () => {
+    if (hoveredStep === null) return null
+    const barElement = barRefs.current[hoveredStep]
+    if (!barElement) return null
+    
+    const container = barElement.closest(`.${styles.stepBarsRow}`)
+    if (!container) return null
+    
+    const containerRect = container.getBoundingClientRect()
+    const barRect = barElement.getBoundingClientRect()
+    
+    // Calculate center of the bar relative to container
+    const barCenter = barRect.left - containerRect.left + barRect.width / 2
+    
+    return {
+      left: barCenter,
+    }
+  }
+
+  const buttonPosition = getButtonPosition()
+  const activeCategory = hoveredStep !== null ? categories[hoveredStep] : null
+  const ActiveIcon = activeCategory?.icon
+
+  return (
+    <div className={styles.stepIndicatorContainer}>
+      <div className={styles.stepBarsRow}>
+        <AnimatePresence>
+          {hoveredStep !== null && activeCategory && buttonPosition && ActiveIcon && (
+            <motion.button
+              className={styles.stepCategoryTooltip}
+              layoutId="stepCategoryButton"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1,
+                left: `${buttonPosition.left}px`,
+              }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{
+                opacity: {
+                  duration: 0.2,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                scale: {
+                  duration: 0.2,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+                left: {
+                  duration: 0.3,
+                  ease: [0.4, 0, 0.2, 1],
+                },
+              }}
+            >
+              <div className={styles.stepCategoryIcon}>
+                <ActiveIcon size={16} />
+              </div>
+              <span className={styles.stepCategoryText}>
+                {activeCategory.label}
+              </span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+        {categories.map((category, index) => (
+          <div 
+            key={index} 
+            className={styles.stepBarWrapper}
+          >
+            <motion.div
+              ref={(el) => { barRefs.current[index] = el }}
+              className={styles.stepBar}
+              onHoverStart={() => setHoveredStep(index)}
+              onHoverEnd={() => setHoveredStep(null)}
+              animate={{
+                backgroundColor: hoveredStep === index ? '#d1d5db' : '#e5e7eb',
+              }}
+              transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 25,
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -1300,7 +1421,7 @@ export default function Home() {
     <main className={styles.main}>
       <div className={styles.grid}>
         <div className={styles.gridItem}>
-          <SubmitButton />
+          <DemoButton />
         </div>
         <div className={styles.gridItem}>
           <NavigationBar />
@@ -1331,6 +1452,9 @@ export default function Home() {
         </div>
         <div className={styles.gridItem}>
           <InlineToast />
+        </div>
+        <div className={styles.gridItem}>
+          <StepIndicator />
         </div>
       </div>
     </main>

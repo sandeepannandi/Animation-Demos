@@ -15,7 +15,7 @@
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-rows: repeat(4, auto);
-  gap: 80px 0px;
+  gap: 40px 0px;
   width: min(1200px, 100%);
   height: auto;
   scroll-behavior: auto;
@@ -28,6 +28,8 @@
   font-size: 48px;
   font-weight: bold;
   color: #333;
+  width: 100%;
+  min-height: 100vh;
 }
 
 .gridItem:nth-child(3n) {
@@ -1072,5 +1074,81 @@
 .todoItemDone .todoLabel {
   text-decoration: line-through;
   color: #9ca3af;
+}
+
+.stepIndicatorContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0px 0px;
+  padding-right: 0px;
+}
+
+.stepBarsRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 500px;
+  padding-top: 60px;
+  margin: 0 auto;
+}
+
+.stepBarWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stepCategoryTooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-left: -60px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  z-index: 10;
+  pointer-events: none;
+  transform: translateX(-50%);
+  will-change: left, opacity, transform;
+}
+
+.stepCategoryIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stepCategoryText {
+  font-weight: 500;
+}
+
+.stepBar {
+  width: 110%;
+  height: 10px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  cursor: pointer;
 }
 
