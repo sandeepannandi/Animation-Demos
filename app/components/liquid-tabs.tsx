@@ -32,6 +32,5 @@ export function LiquidTabsPreview() {
         }}><tab.icon size={21} strokeWidth={index === active ? 2.2 : 1.7} aria-hidden="true" /><span>{tab.label}</span></button>)}
       </div>
     </div>
-    <p className={styles.note}>Web preview, not native glass. Not yet tested on a device.<br />iOS 26+: native glass when available. Earlier iOS: blur. Android: opaque fallback.</p>
   </div>;
 }
