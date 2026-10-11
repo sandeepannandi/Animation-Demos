@@ -310,7 +310,7 @@ export default function Home() {
         <div className={styles.headerInner}>
           <div className={styles.logo}>
             <img src="/icon.png" alt="" className={styles.logoIcon} />
-            <span className={styles.logoText}>SandUI</span>
+            <span className={styles.logoText}>Nativelet</span>
           </div>
 
           {/* Desktop Nav */}
@@ -329,7 +329,7 @@ export default function Home() {
               </motion.a>
             ))}
             <motion.a
-              href="https://github.com/sandeepannandi/Design-Experiments"
+              href="https://github.com/sandeepannandi/Nativelet"
               target="_blank"
               rel="noopener noreferrer"
               className={styles.navGithub}
@@ -379,7 +379,7 @@ export default function Home() {
                 </a>
               ))}
               <div className={styles.mobileNavDivider} />
-              <a href="https://github.com/sandeepannandi/Design-Experiments" target="_blank" rel="noopener noreferrer" className={styles.mobileNavGithub}>
+              <a href="https://github.com/sandeepannandi/Nativelet" target="_blank" rel="noopener noreferrer" className={styles.mobileNavGithub}>
                 <Github size={16} />
                 <span>GitHub</span>
                 <span className={styles.mobileGithubBadge}>
@@ -573,7 +573,7 @@ export default function Home() {
       >
         <div className={styles.footerInner}>
           <div className={styles.footerBrand}>
-            <span className={styles.footerLogo}>SandUI</span>
+            <span className={styles.footerLogo}>Nativelet</span>
             <p className={styles.footerTagline}>
               The motion toolkit for Next.js &amp; React Native.
               <br />
@@ -597,7 +597,7 @@ export default function Home() {
                 <ArrowUpRight size={12} className={styles.linkIcon} />
               </motion.a>
               <motion.a
-                href="https://github.com/sandeepannandi/Design-Experiments"
+                href="https://github.com/sandeepannandi/Nativelet"
                 target="_blank"
                 rel="noopener noreferrer"
                 className={styles.footerLink}
@@ -635,7 +635,7 @@ export default function Home() {
         </div>
         <div className={styles.footerBottom}>
           <p>
-            &copy; {new Date().getFullYear()} SandUI.
+            &copy; {new Date().getFullYear()} Nativelet.
           </p>
           <div className={styles.footerBottomLinks}>
             <a target="_blank" rel="noopener noreferrer">MIT License</a>

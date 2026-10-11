@@ -3,7 +3,7 @@ import './globals.css'
 import { GeistSans } from 'geist/font/sans'
 
 export const metadata: Metadata = {
-  title: 'SandUI | Motion Toolkit for Next.js & React Native',
+  title: 'Nativelet | Motion Toolkit for Next.js & React Native',
   description:
     'Copy-paste animated components built on Framer Motion and Animated. Free and open source.',
   icons: {
