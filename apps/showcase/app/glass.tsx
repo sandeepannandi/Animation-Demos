@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
 import { LiquidTabs } from '../../../packages/ui/src/components/liquid-tabs/LiquidTabs';
@@ -18,9 +19,10 @@ export default function GlassScreen() {
       <Text style={styles.title}>A little room to wander.</Text>
       <Text style={styles.label}>Selected: {tabs.find(tab => tab.id === activeId)?.label}</Text>
       <View style={styles.art}><View style={styles.hill} /></View>
-      <Text style={styles.label}>Not device-tested. iOS 26+: native glass when available. Earlier iOS: blur. Android and web: opaque.</Text>
+      <Text style={styles.label}>Tap a tab, or hold the active tab and slide left or right. Not device-tested. iOS 26+: native glass when available. Earlier iOS: blur. Android and web: opaque. Optional haptics run only on native.</Text>
     </View>
-    <LiquidTabs tabs={tabs} activeId={activeId} onTabChange={setActiveId} bottomInset={insets.bottom} />
+    <LiquidTabs tabs={tabs} activeId={activeId} onTabChange={setActiveId} bottomInset={insets.bottom}
+      onFeedback={() => { if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {}); }} />
   </View>;
 }
 const styles = StyleSheet.create({

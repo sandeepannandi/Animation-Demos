@@ -12,14 +12,16 @@
 .landscape span:nth-child(2) { background:#90b5a0; left:20%; top:25px; transform:rotate(14deg); }
 .landscape span:nth-child(3) { background:#3b6a57; left:0; top:90px; }
 .sceneNote { display:block; margin-top:16px; font-size:8px; letter-spacing:1.4px; color:#4a6b59; }
-.bar { position:absolute; display:flex; bottom:22px; left:18px; right:18px; border:1px solid #ffffffb0; border-radius:38px; padding:6px; background:#ffffff30; backdrop-filter:blur(18px) saturate(1.6); box-shadow:0 12px 36px #153d2e1a,inset 0 1px 0 #ffffffb0; }
+.bar { position:absolute; display:flex; bottom:22px; left:18px; right:18px; border:1px solid #ffffffb0; border-radius:38px; padding:6px; background:#ffffff30; backdrop-filter:blur(18px) saturate(1.6); box-shadow:0 12px 36px #153d2e1a,inset 0 1px 0 #ffffffb0;  touch-action:pan-y; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; transition:padding 260ms cubic-bezier(.34,1.3,.64,1); }
+.expanded { padding:10px; }
 .opaque { background:#eff3ed; backdrop-filter:none; }
 .lens { position:absolute; top:6px; bottom:6px; left:6px; width:calc((100% - 12px)/4); border-radius:30px; background:linear-gradient(135deg,#ffffffc0,#ffffff70); border:1px solid #fff; box-shadow:0 2px 8px #254d3810; }
-.bar button { position:relative; flex:1; min-width:0; min-height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border:0; background:none; border-radius:30px; color:#53615d; font-size:10px; }
+.bar button { position:relative; flex:1; min-width:0; min-height:60px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; border:0; background:none; border-radius:30px; color:#53615d; font-size:10px;  transition:min-height 260ms cubic-bezier(.34,1.3,.64,1); }
+.expanded button { min-height:76px; }
 .bar button[aria-selected="true"] { color:#173f33; font-weight:600; }
 .bar button:focus-visible { outline:2px solid #245541; outline-offset:1px; }
 .note { font-size:11px; color:#61705a; text-align:center; line-height:1.7; margin:16px auto; }
 @supports not (backdrop-filter:blur(1px)) { .bar { background:#eff3ed; } }
 @media(max-width:760px) { .wrapper { padding:12px 14px 0; } .content { padding:28px 20px 120px; } .content h4 { font-size:29px; } .bar { left:10px; right:10px; } }
-@media(prefers-reduced-motion:reduce) { .scene { transition:none; } }
+@media(prefers-reduced-motion:reduce) { .scene, .bar, .bar button { transition:none; } }
 @media(prefers-reduced-transparency:reduce) { .bar { background:#eff3ed; backdrop-filter:none; } }
