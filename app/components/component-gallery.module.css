@@ -51,6 +51,9 @@
   overflow: auto;
   box-shadow: 0 24px 100px #172b2440;
 }
+/* Dialog stays scrollable (wheel, touch, keyboard) without drawing scrollbar chrome. */
+.dialog { scrollbar-width: none; -ms-overflow-style: none; }
+.dialog::-webkit-scrollbar { display: none; }
 .dialog::backdrop { background: #14291ee0; backdrop-filter: blur(5px); }
 .dialog[open] { animation: appear 180ms ease-out; }
 .dialogTop { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; gap: 20px; }
