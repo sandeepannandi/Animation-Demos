@@ -18,7 +18,7 @@ export default function CapsuleScreen() {
   };
   return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
     <Link href="/" style={styles.back}>← Preview Rail</Link>
-    <Text accessibilityRole="header" style={styles.title}>{'A pill that\nchanges its mind.'}</Text>
+    <Link href="/toasts">Next: Toast Stack →</Link><Text accessibilityRole="header" style={styles.title}>{'A pill that\nchanges its mind.'}</Text>
     <Text style={styles.subtitle}>Tap to step up. Drag down to expand and up to collapse. Grab it mid-morph.</Text>
     <View style={styles.demo}>
       <Text style={styles.platform}>{Platform.OS === 'web' ? 'React Native Web preview' : 'Native demo'}</Text>

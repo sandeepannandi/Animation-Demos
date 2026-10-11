@@ -1,0 +1,16 @@
+.stage { margin: 14px 28px 0; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; }
+.toolbar button { background: #e6edde; border: 1px solid #d5e1d2; color: #245541; border-radius: 14px; padding: 10px 13px; min-height: 44px; font-size: 12px; }
+.hint { color: #61705a; font-size: 12px; line-height: 1.7; margin: 14px 0; }
+.canvas { height: 380px; border-radius: 22px; border: 1px solid #d5e1d2; background: #f0f4eb; position: relative; overflow: hidden; }
+.caption { position: absolute; left: 0; right: 0; top: 50%; text-align: center; color: #82917b; font-size: 9px; letter-spacing: 1.5px; }
+.stack { position: absolute; left: 12px; right: 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.top { top: 16px; } .bottom { bottom: 16px; }
+.card { width: 100%; max-width: 360px; min-height: 98px; flex-shrink: 0; background: white; border: 1px solid #d5e1d2; border-radius: 22px; padding: 14px 8px 14px 18px; display: flex; align-items: center; gap: 8px; box-shadow: 0 5px 20px #173b2915; cursor: grab; }
+.text { min-width: 0; flex: 1; display: flex; flex-direction: column; gap: 5px; }
+.text strong { font-size: 14px; color: #193f30; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.text span { font-size: 12px; line-height: 17px; color: #52654f; }
+.text .error { color: #9b3434; }
+.card button { min-width: 44px; min-height: 44px; border: 0; background: transparent; font-size: 13px; font-weight: 600; color: #245541; padding: 6px; }
+.card button:last-child { font-size: 24px; }
+@media(max-width:760px) { .stage { margin:12px 14px 0; } .canvas { height:380px; } .card { padding-left:12px; } }

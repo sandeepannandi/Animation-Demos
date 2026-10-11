@@ -23,12 +23,14 @@ import {
 } from "lucide-react";
 import { PreviewRail } from "./preview-rail";
 import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
+import { ToastStackPreview } from "./toast-stack";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule";
+type ComponentId = "rail" | "capsule" | "toast";
 const META = {
+  toast: { title: "Toast Stack", number: "03", folder: "toast-stack", note: "React Native source for Expo. Copy ToastStack.tsx and toastLogic.ts together and keep the LICENSE. The web adapter shares the queue, timer and gesture helpers, not the native render. Pass safe-area insets from your app.", footer: "Preview: React · Framer Motion. Source: React Native" },
   rail: {
     title: "Preview Rail",
     number: "01",
@@ -437,9 +439,9 @@ export default function NativeletSite({
                 </h2>
               </div>
               <p>
-                Two working web components today.
+                Three React Native components with web previews.
                 <br />
-                Vertical or horizontal. Open it to try it and copy the code.
+                Open one to try it and copy its React Native source.
               </p>
             </div>
             <div className={gallery.grid}>
@@ -463,6 +465,10 @@ export default function NativeletSite({
                   <div><span className={gallery.label}>WEB PREVIEW · 02</span><strong>Morph Capsule</strong><small>Idle, compact and expanded · tap or drag inside</small></div>
                   <ArrowUpRight size={20} aria-hidden="true" />
                 </div>
+              </button>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "toast")} aria-haspopup="dialog" aria-label="Open Toast Stack web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniToasts}><span>✓ Saved to collection <b>Undo</b></span><span>A little less to carry.</span></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 03</span><strong>Toast Stack</strong><small>Queue, swipe, pause and undo · feedback that feels right</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
@@ -522,7 +528,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "capsule" ? (
+                {which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
