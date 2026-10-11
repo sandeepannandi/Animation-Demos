@@ -1,6 +1,6 @@
 .grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 18px;
 }
 .tile {
@@ -15,7 +15,6 @@
   text-align: left;
   transition: border-color 180ms ease, transform 180ms ease;
 }
-.tile:nth-child(2) { background: #f0f2eb; }
 .tile:hover { transform: translateY(-3px); border-color: #91ac7d; }
 .study {
   display: flex;
@@ -55,12 +54,13 @@
 .dialog { scrollbar-width: none; -ms-overflow-style: none; }
 .dialog::-webkit-scrollbar { display: none; }
 .dialog::backdrop { background: #14291ee0; backdrop-filter: blur(5px); }
-.dialog[open] { animation: appear 180ms ease-out; }
+.dialog[open]::backdrop { animation: fade 240ms ease-out; }
+.dialog[data-closing="true"]::backdrop { opacity: 0; transition: opacity 240ms ease-in; }
 .dialogTop { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; gap: 20px; }
 .dialogTop p { margin: 0; font-size: 11px; color: #61705a; line-height: 1.6; }
 .close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid #dbe3d3; border-radius: 50%; background: white; color: #294337; }
 .dialogBody { padding: 0 20px 20px; }
-@keyframes appear { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 760px) {
   .grid { grid-template-columns: 1fr; }
   .tile { min-height: 280px; padding: 22px; }
@@ -71,5 +71,10 @@
 @media (prefers-reduced-motion: reduce) {
   .tile { transition: none; }
   .tile:hover { transform: none; }
-  .dialog[open] { animation: none; }
+  .dialog[open]::backdrop { animation: none; }
+  .dialog[data-closing="true"]::backdrop { transition: none; }
 }
+.orientation { display: flex; gap: 8px; padding: 14px 28px 0; }
+.orientation button { padding: 8px 14px; border: 1px solid #dbe3d3; border-radius: 999px; background: #fff; color: #294337; font-size: 11px; }
+.orientation button[aria-pressed="true"] { background: #163e32; border-color: #163e32; color: #fff; }
+@media (max-width: 760px) { .orientation { padding: 12px 14px 0; } }

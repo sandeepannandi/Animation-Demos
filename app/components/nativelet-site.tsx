@@ -19,7 +19,6 @@ import {
   Smartphone,
   Layers,
   Sparkles,
-  Plus,
   X,
 } from "lucide-react";
 import { PreviewRail } from "./preview-rail";
@@ -49,14 +48,6 @@ const sections = [
     href: "#rail-detail",
   },
 ];
-const snippet = `import { PreviewRail } from "./preview-rail";
-
-const items = [
-  { id: "intro", label: "Introduction", href: "#intro" },
-  { id: "work", label: "Selected work", href: "#work" },
-];
-
-<PreviewRail items={items} />;`;
 
 export default function NativeletSite({
   sources,
@@ -76,6 +67,7 @@ export default function NativeletSite({
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
   const savedOverflow = useRef("");
+  const closing = useRef(false);
   function openComponent(event: React.MouseEvent<HTMLButtonElement>, layout: "vertical" | "horizontal") {
     opener.current = event.currentTarget;
     setOrientation(layout);
@@ -85,10 +77,57 @@ export default function NativeletSite({
     setCopyError(false);
     savedOverflow.current = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    dialog.current?.showModal();
+    const modal = dialog.current;
+    if (!modal) return;
+    modal.showModal();
+    const from = originTransform();
+    if (from && modal.animate) {
+      modal.animate(
+        [{ transform: from, opacity: 0.2 }, { transform: "none", opacity: 1 }],
+        { duration: 320, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" },
+      );
+    }
+  }
+  function originTransform() {
+    const modal = dialog.current;
+    const source = opener.current;
+    if (!modal || !source) return null;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return null;
+    const card = source.getBoundingClientRect();
+    const box = modal.open ? modal.getBoundingClientRect() : null;
+    const width = box?.width || Math.min(960, window.innerWidth - 32);
+    const height = box?.height || Math.min(720, window.innerHeight - 32);
+    const left = box ? box.left : (window.innerWidth - width) / 2;
+    const top = box ? box.top : (window.innerHeight - height) / 2;
+    const dx = card.left + card.width / 2 - (left + width / 2);
+    const dy = card.top + card.height / 2 - (top + height / 2);
+    return `translate(${dx}px, ${dy}px) scale(${card.width / width}, ${card.height / height})`;
   }
   function closeComponent() {
-    dialog.current?.close();
+    const modal = dialog.current;
+    if (!modal || !modal.open || closing.current) return;
+    const to = originTransform();
+    if (!to || !modal.animate) {
+      modal.close();
+      return;
+    }
+    closing.current = true;
+    modal.dataset.closing = "true";
+    const animation = modal.animate(
+      [{ transform: "none", opacity: 1 }, { transform: to, opacity: 0.2 }],
+      { duration: 240, easing: "cubic-bezier(0.4, 0, 0.6, 1)", fill: "forwards" },
+    );
+    const done = () => {
+      closing.current = false;
+      delete modal.dataset.closing;
+      animation.cancel();
+      modal.close();
+    };
+    animation.onfinish = done;
+    animation.oncancel = () => {
+      closing.current = false;
+      delete modal.dataset.closing;
+    };
   }
   function afterClose() {
     document.body.style.overflow = savedOverflow.current;
@@ -363,26 +402,24 @@ export default function NativeletSite({
               <p>
                 One working web component today.
                 <br />
-                Two layouts. Open a tile to try it and copy the code.
+                Vertical or horizontal. Open it to try it and copy the code.
               </p>
             </div>
             <div className={gallery.grid}>
-              {(["vertical", "horizontal"] as const).map((layout) => (
-                <button key={layout} className={gallery.tile} onClick={(event) => openComponent(event, layout)} aria-haspopup="dialog" aria-label={`Open ${layout} Preview Rail web preview`}>
-                  <div className={`${gallery.study} ${layout === "horizontal" ? gallery.stacked : ""}`} aria-hidden="true">
-                    <div className={`${gallery.miniRail} ${layout === "horizontal" ? gallery.horizontal : ""}`}>
-                      {[0, 1, 2].map((tick) => <span key={tick} className={gallery.tick} />)}
-                    </div>
-                    <div className={gallery.miniCard}><span>A LITTLE CLARITY</span><strong>One thing at a time.</strong></div>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "vertical")} aria-haspopup="dialog" aria-label="Open Preview Rail web preview">
+                <div className={gallery.study} aria-hidden="true">
+                  <div className={gallery.miniRail}>
+                    {[0, 1, 2].map((tick) => <span key={tick} className={gallery.tick} />)}
                   </div>
-                  <div className={gallery.caption}>
-                    <div><span className={gallery.label}>WEB PREVIEW · 01</span><strong>Preview Rail</strong><small>{layout === "vertical" ? "Vertical navigation" : "Horizontal navigation"} · same component</small></div>
-                    <ArrowUpRight size={20} aria-hidden="true" />
-                  </div>
-                </button>
-              ))}
+                  <div className={gallery.miniCard}><span>A LITTLE CLARITY</span><strong>One thing at a time.</strong></div>
+                </div>
+                <div className={gallery.caption}>
+                  <div><span className={gallery.label}>WEB PREVIEW · 01</span><strong>Preview Rail</strong><small>Vertical and horizontal navigation · switch inside</small></div>
+                  <ArrowUpRight size={20} aria-hidden="true" />
+                </div>
+              </button>
             </div>
-            <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onKeyDown={(event) => {
+            <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
               const elements = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], select, [tabindex="0"]')).filter((element) => element.getClientRects().length > 0);
               const first = elements[0];
@@ -432,6 +469,12 @@ export default function NativeletSite({
                 </div>
               </div>
               {panel === "preview" ? (
+                <>
+                <div className={gallery.orientation} role="group" aria-label="Rail orientation">
+                  {(["vertical", "horizontal"] as const).map((layout) => (
+                    <button key={layout} type="button" aria-pressed={orientation === layout} onClick={() => setOrientation(layout)}>{layout === "vertical" ? "Vertical" : "Horizontal"}</button>
+                  ))}
+                </div>
                 <div className={styles.demo}>
                   <div className={styles.demoNavigation}>
                     <PreviewRail
@@ -509,6 +552,7 @@ export default function NativeletSite({
                     </AnimatePresence>
                   </div>
                 </div>
+                </>
               ) : (
                 <div className={styles.sourcePanel}>
                   <div className={styles.sourceToolbar}>
@@ -548,26 +592,6 @@ export default function NativeletSite({
             </div>
               </div>
             </dialog>
-            <details className={styles.quickstart}>
-              <summary>
-                Using the web Preview Rail <Plus size={17} />
-              </summary>
-              <div>
-                <p>
-                  Copy Preview Rail and its three helper files from the Code
-                  view. It needs React, Framer Motion, Tailwind CSS, the theme
-                  tokens, and an <code>@/</code> path alias. The complete
-                  working setup is in the repository. This is web React, not a
-                  React Native install command.
-                </p>
-                <pre role="region" tabIndex={0} aria-label="Preview Rail usage example">
-                  <code>{snippet}</code>
-                </pre>
-                <a href={REPO}>
-                  Open the complete project <ArrowUpRight size={15} />
-                </a>
-              </div>
-            </details>
           </section>
           <section
             id="direction"
