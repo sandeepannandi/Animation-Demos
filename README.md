@@ -9,8 +9,8 @@ Nativelet is the next direction for Design-Experiments: components and screens t
 ## What's here
 
 - **Preview Rail:** an animated navigation rail with vertical and horizontal layouts, hover and keyboard-focus previews, controlled or internal selection, and reduced-motion handling.
-- **Web showcase:** a component preview modal and a code view with a copy button.
-- **Three placeholder cards:** these are not shipped components.
+- **Web showcase:** an animated phone design study, an interactive Preview Rail playground, and a code view with component and helper source plus a copy button.
+- **Native roadmap:** React Native components and blocks are planned. The phone is a web design study, not a shipped native screen.
 
 The current component uses React DOM, Framer Motion, Tailwind classes, and local helpers. It cannot be pasted unchanged into a React Native app. The code view also needs those helpers and theme styles; it is not a standalone install bundle.
 
@@ -39,10 +39,11 @@ The current app uses Next.js 14, React 18, TypeScript, Framer Motion, Tailwind C
 ```text
 app/
   components/preview-rail.tsx   Component implementation
-  page.tsx                      Showcase, preview modal, and code view
+  components/nativelet-site.tsx Website interactions
+  page.tsx                      Loads component and helper source
   layout.tsx                    Page metadata and Geist font
   globals.css                   Global styles and theme tokens
-  page.module.css               Showcase styles
+  page.module.css               Website styles
 lib/
   ease.ts                       Animation settings
   hooks/use-hover-capable.ts    Hover capability detection
