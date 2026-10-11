@@ -29,7 +29,7 @@ export function LiquidTabs({ tabs, activeId, onTabChange, bottomInset = 0, reduc
     let motionChanged = false;
     const t = AccessibilityInfo.addEventListener('reduceTransparencyChanged', value => { transparencyChanged = true; setSystemTransparency(value); });
     const m = AccessibilityInfo.addEventListener('reduceMotionChanged', value => { motionChanged = true; setSystemMotion(value); });
-    void AccessibilityInfo.isReduceTransparencyEnabled().then(value => { if (live && !transparencyChanged) setSystemTransparency(value); }).catch(() => {});
+    if (Platform.OS === 'ios') void AccessibilityInfo.isReduceTransparencyEnabled().then(value => { if (live && !transparencyChanged) setSystemTransparency(value); }).catch(() => {});
     void AccessibilityInfo.isReduceMotionEnabled().then(value => { if (live && !motionChanged) setSystemMotion(value); }).catch(() => {});
     return () => { live = false; t.remove(); m.remove(); };
   }, []);
