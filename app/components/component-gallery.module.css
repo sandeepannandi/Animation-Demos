@@ -85,3 +85,8 @@
 .capsuleStage { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 36px 16px 32px; margin: 14px 28px 0; border: 1px solid #dbe3d3; border-radius: 18px; background: #fff; }
 .capsuleStage p { margin: 0; max-width: 34ch; text-align: center; font-size: 12px; line-height: 1.7; color: #61705a; }
 @media (max-width: 760px) { .capsuleStage { margin: 12px 14px 0; padding: 28px 8px 24px; } }
+
+.miniToasts { width: 260px; max-width:100%; display:flex; flex-direction:column; gap:8px; transform:rotate(-4deg); }
+.miniToasts span { padding:18px; border-radius:16px; background:white; box-shadow:0 5px 20px #173b2915; font-size:12px; }
+.miniToasts b { float:right; color:#245541; }
+.miniToasts span:last-child { transform:translateX(8px); background:#f9fcf6; }
