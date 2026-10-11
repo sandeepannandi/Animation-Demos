@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Link } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { PreviewRail } from '../../../packages/ui/src/components/preview-rail/PreviewRail';
 import { SourcePanel } from '../src/web/SourcePanel';
@@ -17,6 +18,7 @@ export default function ShowcaseHome() {
   const [reduce, setReduce] = useState<boolean | undefined>();
   return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
     <View style={styles.header}><Text style={styles.brand}>nativelet</Text><Text style={styles.badge}>NATIVE STUDY / 01</Text></View>
+    <Link href="/capsule" style={styles.note}>Next: Morph Capsule →</Link>
     <Text accessibilityRole="header" style={styles.title}>{'A small rail.\nA world of previews.'}</Text>
     <Text style={styles.subtitle}>Press a tick. Drag to explore. Release to choose.</Text>
     <View style={styles.demo}>
