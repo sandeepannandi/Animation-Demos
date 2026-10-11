@@ -469,7 +469,7 @@ export default function NativeletSite({
                   <p role="status">
                     {copyError
                       ? "Clipboard unavailable. Select the source below and copy it manually."
-                      : "Exact repository source. Include the helper files and configure the @/ alias."}
+                      : "Exact repository source. Include the helper files and configure the @/ alias. Scroll to read more; focus the code to scroll with arrow keys."}
                   </p>
                   <pre tabIndex={0} aria-label={sources[source].name}>
                     <code>{sources[source].code}</code>
@@ -495,7 +495,7 @@ export default function NativeletSite({
                   working setup is in the repository. This is web React, not a
                   React Native install command.
                 </p>
-                <pre>
+                <pre tabIndex={0} aria-label="Preview Rail usage example">
                   <code>{snippet}</code>
                 </pre>
                 <a href={REPO}>
