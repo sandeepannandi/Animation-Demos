@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  glass: { dir: "packages/ui/src/components/liquid-tabs", files: ["LiquidTabs.tsx", "README.md", "LICENSE"] },
   toast: { dir: "packages/ui/src/components/toast-stack", files: ["ToastStack.tsx", "toastLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
   rail: {
     dir: "packages/ui/src/components/preview-rail",
@@ -23,6 +24,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    glass: read(components.glass.dir, components.glass.files),
     toast: read(components.toast.dir, components.toast.files),
     rail: read(components.rail.dir, components.rail.files),
     capsule: read(components.capsule.dir, components.capsule.files),
