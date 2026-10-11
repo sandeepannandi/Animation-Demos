@@ -439,14 +439,14 @@ export default function NativeletSite({
               if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeComponent();
             }}>
               <div className={gallery.dialogTop}>
-                <p id="preview-dialog-description">Web preview. React Native library in the making.</p>
+                <p id="preview-dialog-description">Web preview of the React Native Preview Rail. Not yet tested on a device.</p>
                 <button type="button" className={gallery.close} aria-label="Close component preview" onClick={closeComponent} autoFocus><X size={19} /></button>
               </div>
               <div className={gallery.dialogBody}>
             <div className={styles.workbench}>
               <div className={styles.workbenchHead}>
                 <div>
-                  <span className={styles.live}>WEB COMPONENT</span>
+                  <span className={styles.live}>REACT NATIVE · WEB PREVIEW</span>
                   <h3 id="preview-dialog-title">
                     Preview Rail <span>01</span>
                   </h3>
@@ -590,7 +590,7 @@ export default function NativeletSite({
                   <p role="status">
                     {copyError
                       ? "Clipboard unavailable. Select the source below and copy it manually."
-                      : "Exact repository source. Include the helper files and configure the @/ alias. Scroll to read more; focus the code to scroll with arrow keys."}
+                      : "React Native source for Expo. Copy PreviewRail.tsx and selection.ts together and keep the LICENSE. The preview shows a web version, not this code. Scroll to read more; focus the code to scroll with arrow keys."}
                   </p>
                   <pre tabIndex={0} aria-label={sources[source].name}>
                     <code>{sources[source].code}</code>
@@ -598,8 +598,8 @@ export default function NativeletSite({
                 </div>
               )}
               <div className={styles.demoFooter}>
-                <span>React · Framer Motion · Tailwind CSS</span>
-                <a href={`${REPO}/tree/main/app/components`}>
+                <span>Preview: React · Framer Motion · Tailwind CSS. Source: React Native</span>
+                <a href={`${REPO}/tree/main/packages/ui/src/components/preview-rail`}>
                   View in repository <ArrowUpRight size={15} />
                 </a>
               </div>
