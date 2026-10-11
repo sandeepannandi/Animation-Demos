@@ -1,13 +1,14 @@
 .grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 .tile {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   min-height: 300px;
-  padding: 25px;
+  padding: 22px;
   border: 1px solid #dbe3d3;
   border-radius: 18px;
   background: #edf2e5;
@@ -21,18 +22,20 @@
   flex: 1;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 14px;
+  min-width: 0;
   min-height: 175px;
 }
 .miniRail { display: flex; flex-direction: column; gap: 14px; }
 .horizontal { flex-direction: row; }
 .tick { width: 14px; height: 3px; border-radius: 4px; background: #8fa27c; }
 .tick:nth-child(3) { width: 25px; background: #245541; }
-.miniCard { padding: 20px; background: #fff; border-radius: 13px; box-shadow: 0 5px 25px #172b240a; }
+.miniCard { min-width: 0; padding: 16px; background: #fff; border-radius: 13px; box-shadow: 0 5px 25px #172b240a; }
 .miniCard strong { display: block; margin-top: 9px; font-size: 17px; font-weight: 500; }
 .miniCard span { font-size: 10px; color: #647267; }
 .stacked { flex-direction: column; gap: 16px; }
 .caption { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.caption > svg { flex-shrink: 0; }
 .caption strong { display: block; font-size: 17px; font-weight: 500; margin: 6px 0; }
 .caption small { color: #61705a; font-size: 11px; line-height: 1.6; }
 .label { font-size: 9px; letter-spacing: 1px; color: #4d705a; }
@@ -61,6 +64,9 @@
 .close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid #dbe3d3; border-radius: 50%; background: white; color: #294337; }
 .dialogBody { padding: 0 20px 20px; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@media (min-width: 761px) and (max-width: 999px) {
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 @media (max-width: 760px) {
   .grid { grid-template-columns: 1fr; }
   .tile { min-height: 280px; padding: 22px; }
@@ -81,7 +87,7 @@
 .orientationPill { position: absolute; inset: -1px; border-radius: 999px; background: #163e32; }
 .toggleLabel { position: relative; z-index: 1; }
 @media (max-width: 760px) { .orientation { padding: 12px 14px 0; } }
-.miniCapsule { display: flex; align-items: center; justify-content: space-between; gap: 28px; width: 216px; height: 52px; padding: 0 22px; border-radius: 26px; background: #10261d; color: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px #10261d33; }
+.miniCapsule { display: flex; align-items: center; justify-content: space-between; gap: 28px; width: 216px; max-width: 100%; height: 52px; padding: 0 22px; border-radius: 26px; background: #10261d; color: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px #10261d33; }
 .capsuleStage { display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 36px 16px 32px; margin: 14px 28px 0; border: 1px solid #dbe3d3; border-radius: 18px; background: #fff; }
 .capsuleStage p { margin: 0; max-width: 34ch; text-align: center; font-size: 12px; line-height: 1.7; color: #61705a; }
 @media (max-width: 760px) { .capsuleStage { margin: 12px 14px 0; padding: 28px 8px 24px; } }
