@@ -20,9 +20,11 @@ import {
   Layers,
   Sparkles,
   Plus,
+  X,
 } from "lucide-react";
 import { PreviewRail } from "./preview-rail";
 import styles from "../page.module.css";
+import gallery from "./component-gallery.module.css";
 
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 const studies = ["Focus", "Listen", "Move"] as const;
@@ -69,6 +71,31 @@ export default function NativeletSite({
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [orientation, setOrientation] = useState<"vertical" | "horizontal">("vertical");
+  const dialog = useRef<HTMLDialogElement>(null);
+  const opener = useRef<HTMLButtonElement | null>(null);
+  const savedOverflow = useRef("");
+  function openComponent(event: React.MouseEvent<HTMLButtonElement>, layout: "vertical" | "horizontal") {
+    opener.current = event.currentTarget;
+    setOrientation(layout);
+    setPanel("preview");
+    setActive("focus");
+    setCopied(false);
+    setCopyError(false);
+    savedOverflow.current = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog.current?.showModal();
+  }
+  function closeComponent() {
+    dialog.current?.close();
+  }
+  function afterClose() {
+    document.body.style.overflow = savedOverflow.current;
+    opener.current?.focus();
+  }
+  useEffect(() => () => {
+    if (dialog.current?.open) document.body.style.overflow = savedOverflow.current;
+  }, []);
   const timer = useRef<ReturnType<typeof setTimeout>>();
   useEffect(
     () => () => {
@@ -335,14 +362,52 @@ export default function NativeletSite({
               <p>
                 One working web component today.
                 <br />
-                Try it, read the code, make it yours.
+                Two layouts. Open a tile to try it and copy the code.
               </p>
             </div>
+            <div className={gallery.grid}>
+              {(["vertical", "horizontal"] as const).map((layout) => (
+                <button key={layout} className={gallery.tile} onClick={(event) => openComponent(event, layout)} aria-haspopup="dialog" aria-label={`Open ${layout} Preview Rail web preview`}>
+                  <div className={`${gallery.study} ${layout === "horizontal" ? gallery.stacked : ""}`} aria-hidden="true">
+                    <div className={`${gallery.miniRail} ${layout === "horizontal" ? gallery.horizontal : ""}`}>
+                      {[0, 1, 2].map((tick) => <span key={tick} className={gallery.tick} />)}
+                    </div>
+                    <div className={gallery.miniCard}><span>A LITTLE CLARITY</span><strong>One thing at a time.</strong></div>
+                  </div>
+                  <div className={gallery.caption}>
+                    <div><span className={gallery.label}>WEB PREVIEW · 01</span><strong>Preview Rail</strong><small>{layout === "vertical" ? "Vertical navigation" : "Horizontal navigation"} · same component</small></div>
+                    <ArrowUpRight size={20} aria-hidden="true" />
+                  </div>
+                </button>
+              ))}
+            </div>
+            <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onKeyDown={(event) => {
+              if (event.key !== "Tab") return;
+              const elements = Array.from(event.currentTarget.querySelectorAll<HTMLElement>('button:not([disabled]), a[href], select, [tabindex="0"]')).filter((element) => element.getClientRects().length > 0);
+              const first = elements[0];
+              const last = elements[elements.length - 1];
+              if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last?.focus();
+              } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first?.focus();
+              }
+            }} onClick={(event) => {
+              if (event.target !== event.currentTarget) return;
+              const box = event.currentTarget.getBoundingClientRect();
+              if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeComponent();
+            }}>
+              <div className={gallery.dialogTop}>
+                <p id="preview-dialog-description">Web preview. React Native library in the making.</p>
+                <button type="button" className={gallery.close} aria-label="Close component preview" onClick={closeComponent} autoFocus><X size={19} /></button>
+              </div>
+              <div className={gallery.dialogBody}>
             <div className={styles.workbench}>
               <div className={styles.workbenchHead}>
                 <div>
                   <span className={styles.live}>WEB COMPONENT</span>
-                  <h3>
+                  <h3 id="preview-dialog-title">
                     Preview Rail <span>01</span>
                   </h3>
                 </div>
@@ -370,6 +435,7 @@ export default function NativeletSite({
                   <div className={styles.demoNavigation}>
                     <PreviewRail
                       items={sections}
+                      orientation={orientation}
                       activeId={active}
                       onActiveChange={setActive}
                       className="!min-h-44"
@@ -483,6 +549,8 @@ export default function NativeletSite({
                 </a>
               </div>
             </div>
+              </div>
+            </dialog>
             <details className={styles.quickstart}>
               <summary>
                 Using the web Preview Rail <Plus size={17} />
