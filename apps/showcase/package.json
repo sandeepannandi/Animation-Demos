@@ -6,6 +6,7 @@
     "@expo/metro-runtime": "~57.0.16",
     "expo": "~57.0.27",
     "expo-constants": "~57.0.21",
+    "expo-haptics": "~57.0.3",
     "expo-linking": "~57.0.12",
     "expo-router": "~57.0.25",
     "expo-status-bar": "~57.0.1",
