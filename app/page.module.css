@@ -506,9 +506,24 @@
   align-items: center;
   min-height: 38px;
 }
+.viewTabs button {
+  position: relative;
+}
 .viewTabs button[aria-pressed="true"] {
-  background: #163e32;
   color: white;
+}
+.viewPill {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  background: #163e32;
+}
+.toggleLabel {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
 }
 .demo {
   display: grid;
@@ -563,9 +578,17 @@
   font-size: 11px;
   min-height: 38px;
 }
+.demoButtons button {
+  position: relative;
+}
 .demoButtons button[aria-pressed="true"] {
-  background: #e0efca;
   border-color: #b8d299;
+}
+.detailPill {
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  background: #e0efca;
 }
 .detailCard {
   display: flex;

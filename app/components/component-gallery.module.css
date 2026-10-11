@@ -76,5 +76,8 @@
 }
 .orientation { display: flex; gap: 8px; padding: 14px 28px 0; }
 .orientation button { padding: 8px 14px; border: 1px solid #dbe3d3; border-radius: 999px; background: #fff; color: #294337; font-size: 11px; }
-.orientation button[aria-pressed="true"] { background: #163e32; border-color: #163e32; color: #fff; }
+.orientation button { position: relative; }
+.orientation button[aria-pressed="true"] { border-color: #163e32; color: #fff; }
+.orientationPill { position: absolute; inset: -1px; border-radius: 999px; background: #163e32; }
+.toggleLabel { position: relative; z-index: 1; }
 @media (max-width: 760px) { .orientation { padding: 12px 14px 0; } }

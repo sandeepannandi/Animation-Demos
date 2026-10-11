@@ -55,6 +55,7 @@ export default function NativeletSite({
   sources: { name: string; code: string }[];
 }) {
   const reduce = useReducedMotion();
+  const slide = { type: "spring", stiffness: 300, damping: 30, mass: 0.9 } as const;
   const [study, setStudy] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [active, setActive] = useState("focus");
@@ -261,6 +262,7 @@ export default function NativeletSite({
                           <motion.span
                             layoutId="study-tab"
                             className={styles.tabPill}
+                            transition={slide}
                           />
                         )}
                         <span>{s}</span>
@@ -458,13 +460,19 @@ export default function NativeletSite({
                     aria-pressed={panel === "preview"}
                     onClick={() => setPanel("preview")}
                   >
-                    Preview
+                    {panel === "preview" && (
+                      <motion.span layoutId="view-pill" className={styles.viewPill} transition={slide} />
+                    )}
+                    <span className={styles.toggleLabel}>Preview</span>
                   </button>
                   <button
                     aria-pressed={panel === "code"}
                     onClick={() => setPanel("code")}
                   >
-                    <Code2 size={14} /> Code
+                    {panel === "code" && (
+                      <motion.span layoutId="view-pill" className={styles.viewPill} transition={slide} />
+                    )}
+                    <span className={styles.toggleLabel}><Code2 size={14} /> Code</span>
                   </button>
                 </div>
               </div>
@@ -472,7 +480,10 @@ export default function NativeletSite({
                 <>
                 <div className={gallery.orientation} role="group" aria-label="Rail orientation">
                   {(["vertical", "horizontal"] as const).map((layout) => (
-                    <button key={layout} type="button" aria-pressed={orientation === layout} onClick={() => setOrientation(layout)}>{layout === "vertical" ? "Vertical" : "Horizontal"}</button>
+                    <button key={layout} type="button" aria-pressed={orientation === layout} onClick={() => setOrientation(layout)}>
+                      {orientation === layout && <motion.span layoutId="orientation-pill" className={gallery.orientationPill} transition={slide} />}
+                      <span className={gallery.toggleLabel}>{layout === "vertical" ? "Vertical" : "Horizontal"}</span>
+                    </button>
                   ))}
                 </div>
                 <div className={styles.demo}>
@@ -508,7 +519,10 @@ export default function NativeletSite({
                           onClick={() => setActive(s.id)}
                           key={s.id}
                         >
-                          {s.label}
+                          {active === s.id && (
+                            <motion.span layoutId="detail-pill" className={styles.detailPill} transition={slide} />
+                          )}
+                          <span className={styles.toggleLabel}>{s.label}</span>
                         </button>
                       ))}
                     </div>
