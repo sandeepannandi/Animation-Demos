@@ -11,6 +11,12 @@
       ],
       "react/*": [
         "./node_modules/@types/react/*"
+      ],
+      "expo-glass-effect": [
+        "./node_modules/expo-glass-effect"
+      ],
+      "expo-blur": [
+        "./node_modules/expo-blur"
       ]
     },
     "typeRoots": [

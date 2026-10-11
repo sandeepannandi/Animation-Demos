@@ -18,6 +18,7 @@ export default function ShowcaseHome() {
   const [reduce, setReduce] = useState<boolean | undefined>();
   return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
     <View style={styles.header}><Text style={styles.brand}>nativelet</Text><Text style={styles.badge}>NATIVE STUDY / 01</Text></View>
+    <Link href="/glass" style={styles.note}>New: Liquid Tabs →</Link>
     <Link href="/capsule" style={styles.note}>Next: Morph Capsule →</Link>
     <Text accessibilityRole="header" style={styles.title}>{'A small rail.\nA world of previews.'}</Text>
     <Text style={styles.subtitle}>Press a tick. Drag to explore. Release to choose.</Text>
