@@ -495,7 +495,7 @@ export default function NativeletSite({
                   working setup is in the repository. This is web React, not a
                   React Native install command.
                 </p>
-                <pre tabIndex={0} aria-label="Preview Rail usage example">
+                <pre role="region" tabIndex={0} aria-label="Preview Rail usage example">
                   <code>{snippet}</code>
                 </pre>
                 <a href={REPO}>
