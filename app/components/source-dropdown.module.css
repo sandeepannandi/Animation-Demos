@@ -1,0 +1,83 @@
+.dropdown {
+  position: relative;
+  min-width: 0;
+  max-width: 100%;
+}
+/* More specific than the source toolbar's generic Copy button rule. */
+.dropdown .trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 11px 13px;
+  background: #f4f7ee;
+  color: #294337;
+  border: 1px solid #d8e3cf;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 11px;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.trigger:hover {
+  background: #edf3e5;
+  border-color: #9bb691;
+}
+.value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.chevron,
+.chevronOpen {
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+.chevronOpen {
+  transform: rotate(180deg);
+}
+.menu {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 7px);
+  left: 0;
+  width: max-content;
+  min-width: 100%;
+  max-width: min(420px, calc(100vw - 80px));
+  margin: 0;
+  padding: 5px;
+  list-style: none;
+  background: #fff;
+  border: 1px solid #d8e3cf;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px #172b241c;
+  transform-origin: top left;
+}
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #294337;
+  font-size: 11px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.option span { min-width: 0; }
+.option svg { flex-shrink: 0; }
+.active { background: #edf3e5; }
+.option[aria-selected="true"] { font-weight: 600; }
+@media (max-width: 760px) {
+  .dropdown { width: 100%; }
+  .menu { width: 100%; max-width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .trigger,
+  .chevron,
+  .chevronOpen { transition: none; }
+}

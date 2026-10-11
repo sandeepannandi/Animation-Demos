@@ -22,6 +22,7 @@ import {
   Plus,
 } from "lucide-react";
 import { PreviewRail } from "./preview-rail";
+import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 
 const REPO = "https://github.com/sandeepannandi/Nativelet";
@@ -445,22 +446,18 @@ export default function NativeletSite({
               ) : (
                 <div className={styles.sourcePanel}>
                   <div className={styles.sourceToolbar}>
-                    <label htmlFor="source-file">Source file</label>
-                    <select
+                    <label id="source-file-label" htmlFor="source-file">Source file</label>
+                    <SourceDropdown
                       id="source-file"
+                      labelId="source-file-label"
+                      options={sources.map((s) => s.name)}
                       value={source}
-                      onChange={(e) => {
-                        setSource(Number(e.target.value));
+                      onChange={(value) => {
+                        setSource(value);
                         setCopied(false);
                         setCopyError(false);
                       }}
-                    >
-                      {sources.map((s, i) => (
-                        <option key={s.name} value={i}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
+                    />
                     <button onClick={copy}>
                       {copied ? <Check size={16} /> : <Copy size={16} />}
                       {copied ? "Copied" : "Copy"}
