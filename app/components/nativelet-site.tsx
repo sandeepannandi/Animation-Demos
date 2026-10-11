@@ -31,7 +31,7 @@ import gallery from "./component-gallery.module.css";
 
 type ComponentId = "rail" | "capsule" | "toast" | "glass";
 const META = {
-  glass: { title: "Liquid Tabs", number: "04", folder: "liquid-tabs", note: "Real React Native source. Install expo-glass-effect and expo-blur with expo install. Keep LICENSE. iOS native glass needs availability checks; Android uses an opaque fallback. See README for integration and device-test limits.", footer: "Preview: CSS glass study. Source: React Native · Expo" },
+  glass: { title: "Liquid Tabs", number: "04", folder: "liquid-tabs", note: "Real React Native source. Install expo-glass-effect and expo-blur with expo install. Keep LICENSE. iOS native glass needs availability checks; Android uses an opaque fallback. Hold the active tab, then slide to switch. See README for integration and device-test limits.", footer: "Preview: CSS glass study. Source: React Native · Expo" },
   toast: { title: "Toast Stack", number: "03", folder: "toast-stack", note: "React Native source for Expo. Copy ToastStack.tsx and toastLogic.ts together and keep the LICENSE. The web adapter shares the queue, timer and gesture helpers, not the native render. Pass safe-area insets from your app.", footer: "Preview: React · Framer Motion. Source: React Native" },
   rail: {
     title: "Preview Rail",
