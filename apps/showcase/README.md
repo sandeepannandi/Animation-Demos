@@ -37,8 +37,8 @@ The separate component PR adds `packages/ui/src/components/preview-rail` and a t
 From the repository root, regenerate/check the exact displayed files and run helper tests:
 
 ```sh
-node scripts/generate-preview-rail.mjs
-node scripts/generate-preview-rail.mjs --check
+node scripts/generate-registry.mjs
+node scripts/generate-registry.mjs --check
 node --experimental-strip-types --test packages/ui/src/components/preview-rail/selection.test.mjs
 ```
 

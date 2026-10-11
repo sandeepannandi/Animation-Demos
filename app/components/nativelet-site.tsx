@@ -22,10 +22,38 @@ import {
   X,
 } from "lucide-react";
 import { PreviewRail } from "./preview-rail";
+import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
+type ComponentId = "rail" | "capsule";
+const META = {
+  rail: {
+    title: "Preview Rail",
+    number: "01",
+    folder: "preview-rail",
+    note: "React Native source for Expo. Copy PreviewRail.tsx and selection.ts together and keep the LICENSE. The preview shows a web version, not this code. Scroll to read more; focus the code to scroll with arrow keys.",
+    footer: "Preview: React · Framer Motion · Tailwind CSS. Source: React Native",
+  },
+  capsule: {
+    title: "Morph Capsule",
+    number: "02",
+    folder: "morph-capsule",
+    note: "React Native source for Expo. Copy MorphCapsule.tsx and morphMath.ts together and keep the LICENSE. The preview shows a web version that shares morphMath.ts, not the native component. Scroll to read more; focus the code to scroll with arrow keys.",
+    footer: "Preview: React · Framer Motion. Source: React Native",
+  },
+} as const;
+const capsuleDescriptions: Record<CapsuleState, string> = {
+  idle: "No session running.",
+  compact: "24 minutes left.",
+  expanded: "24 minutes and 10 seconds left.",
+};
+const capsuleContent: Record<CapsuleState, React.ReactNode> = {
+  idle: <span style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: 600 }}>Ready</span>,
+  compact: <span style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "space-between", padding: "0 20px", fontSize: 13, fontWeight: 600 }}><span>Focus session</span><span>24:10</span></span>,
+  expanded: <span style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}><span style={{ fontSize: 10, letterSpacing: 1.5, fontWeight: 700, color: "#9fc7b0" }}>FOCUS SESSION</span><span style={{ fontSize: 44, fontWeight: 700, letterSpacing: -1.5, lineHeight: 1 }}>24:10</span><span style={{ fontSize: 12, color: "#9fc7b0" }}>Tap or drag to collapse</span></span>,
+};
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 const studies = ["Focus", "Listen", "Move"] as const;
 const sections = [
@@ -52,7 +80,7 @@ const sections = [
 export default function NativeletSite({
   sources,
 }: {
-  sources: { name: string; code: string }[];
+  sources: Record<ComponentId, { name: string; code: string }[]>;
 }) {
   const reduce = useReducedMotion();
   const slide = { type: "spring", stiffness: 300, damping: 30, mass: 0.9 } as const;
@@ -61,6 +89,10 @@ export default function NativeletSite({
   const [active, setActive] = useState("focus");
   const [panel, setPanel] = useState<"preview" | "code">("preview");
   const [source, setSource] = useState(0);
+  const [which, setWhich] = useState<ComponentId>("rail");
+  const [capsule, setCapsule] = useState<CapsuleState>("idle");
+  const list = sources[which];
+  const meta = META[which];
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const [paused, setPaused] = useState(false);
@@ -69,8 +101,11 @@ export default function NativeletSite({
   const opener = useRef<HTMLButtonElement | null>(null);
   const savedOverflow = useRef("");
   const closing = useRef(false);
-  function openComponent(event: React.MouseEvent<HTMLButtonElement>, layout: "vertical" | "horizontal") {
+  function openComponent(event: React.MouseEvent<HTMLButtonElement>, id: ComponentId, layout: "vertical" | "horizontal" = "vertical") {
     opener.current = event.currentTarget;
+    setWhich(id);
+    setSource(0);
+    setCapsule("idle");
     setOrientation(layout);
     setPanel("preview");
     setActive("focus");
@@ -146,7 +181,7 @@ export default function NativeletSite({
   );
   async function copy() {
     try {
-      await navigator.clipboard.writeText(sources[source].code);
+      await navigator.clipboard.writeText(list[source].code);
       setCopied(true);
       setCopyError(false);
       if (timer.current) clearTimeout(timer.current);
@@ -402,13 +437,13 @@ export default function NativeletSite({
                 </h2>
               </div>
               <p>
-                One working web component today.
+                Two working web components today.
                 <br />
                 Vertical or horizontal. Open it to try it and copy the code.
               </p>
             </div>
             <div className={gallery.grid}>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "vertical")} aria-haspopup="dialog" aria-label="Open Preview Rail web preview">
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "rail")} aria-haspopup="dialog" aria-label="Open Preview Rail web preview">
                 <div className={gallery.study} aria-hidden="true">
                   <div className={gallery.miniRail}>
                     {[0, 1, 2].map((tick) => <span key={tick} className={gallery.tick} />)}
@@ -417,6 +452,15 @@ export default function NativeletSite({
                 </div>
                 <div className={gallery.caption}>
                   <div><span className={gallery.label}>WEB PREVIEW · 01</span><strong>Preview Rail</strong><small>Vertical and horizontal navigation · switch inside</small></div>
+                  <ArrowUpRight size={20} aria-hidden="true" />
+                </div>
+              </button>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "capsule")} aria-haspopup="dialog" aria-label="Open Morph Capsule web preview">
+                <div className={gallery.study} aria-hidden="true">
+                  <div className={gallery.miniCapsule}><span>Focus session</span><strong>24:10</strong></div>
+                </div>
+                <div className={gallery.caption}>
+                  <div><span className={gallery.label}>WEB PREVIEW · 02</span><strong>Morph Capsule</strong><small>Idle, compact and expanded · tap or drag inside</small></div>
                   <ArrowUpRight size={20} aria-hidden="true" />
                 </div>
               </button>
@@ -439,7 +483,7 @@ export default function NativeletSite({
               if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeComponent();
             }}>
               <div className={gallery.dialogTop}>
-                <p id="preview-dialog-description">Web preview of the React Native Preview Rail. Not yet tested on a device.</p>
+                <p id="preview-dialog-description">Web preview of the React Native {meta.title}. Not yet tested on a device.</p>
                 <button type="button" className={gallery.close} aria-label="Close component preview" onClick={closeComponent} autoFocus><X size={19} /></button>
               </div>
               <div className={gallery.dialogBody}>
@@ -448,13 +492,13 @@ export default function NativeletSite({
                 <div>
                   <span className={styles.live}>REACT NATIVE · WEB PREVIEW</span>
                   <h3 id="preview-dialog-title">
-                    Preview Rail <span>01</span>
+                    {meta.title} <span>{meta.number}</span>
                   </h3>
                 </div>
                 <div
                   className={styles.viewTabs}
                   role="group"
-                  aria-label="Preview Rail view"
+                  aria-label={`${meta.title} view`}
                 >
                   <button
                     aria-pressed={panel === "preview"}
@@ -478,6 +522,23 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
+                {which === "capsule" ? (
+                  <>
+                    <div className={gallery.orientation} role="group" aria-label="Capsule state">
+                      {CAPSULE_STATES.map((name) => (
+                        <button key={name} type="button" aria-pressed={capsule === name} onClick={() => setCapsule(name)}>
+                          {capsule === name && <motion.span layoutId="capsule-pill" className={gallery.orientationPill} transition={slide} />}
+                          <span className={gallery.toggleLabel}>{name[0].toUpperCase() + name.slice(1)}</span>
+                        </button>
+                      ))}
+                    </div>
+                    <div className={gallery.capsuleStage}>
+                      <MorphCapsule state={capsule} onStateChange={setCapsule} content={capsuleContent} label="Focus session" descriptions={capsuleDescriptions} />
+                      <p>Tap to step up. Drag down to expand and up to collapse. Grab it mid-morph.</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
                 <div className={gallery.orientation} role="group" aria-label="Rail orientation">
                   {(["vertical", "horizontal"] as const).map((layout) => (
                     <button key={layout} type="button" aria-pressed={orientation === layout} onClick={() => setOrientation(layout)}>
@@ -566,6 +627,8 @@ export default function NativeletSite({
                     </AnimatePresence>
                   </div>
                 </div>
+                  </>
+                )}
                 </>
               ) : (
                 <div className={styles.sourcePanel}>
@@ -574,7 +637,7 @@ export default function NativeletSite({
                     <SourceDropdown
                       id="source-file"
                       labelId="source-file-label"
-                      options={sources.map((s) => s.name)}
+                      options={list.map((s) => s.name)}
                       value={source}
                       onChange={(value) => {
                         setSource(value);
@@ -590,16 +653,16 @@ export default function NativeletSite({
                   <p role="status">
                     {copyError
                       ? "Clipboard unavailable. Select the source below and copy it manually."
-                      : "React Native source for Expo. Copy PreviewRail.tsx and selection.ts together and keep the LICENSE. The preview shows a web version, not this code. Scroll to read more; focus the code to scroll with arrow keys."}
+                      : meta.note}
                   </p>
-                  <pre tabIndex={0} aria-label={sources[source].name}>
-                    <code>{sources[source].code}</code>
+                  <pre tabIndex={0} aria-label={list[source].name}>
+                    <code>{list[source].code}</code>
                   </pre>
                 </div>
               )}
               <div className={styles.demoFooter}>
-                <span>Preview: React · Framer Motion · Tailwind CSS. Source: React Native</span>
-                <a href={`${REPO}/tree/main/packages/ui/src/components/preview-rail`}>
+                <span>{meta.footer}</span>
+                <a href={`${REPO}/tree/main/packages/ui/src/components/${meta.folder}`}>
                   View in repository <ArrowUpRight size={15} />
                 </a>
               </div>
@@ -635,7 +698,7 @@ export default function NativeletSite({
                 </span>
                 <span>
                   <strong>Web playground</strong>
-                  <small>Available now · Preview Rail</small>
+                  <small>Available now · Preview Rail, Morph Capsule</small>
                 </span>
                 <span className={styles.now}>NOW</span>
               </div>
