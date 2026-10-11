@@ -29,3 +29,17 @@ The root TypeScript config excludes `apps` and `packages`; this app has a separa
 ## Known dependency advisories
 
 At scaffold validation, `npm audit --omit=dev` reported 28 affected package entries (18 high, 10 moderate). The underlying advisories include `braces`, `node-forge`, `uuid`, and `decode-uri-component` in Expo/Metro/Router tooling. Registry latest `braces` and `node-forge` were still in the affected range. Doctor checks dependency compatibility, not security. No forced downgrades, major transitive overrides or audit suppressions were applied. Recheck before deploying this prototype or accepting untrusted build inputs.
+
+## Preview Rail development
+
+The separate component PR adds `packages/ui/src/components/preview-rail` and a tiny generated source registry. It is a source folder, not a published package. In this transition, Metro watches `packages` and prefers this app's native dependencies; TypeScript points React typings at this app rather than the React 18 legacy site. `experiments.tsconfigPaths: false` prevents those type-only paths becoming runtime aliases.
+
+From the repository root, regenerate/check the exact displayed files and run helper tests:
+
+```sh
+node scripts/generate-preview-rail.mjs
+node scripts/generate-preview-rail.mjs --check
+node --experimental-strip-types --test packages/ui/src/components/preview-rail/selection.test.mjs
+```
+
+The component uses core Animated/PanResponder, so no additional gesture/animation dependency is needed by copied source. The demo supplies optional `expo-haptics`. Copy `PreviewRail.tsx`, `selection.ts`, and `LICENSE` together; usage is `Example.tsx`. Source/clipboard tooling has a `.web.tsx` implementation and a null native fallback.
