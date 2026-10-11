@@ -96,3 +96,8 @@
 .miniToasts span { padding:18px; border-radius:16px; background:white; box-shadow:0 5px 20px #173b2915; font-size:12px; }
 .miniToasts b { float:right; color:#245541; }
 .miniToasts span:last-child { transform:translateX(8px); background:#f9fcf6; }
+
+.miniGlass { display:flex; width:260px; max-width:100%; padding:6px; border-radius:32px; background:linear-gradient(130deg,#ffffffbd,#c9e1d7a6); border:1px solid #fff; box-shadow:0 10px 30px #183e2c12; }
+.miniGlass > span { flex:1; padding:10px 2px; text-align:center; font-size:23px; color:#315a49; }
+.miniGlass > span:first-child { background:#ffffffb8; border-radius:25px; }
+.miniGlass small { display:block; margin-top:4px; font-size:8px; }
