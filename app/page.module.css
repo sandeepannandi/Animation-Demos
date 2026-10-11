@@ -647,6 +647,16 @@
   align-items: center;
   gap: 5px;
 }
+/* Keep code scrollable without drawing nested scrollbar chrome. */
+.quickstart pre,
+.sourcePanel pre {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.quickstart pre::-webkit-scrollbar,
+.sourcePanel pre::-webkit-scrollbar {
+  display: none;
+}
 .sourcePanel {
   padding: 20px 28px;
 }
