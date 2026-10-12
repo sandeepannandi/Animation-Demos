@@ -22,7 +22,7 @@ export function ToastStackPreview() {
       <button onClick={() => setItems([])}>Clear all</button>
     </div>
     <p className={styles.hint}>Swipe a card in any direction. Hold to pause. {Math.max(0, items.length-visible.length)} queued.</p>
-    <div className={styles.canvas} aria-label="Toast playground">
+    <div className={styles.canvas} aria-label="Toast stack preview">
       <span className={styles.caption}>A SMALL MOMENT OF FEEDBACK</span>
       <div className={`${styles.stack} ${position === 'top' ? styles.top : styles.bottom}`}>
         {visible.map((item) => <Card key={item.id} item={item} dismiss={dismiss} />)}
