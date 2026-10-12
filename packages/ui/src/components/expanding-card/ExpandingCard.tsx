@@ -1,7 +1,7 @@
 // MIT License. Copyright (c) 2026 Sandeepan Nandi. Keep the accompanying LICENSE.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AccessibilityInfo, Animated, BackHandler, Easing, findNodeHandle, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
-import { backgroundScale, clamp, cornerRadius, crossedDismiss, dimOpacity, dismissOutcome, dragToProgress, dragTranslateX, heroHeightFor, shouldCaptureDismiss, staggerDelay, type Rect } from './expandingLogic';
+import { clamp, cornerRadius, crossedDismiss, dimOpacity, dismissOutcome, dragToProgress, dragTranslateX, heroHeightFor, shouldCaptureDismiss, staggerDelay, type Rect } from './expandingLogic';
 
 export type ExpandingFeedbackEvent = 'open' | 'threshold' | 'close';
 export type Insets = { top: number; bottom: number };
@@ -198,13 +198,12 @@ export function ExpandingCardHost({ children, insets = { top: 0, bottom: 0 }, on
   const api = useMemo<HostApi>(() => ({ open, activeId: active?.id ?? null }), [open, active?.id]);
   const onLayout = (event: LayoutChangeEvent) => setSize({ width: event.nativeEvent.layout.width, height: event.nativeEvent.layout.height });
 
-  const bgScale = progress.interpolate({ inputRange: [0, 1], outputRange: [1, backgroundScale(1)], extrapolate: 'clamp' });
   const dim = progress.interpolate({ inputRange: [0, 1], outputRange: [0, dimOpacity(1)], extrapolate: 'clamp' });
 
   return <HostContext.Provider value={api}>
     <View ref={hostRef} onLayout={onLayout} style={[styles.host, style]}>
       <Animated.View
-        style={[styles.fill, reduce ? null : { transform: [{ scale: bgScale }] }]}
+        style={styles.fill}
         pointerEvents={active ? 'none' : 'auto'}
         accessibilityElementsHidden={!!active}
         importantForAccessibility={active ? 'no-hide-descendants' : 'auto'}>
