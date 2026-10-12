@@ -14,6 +14,9 @@ export function Sponsor() {
       </p>
       <a className={styles.button} href={SPONSOR_URL}>
         <Heart size={16} aria-hidden="true" /> Sponsor on GitHub <ArrowUpRight size={16} aria-hidden="true" />
+      </a>{" "}
+      <a className={styles.more} href="/sponsor">
+        More ways to support
       </a>
     </section>
   );
