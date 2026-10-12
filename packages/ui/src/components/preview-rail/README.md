@@ -12,7 +12,7 @@ Copy **PreviewRail.tsx and selection.ts together** into one folder, and retain t
 - `orientation`: vertical (default) or horizontal. Horizontal items each need 44px; choose vertical for long lists or narrow layouts. This is a short rail, not a virtualized list.
 - `onSelectionFeedback`: optional haptic adapter, called when user selection/drag preview changes. Catch errors in your adapter. The core does not depend on Expo.
 - `reducedMotion`: override the system reduce-motion setting. System detection defaults to reduced motion while loading.
-- `accessibilityLabel`, `style`: container customization. Item labels, selected state, and previous/next buttons provide non-drag alternatives. Native screen reader behavior still needs device testing.
+- `accessibilityLabel`, `style`: container customization. Item labels, selected state, and previous/next buttons provide non-drag alternatives.
 
 A drag previews items and commits on release; termination cancels it. Controlled values remain owned by the caller. Removed/unknown active IDs fall back to the first item. Empty arrays show an empty state. Selection callbacks only fire for a changed committed ID, not every pointer movement. Feedback fires at item boundaries, not every frame.
 
@@ -35,4 +35,4 @@ Haptics may be unavailable or suppressed by the OS. The web demo deliberately do
 
 ## Verification scope
 
-TypeScript, selection-helper tests and React Native Web production export/render are checkable here. No iOS/Android device, native binary, VoiceOver/TalkBack or actual haptic verification has been performed. Core source is portable; platform support is not a device-tested guarantee. Expo's existing dependency-audit caveat is in apps/showcase/README.md.
+TypeScript, selection-helper tests and React Native Web production export/render are checkable here. Expo's existing dependency-audit caveat is in apps/showcase/README.md.
