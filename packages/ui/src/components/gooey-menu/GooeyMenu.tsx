@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AccessibilityInfo, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Blur, Canvas, Circle, ColorMatrix, Group, Paint } from '@shopify/react-native-skia';
 import Animated, { useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming, type SharedValue } from 'react-native-reanimated';
-import { clamp, gooMatrix, itemPose, layout, mainRotation, type GooeyGeometry } from './gooeyMath';
+import { clamp, gooMatrix, itemPose, layout, mainRotation, springConfig, type GooeyGeometry } from './gooeyMath';
 
 export type GooeyMenuItem = { id: string; label: string; glyph: string };
 export type GooeyFeedback = 'open' | 'close' | 'select';
@@ -23,6 +23,8 @@ export type GooeyMenuProps = {
   /** Blur sigma. Higher is gooier; keep it near a third of the item radius. */
   blur?: number;
   reducedMotion?: boolean;
+  /** Plays the open and close spring about four times slower so you can watch the goo. Ignored while Reduce Motion is on. */
+  slowMotion?: boolean;
 };
 
 const PAD = 24;
@@ -49,7 +51,7 @@ function ItemButton({ item, progress, index, count, geo, open, iconColor, onPres
   );
 }
 
-export function GooeyMenu({ items, onSelect, onOpenChange, onFeedback, label = 'Create', color = '#204835', iconColor = '#f4f6ef', mainRadius = 32, itemRadius = 26, distance = 104, startAngle = -165, endAngle = -15, blur = 9, reducedMotion }: GooeyMenuProps) {
+export function GooeyMenu({ items, onSelect, onOpenChange, onFeedback, label = 'Create', color = '#204835', iconColor = '#f4f6ef', mainRadius = 32, itemRadius = 26, distance = 104, startAngle = -165, endAngle = -15, blur = 9, reducedMotion, slowMotion = false }: GooeyMenuProps) {
   const [open, setOpen] = useState(false);
   const [systemReduce, setSystemReduce] = useState(false);
   const reduce = reducedMotion ?? systemReduce;
@@ -67,11 +69,11 @@ export function GooeyMenu({ items, onSelect, onOpenChange, onFeedback, label = '
   const matrix = useMemo(() => gooMatrix(), []);
   const move = useCallback((next: boolean) => {
     setOpen(next);
-    progress.value = reduce ? withTiming(next ? 1 : 0, { duration: 140 }) : withSpring(next ? 1 : 0, { stiffness: 170, damping: 14, mass: 1 });
+    progress.value = reduce ? withTiming(next ? 1 : 0, { duration: 140 }) : withSpring(next ? 1 : 0, springConfig(slowMotion));
     latest.current.onOpenChange?.(next);
     latest.current.onFeedback?.(next ? 'open' : 'close');
     AccessibilityInfo.announceForAccessibility?.(next ? `${label} menu open` : `${label} menu closed`);
-  }, [label, progress, reduce]);
+  }, [label, progress, reduce, slowMotion]);
   const choose = useCallback((item: GooeyMenuItem) => { latest.current.onSelect?.(item); latest.current.onFeedback?.('select'); move(false); }, [move]);
   useEffect(() => { if (items.length === 0 && open) move(false); }, [items.length, open, move]);
   const spin = useAnimatedStyle(() => ({ transform: [{ rotate: `${mainRotation(progress.value)}deg` }] }));
