@@ -59,6 +59,7 @@
 .dialog::backdrop { background: #14291ee0; backdrop-filter: blur(5px); }
 .dialog[open]::backdrop { animation: fade 240ms ease-out; }
 .dialog[data-closing="true"]::backdrop { opacity: 0; transition: opacity 240ms ease-in; }
+.srOnly { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 .dialogTop { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; gap: 20px; }
 .dialogTop p { margin: 0; font-size: 11px; color: #61705a; line-height: 1.6; }
 .close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid #dbe3d3; border-radius: 50%; background: white; color: #294337; }
@@ -70,9 +71,9 @@
 @media (max-width: 760px) {
   .grid { grid-template-columns: 1fr; }
   .tile { min-height: 280px; padding: 22px; }
-  .dialog { max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); border-radius: 15px; }
+  .dialog { max-width: calc(100vw - 24px); max-height: calc(100dvh - 72px); border-radius: 15px; }
   .dialogTop { padding: 14px; gap: 10px; }
-  .dialogBody { padding: 0 10px 10px; }
+  .dialogBody { padding: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .tile { transition: none; }
