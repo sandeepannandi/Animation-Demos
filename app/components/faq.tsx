@@ -5,7 +5,7 @@ const REPO = "https://github.com/sandeepannandi/Nativelet";
 const faqs = [
   {
     q: "What is Nativelet?",
-    a: "An open-source interface playground by Sandeepan Nandi. It is a growing set of small interaction components, each with a web preview and React Native source.",
+    a: "A set of small, open-source interaction components by Sandeepan Nandi. Each one has a web preview and React Native source you can copy and use.",
   },
   {
     q: "Can I use the components in my React Native app?",
