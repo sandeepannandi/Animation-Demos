@@ -1,6 +1,6 @@
 import { Link } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Platform, ScrollView, Text, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Example from '../../../packages/ui/src/components/drag-to-sort/Example';
 export default function SortScreen() {
