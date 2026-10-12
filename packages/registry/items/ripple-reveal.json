@@ -1,6 +1,6 @@
 {
   "slug": "ripple-reveal",
-  "title": "Ripple Reveal",
+  "title": "Theme Reveal",
   "category": "interaction",
   "files": [
     "RippleReveal.tsx",

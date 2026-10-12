@@ -1,4 +1,4 @@
-// Pure geometry for the Ripple Reveal. Every function is a worklet so Skia and
+// Pure geometry for the Theme Reveal. Every function is a worklet so Skia and
 // Reanimated can call it on the UI thread; plain JS (tests, web preview) ignores the tag.
 export type RippleConfig = { width: number; height: number; ringWidth: number; wavelength: number; amplitude: number };
 export type RipplePoint = { x: number; y: number };
