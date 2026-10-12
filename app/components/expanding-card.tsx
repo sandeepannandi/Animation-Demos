@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'framer-motion';
-import { BACKGROUND_SCALE, DIM_OPACITY, STAGGER_MS, cornerRadius, crossedDismiss, dismissOutcome, dragToProgress, dragTranslateX, heroHeightFor, lerp, shouldCaptureDismiss, staggerDelay, type Rect } from '../../packages/ui/src/components/expanding-card/expandingLogic';
+import { DIM_OPACITY, STAGGER_MS, cornerRadius, crossedDismiss, dismissOutcome, dragToProgress, dragTranslateX, heroHeightFor, lerp, shouldCaptureDismiss, staggerDelay, type Rect } from '../../packages/ui/src/components/expanding-card/expandingLogic';
 import styles from './expanding-card.module.css';
 
 type Story = { id: string; eyebrow: string; title: string; color: string; art: ReactNode; blocks: ReactNode[] };
@@ -88,12 +88,11 @@ export function ExpandingCardPreview() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active?.id]);
 
-  const bgScale = useTransform(p, value => reduce ? 1 : lerp(1, BACKGROUND_SCALE, Math.min(1, Math.max(0, value))));
   const dim = useTransform(p, value => lerp(0, DIM_OPACITY, Math.min(1, Math.max(0, value))));
 
   return <div className={styles.stage}>
     <div ref={stage} className={styles.phone} data-open={active ? 'true' : 'false'}>
-      <motion.div className={styles.feed} style={{ scale: bgScale }} aria-hidden={active ? true : undefined} {...(active ? { inert: '' as unknown as boolean } : {})}>
+      <motion.div className={styles.feed} aria-hidden={active ? true : undefined} {...(active ? { inert: '' as unknown as boolean } : {})}>
         <p className={styles.date}>MONDAY, OCTOBER 12</p>
         <h3 className={styles.today}>Today</h3>
         {STORIES.map(story => <button key={story.id} ref={node => { cardRefs.current[story.id] = node; }} className={styles.card} data-hidden={active?.id === story.id ? 'true' : 'false'} style={{ background: story.color, height: CARD_H, borderRadius: CARD_RADIUS }} onClick={() => open(story.id)} aria-label={`${story.eyebrow}. ${story.title}`} aria-haspopup="dialog">

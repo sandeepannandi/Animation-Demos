@@ -12,8 +12,6 @@ export const DISMISS_VELOCITY = 0.9;
 export const CAPTURE_SLOP = 6;
 /** How far the card shrinks while dragged all the way down (1 = full size, 0.5 = half). */
 export const MIN_DRAG_PROGRESS = 0.5;
-/** The screen behind the card scales to this when the card is fully open. */
-export const BACKGROUND_SCALE = 0.93;
 /** Opacity of the dim layer over the background when the card is fully open. */
 export const DIM_OPACITY = 0.45;
 /** Delay (ms) between one content block entering and the next. */
@@ -58,7 +56,6 @@ export function crossedDismiss(previousDy: number, dy: number) {
   return (previousDy > DISMISS_DISTANCE) !== (dy > DISMISS_DISTANCE);
 }
 
-export function backgroundScale(p: number) { return lerp(1, BACKGROUND_SCALE, clamp(p, 0, 1)); }
 export function dimOpacity(p: number) { return lerp(0, DIM_OPACITY, clamp(p, 0, 1)); }
 export function cornerRadius(p: number, cardRadius: number, openRadius: number) {
   // keep the card radius for most of the drag, relax it to the screen radius only near full size

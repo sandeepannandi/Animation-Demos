@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { lerpRect, dragToProgress, dragTranslateX, shouldCaptureDismiss, dismissOutcome, crossedDismiss, backgroundScale, dimOpacity, cornerRadius, staggerDelay, heroHeightFor, DISMISS_DISTANCE, BACKGROUND_SCALE, MIN_DRAG_PROGRESS } from './expandingLogic.ts';
+import { lerpRect, dragToProgress, dragTranslateX, shouldCaptureDismiss, dismissOutcome, crossedDismiss, dimOpacity, cornerRadius, staggerDelay, heroHeightFor, DISMISS_DISTANCE, MIN_DRAG_PROGRESS } from './expandingLogic.ts';
 const from = { x: 20, y: 300, width: 320, height: 240 };
 const to = { x: 0, y: 0, width: 390, height: 844 };
 test('rect interpolates between the card and the full host and clamps', () => {
@@ -45,9 +45,8 @@ test('threshold crossing is detected in both directions', () => {
   assert.equal(crossedDismiss(150, 200), false);
   assert.equal(crossedDismiss(10, 20), false);
 });
-test('background and dim follow progress', () => {
-  assert.equal(backgroundScale(0), 1);
-  assert.equal(backgroundScale(1), BACKGROUND_SCALE);
+test('dim follows progress and the background stays fixed', () => {
+  assert.equal(dimOpacity(0), 0);
   assert.ok(dimOpacity(0.5) > 0 && dimOpacity(0.5) < dimOpacity(1));
   assert.equal(cornerRadius(1, 24, 0), 0);
   assert.equal(cornerRadius(0.5, 24, 0), 24);
