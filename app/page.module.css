@@ -443,8 +443,7 @@
 .sectionHeading .eyebrow {
   margin-bottom: 15px;
 }
-.sectionHeading h2,
-.direction h2 {
+.sectionHeading h2{
   font-size: 39px;
   line-height: 1.14;
   font-weight: 500;
@@ -725,73 +724,6 @@
   font-size: 11px;
   line-height: 1.7;
 }
-.direction {
-  margin: 0 5.5%;
-  background: #edf2e5;
-  border: 1px solid #dce5d1;
-  border-radius: 20px;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 48px;
-  padding: 44px;
-}
-.direction h2 {
-  font-size: 34px;
-}
-.direction h2 em {
-  font-style: normal;
-  color: #55754c;
-}
-.direction p:not(.eyebrow) {
-  font-size: 13px;
-  line-height: 1.8;
-  color: #52634c;
-  max-width: 360px;
-  margin: 20px 0 25px;
-}
-.roadmap {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.roadmap > div {
-  display: flex;
-  gap: 13px;
-  align-items: center;
-  padding: 21px 0;
-  border-bottom: 1px solid #dce5d2;
-}
-.roadmap > div:last-child {
-  border: 0;
-}
-.roadmapIcon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 39px;
-  height: 39px;
-  border-radius: 11px;
-  background: #e1e9d6;
-  color: #5c7951;
-}
-.roadmap strong {
-  font-size: 13px;
-  font-weight: 550;
-  display: block;
-}
-.roadmap small {
-  font-size: 10px;
-  color: #59694f;
-  display: block;
-  margin-top: 6px;
-}
-.now {
-  font-size: 8px;
-  background: #d4e7b9;
-  border-radius: 4px;
-  padding: 4px 6px;
-  margin-left: auto;
-}
 .endnote {
   text-align: center;
   padding: 90px 20px;
@@ -874,10 +806,6 @@
   }
   .sectionHeading h2 {
     font-size: 34px;
-  }
-  .direction {
-    gap: 30px;
-    padding: 32px;
   }
   .demo {
     gap: 22px;
@@ -1096,30 +1024,6 @@
   .sourceToolbar button {
     min-height: 44px;
   }
-  .direction {
-    margin: 0 6%;
-    grid-template-columns: 1fr;
-    padding: 27px 23px;
-    gap: 20px;
-    border-radius: 15px;
-  }
-  .direction h2 {
-    font-size: 29px;
-    letter-spacing: -1px;
-  }
-  .direction p:not(.eyebrow) {
-    font-size: 12px;
-    margin: 17px 0 22px;
-  }
-  .roadmap > div {
-    padding: 19px 0;
-  }
-  .roadmap strong {
-    font-size: 12px;
-  }
-  .roadmap small {
-    font-size: 9px;
-  }
   .endnote {
     padding: 62px 20px;
   }
@@ -1189,9 +1093,6 @@
 .visualCaption {
   font-size: 10px;
 }
-.roadmap small {
-  font-size: 11px;
-}
 .status {
   font-size: 12px;
 }
@@ -1209,9 +1110,6 @@
     font-size: 9px;
   }
   .status {
-    font-size: 11px;
-  }
-  .roadmap small {
     font-size: 11px;
   }
   .demoFooter {
