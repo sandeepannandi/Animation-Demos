@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { HeroShowcase } from "./hero-showcase";
+import { WhatYouGet } from "./what-you-get";
 import { PreviewRail } from "./preview-rail";
 import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
 import { LiquidTabsPreview } from "./liquid-tabs";
@@ -670,6 +671,7 @@ export default function NativeletSite({
               </div>
             </dialog>
           </section>
+          <WhatYouGet />
           <section className={styles.endnote}>
             <span aria-hidden="true">✳</span>
             <h2>
@@ -737,4 +739,4 @@ export default function NativeletSite({
       </div>
     </MotionConfig>
   );
-}
+                      }
