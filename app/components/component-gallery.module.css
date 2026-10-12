@@ -123,3 +123,14 @@
 .miniCarousel > span:last-child { right: 0; background: #ded4e9; transform: scale(.84) rotateY(20deg); }
 .miniCarousel > span:nth-child(2) { left: 50px; top: 0; background: #f1d9c3; z-index: 2; }
 .miniCarousel small { display: block; font-size: 11px; font-weight: 600; margin-top: 8px; }
+
+.miniGooeyWrap { position: relative; width: 230px; height: 170px; }
+.miniGooey { position: absolute; inset: 0; filter: url(#nativelet-mini-goo); }
+.miniGooeyPlus { position: absolute; left: 83px; top: 82px; width: 64px; height: 64px; display: grid; place-items: center; color: #f4f6ef; font-size: 30px; font-style: normal; }
+.miniGooey i, .miniGooey b { position: absolute; border-radius: 50%; background: #204835; }
+.miniGooey i { width: 44px; height: 44px; }
+.miniGooey i:nth-child(1) { left: 22px; top: 66px; }
+.miniGooey i:nth-child(2) { left: 56px; top: 14px; }
+.miniGooey i:nth-child(3) { left: 130px; top: 14px; }
+.miniGooey i:nth-child(4) { left: 164px; top: 66px; }
+.miniGooey b { left: 83px; top: 82px; width: 64px; height: 64px; }

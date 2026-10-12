@@ -27,14 +27,16 @@ import { LiquidTabsPreview } from "./liquid-tabs";
 import { ToastStackPreview } from "./toast-stack";
 import { SwipeRowPreview } from "./swipe-row";
 import { StackedCarouselPreview } from "./stacked-carousel";
+import { GooeyMenuPreview } from "./gooey-menu";
 import { DragToSortPreview } from "./drag-to-sort";
 import { ExpandingCardPreview } from "./expanding-card";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey";
 const META = {
+  gooey: { title: "Gooey Menu", number: "09", folder: "gooey-menu", note: "Real React Native source. Copy GooeyMenu.tsx and gooeyMath.ts together and keep LICENSE. Needs @shopify/react-native-skia, react-native-reanimated and react-native-worklets. Tap the plus and the actions pull out of it like drops of liquid, then merge back in. Reduce Motion swaps the spring for a short timing. The web preview shares the geometry and uses an SVG blur and colour matrix instead of Skia, so it is not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion · SVG filter. Source: React Native · Skia" },
   carousel: { title: "Stacked Carousel", number: "08", folder: "stacked-carousel", note: "Real React Native source. Copy StackedCarousel.tsx and carouselLogic.ts together and keep LICENSE. Core RN only. Drag with velocity snap, tap a side card, or use next/previous actions and keyboard arrows. Finite, short collections, no autoplay. The web preview shares the math, not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion. Source: React Native" },
   sort: { title: "Drag to Sort", number: "07", folder: "drag-to-sort", note: "Real React Native source. Copy DragToSort.tsx and sortLogic.ts together and keep LICENSE. Core RN only. Grab a handle to lift a row, move past a neighbor to open a gap, hold near an edge to scroll, then release to settle. Cancel restores the starting order. Screen reader Move up/down actions and web keyboard arrows are included. Fixed-height, non-virtualized list. The web preview shares reorder and edge-scroll rules, not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion. Source: React Native" },
   expand: { title: "Expanding Card", number: "06", folder: "expanding-card", note: "Real React Native source. Copy ExpandingCard.tsx and expandingLogic.ts together and keep the LICENSE. No animation or navigation dependency, only measureInWindow and Animated. Tap a card to grow it into a detail view, then drag down to shrink it back. Pass safe-area insets from your app. The web adapter shares the geometry and gesture rules, not the native render. See README for accessibility and device-test limits.", footer: "Preview: React · Framer Motion. Source: React Native" },
@@ -500,6 +502,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniCarousel}><span>≋</span><span>↗<small>Take the long way</small></span><span>☾</span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 08</span><strong>Stacked Carousel</strong><small>Depth, tilt and a spring settle · swipe or focus a card</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "gooey")} aria-haspopup="dialog" aria-label="Open Gooey Menu web preview">
+                <div className={gallery.study} aria-hidden="true"><svg width="0" height="0" style={{ position: "absolute" }}><filter id="nativelet-mini-goo" colorInterpolationFilters="sRGB"><feGaussianBlur stdDeviation="6" /><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 24 -11" /></filter></svg><div className={gallery.miniGooeyWrap}><div className={gallery.miniGooey}><i /><i /><i /><i /><b /></div><em className={gallery.miniGooeyPlus}>+</em></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 09</span><strong>Gooey Menu</strong><small>Actions pull out like liquid · tap the plus</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -558,7 +564,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (

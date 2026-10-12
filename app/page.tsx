@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  gooey: { dir: "packages/ui/src/components/gooey-menu", files: ["GooeyMenu.tsx", "gooeyMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   carousel: { dir: "packages/ui/src/components/stacked-carousel", files: ["StackedCarousel.tsx", "carouselLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
   sort: { dir: "packages/ui/src/components/drag-to-sort", files: ["DragToSort.tsx", "sortLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
   glass: { dir: "packages/ui/src/components/liquid-tabs", files: ["LiquidTabs.tsx", "README.md", "LICENSE"] },
@@ -28,6 +29,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    gooey: read(components.gooey.dir, components.gooey.files),
     carousel: read(components.carousel.dir, components.carousel.files),
     sort: read(components.sort.dir, components.sort.files),
     glass: read(components.glass.dir, components.glass.files),

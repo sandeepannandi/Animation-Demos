@@ -17,6 +17,12 @@
       ],
       "expo-blur": [
         "./node_modules/expo-blur"
+      ],
+      "@shopify/react-native-skia": [
+        "./node_modules/@shopify/react-native-skia"
+      ],
+      "react-native-reanimated": [
+        "./node_modules/react-native-reanimated"
       ]
     },
     "typeRoots": [
