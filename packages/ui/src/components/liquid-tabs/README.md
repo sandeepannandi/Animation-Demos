@@ -1,8 +1,8 @@
 # Liquid Tabs
 
 A controlled floating bottom navigation bar with a spring-sliding selection lens.
-Tap to switch tabs, or hold the active tab: the bar expands with a spring and you
-slide left or right to move the selection, then release to settle.
+Tap to switch tabs, or hold the active tab: the selection lens expands with a
+bouncy spring and you slide it left or right, then release to settle. The bar itself does not change size.
 Copy LiquidTabs.tsx and keep LICENSE. Install SDK-matched modules with:
 
 ```sh
@@ -33,14 +33,14 @@ Render the bar after the content it overlays. Reserve its height so it never hid
 
 ## Hold and slide
 
-Hold the active tab for `holdDelay` milliseconds (default 280) and the bar expands with a spring. Keep holding and slide left or right: the selection lens follows your finger, clamped inside the track, and `onTabChange` fires live as you cross each tab. Release to settle the lens with a spring. The gesture is core React Native only (Pressable + PanResponder + Animated), so it adds no dependencies. It never replaces the tap path: taps, keyboard focus and screen-reader activation keep working, the active tab carries an accessibility hint for the gesture, and iOS/Android announce "Slide left or right to choose a tab." when the hold starts. Disabled tabs are skipped while sliding.
+Hold the active tab for `holdDelay` milliseconds (default 280) and only the selection lens grows, with a bouncy spring (the bar container stays the same size). Keep holding and slide left or right: the lens follows your finger, clamped inside the track, and `onTabChange` fires live as you cross each tab. Release and the lens settles into the tab where it stopped with a small bounce. The gesture is core React Native only (Pressable + PanResponder + Animated), so it adds no dependencies. It never replaces the tap path: taps, keyboard focus and screen-reader activation keep working, the active tab carries an accessibility hint for the gesture, and iOS/Android announce "Slide left or right to choose a tab." when the hold starts. Disabled tabs are skipped while sliding.
 
 ## What actually renders
 
 - iOS 26+: Expo GlassView, only when both isGlassEffectAPIAvailable() and isLiquidGlassAvailable() pass.
 - Earlier iOS or unavailable glass: expo-blur BlurView, not native liquid glass.
 - Android and web: an opaque tinted surface. No Android native glass or Android blur is claimed. Current Expo supports Android blur via BlurTargetView; this self-contained component deliberately avoids that extra host integration.
-- Reduce Transparency: opaque surface, even on supported iOS. Reduce Motion: the expand and settle springs are skipped, but the hold-and-slide gesture still works because it directly follows your finger. Both preferences follow system changes; props can override them. Initial rendering is opaque until preferences resolve.
+- Reduce Transparency: opaque surface, even on supported iOS. Reduce Motion: the expand and settle springs (and the bounce) are skipped, but the hold-and-slide gesture still works because it directly follows your finger. Both preferences follow system changes; props can override them. Initial rendering is opaque until preferences resolve.
 
 Do not animate the opacity of the native glass or its parent to zero. Glass and blur are decorative backgrounds; the accessible tab controls remain separate.
 
