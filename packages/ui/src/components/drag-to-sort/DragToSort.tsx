@@ -133,7 +133,7 @@ function SortRow({ id, index, count, label, height, y, lift, active, reduce, fun
     onPanResponderTerminationRequest: () => false,
   })).current;
   const handlers = { ...pan.panHandlers };
-  return <Animated.View style={[styles.row, { height, zIndex: active ? 100 : 0, borderColor: active ? '#91ad82' : '#e0e9dc', backgroundColor: active ? '#f7faef' : '#fff', transform: [{ translateY: y }, { scale: active && !reduce ? lift.interpolate({ inputRange: [0, 1], outputRange: [1, 1.035] }) : 1 }] }]}>
+  return <Animated.View style={[styles.row, { height, zIndex: active ? 100 : 0, transform: [{ translateY: y }, { scale: active && !reduce ? lift.interpolate({ inputRange: [0, 1], outputRange: [1, 1.035] }) : 1 }] }]}>
     <View style={styles.content}>{children}</View>
     <View {...handlers} accessible accessibilityRole="adjustable" accessibilityLabel={`${label}, position ${index + 1} of ${count}. Drag handle`} accessibilityHint="Drag to reorder, or use Move up and Move down actions." accessibilityActions={[...(index > 0 ? [{ name: 'decrement', label: 'Move up' }] : []), ...(index < count - 1 ? [{ name: 'increment', label: 'Move down' }] : [])]} onAccessibilityAction={e => functions.current.shift(id, e.nativeEvent.actionName === 'decrement' ? -1 : 1)} {...(Platform.OS === 'web' ? { tabIndex: 0, onKeyDown: (e: { key: string; preventDefault: () => void; stopPropagation: () => void }) => { if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); functions.current.finish(true); } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); functions.current.shift(id, e.key === 'ArrowUp' ? -1 : 1); } } } : {})} style={styles.handle}><Text accessible={false} style={styles.grip}>⠿</Text></View>
   </Animated.View>;
