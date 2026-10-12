@@ -9,7 +9,6 @@ import {
 } from "framer-motion";
 import {
   ArrowUpRight,
-  ArrowRight,
   Github,
   Play,
   Pause,
@@ -223,7 +222,6 @@ export default function NativeletSite({
           </a>
           <nav aria-label="Main navigation">
             <a href="#components">Components</a>
-            <a href="#direction">The direction</a>
             <a
               href={REPO}
               className={styles.github}
@@ -264,9 +262,6 @@ export default function NativeletSite({
               <div className={styles.actions}>
                 <a href="#components" className={styles.primary}>
                   Explore the playground <ArrowUpRight size={19} />
-                </a>
-                <a href="#direction" className={styles.secondary}>
-                  Where we&apos;re headed <ArrowRight size={17} />
                 </a>
               </div>
               <p className={styles.status}>
@@ -730,58 +725,6 @@ export default function NativeletSite({
               </div>
             </dialog>
           </section>
-          <section
-            id="direction"
-            className={styles.direction}
-            aria-labelledby="direction-title"
-          >
-            <div>
-              <p className={styles.eyebrow}>THE NEXT CHAPTER</p>
-              <h2 id="direction-title">
-                Same attention to detail.
-                <br />
-                <em>A native canvas.</em>
-              </h2>
-              <p>
-                The direction is React Native components and blocks. This
-                website is the starting point, not a claim that the library has
-                shipped.
-              </p>
-              <a className={styles.primary} href={REPO}>
-                Follow the project <ArrowUpRight size={18} />
-              </a>
-            </div>
-            <div className={styles.roadmap}>
-              <div>
-                <span className={styles.roadmapIcon}>
-                  <Check size={19} />
-                </span>
-                <span>
-                  <strong>Web playground</strong>
-                  <small>Available now · explore the component gallery</small>
-                </span>
-                <span className={styles.now}>NOW</span>
-              </div>
-              <div>
-                <span className={styles.roadmapIcon}>
-                  <Smartphone size={19} />
-                </span>
-                <span>
-                  <strong>React Native components</strong>
-                  <small>Source available · not yet device-tested</small>
-                </span>
-              </div>
-              <div>
-                <span className={styles.roadmapIcon}>
-                  <Layers size={19} />
-                </span>
-                <span>
-                  <strong>Native blocks</strong>
-                  <small>Planned · no release date</small>
-                </span>
-              </div>
-            </div>
-          </section>
           <section className={styles.endnote}>
             <span aria-hidden="true">✳</span>
             <h2>
@@ -809,4 +752,4 @@ export default function NativeletSite({
       </div>
     </MotionConfig>
   );
-              }
+}
