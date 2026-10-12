@@ -1,0 +1,11 @@
+.root { padding: 20px 0 24px; background: #f4f6ef; overflow: hidden; border-top: 1px solid #dde5d7; display: flex; flex-direction: column; align-items: center; }
+.status { font-size: 13px; color: #31513b; margin-bottom: 12px; min-height: 18px; }
+.stage { position: relative; width: 300px; max-width: calc(100% - 32px); height: 200px; border-radius: 22px; overflow: hidden; }
+.canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.overlay { position: absolute; inset: 0; padding: 20px; display: flex; flex-direction: column; justify-content: flex-end; pointer-events: none; }
+.overlay strong { font-size: 22px; line-height: 1.2; }
+.overlay span { font-size: 13px; }
+.hit { position: absolute; inset: 0; background: transparent; cursor: pointer; border-radius: 22px; }
+.hit:focus-visible { outline: 2px solid #204835; outline-offset: -4px; }
+.note { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 14px 16px 0; font-size: 11px; color: #526b58; }
+.note button { padding: 12px; min-height: 44px; border-radius: 14px; background: #e6edde; }
