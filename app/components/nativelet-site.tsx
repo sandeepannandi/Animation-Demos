@@ -168,6 +168,21 @@ const sections = [
   },
 ];
 
+const COMPONENT_NAMES: [string, string][] = [
+  ["Preview Rail", "Vertical and horizontal navigation · switch inside"],
+  ["Morph Capsule", "Idle, compact and expanded · tap or drag inside"],
+  ["Toast Stack", "Queue, swipe, pause and undo · feedback that feels right"],
+  ["Liquid Tabs", "A floating tab bar · native iOS glass with fallbacks"],
+  ["Swipe Row", "Swipe to reveal actions · full-swipe commit with undo"],
+  ["Expanding Card", "Tap to expand into a detail view · drag down to dismiss"],
+  ["Drag to Sort", "Lift, make a gap, scroll the edge · drop to settle"],
+  ["Stacked Carousel", "Depth, tilt and a spring settle · swipe or focus a card"],
+  ["Gooey Menu", "Actions pull out like liquid · tap the plus"],
+  ["Theme Reveal", "A theme switch that spreads from your tap"],
+  ["Glass Lens", "A lens that trails your finger"],
+  ["Scrub Chart", "A smooth trend, a reading under your finger"],
+];
+
 export default function NativeletSite({
   sources,
 }: {
@@ -186,6 +201,14 @@ export default function NativeletSite({
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [query, setQuery] = useState("");
+  const normalizedQuery = query.trim().toLowerCase();
+  const matches = (name: string, description: string) =>
+    !normalizedQuery ||
+    normalizedQuery
+      .split(/\s+/)
+      .every((word) => `${name} ${description}`.toLowerCase().includes(word));
+  const visibleCount = COMPONENT_NAMES.filter(([name, description]) => matches(name, description)).length;
   const [orientation, setOrientation] = useState<"vertical" | "horizontal">("vertical");
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLButtonElement | null>(null);
@@ -395,8 +418,29 @@ export default function NativeletSite({
                 Open one to try it and copy its React Native source.
               </p>
             </div>
+            <div className={gallery.searchRow}>
+              <label htmlFor="component-search" className={gallery.searchLabel}>Search components</label>
+              <input
+                id="component-search"
+                type="search"
+                className={gallery.search}
+                placeholder="Search components, e.g. swipe, tabs, toast"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                autoComplete="off"
+              />
+              <p className={gallery.searchCount} role="status" aria-live="polite">
+                {normalizedQuery ? `${visibleCount} of ${COMPONENT_NAMES.length} components` : `${COMPONENT_NAMES.length} components`}
+              </p>
+            </div>
+            {visibleCount === 0 ? (
+              <div className={gallery.empty}>
+                <p>No components match &ldquo;{query.trim()}&rdquo;.</p>
+                <button type="button" onClick={() => setQuery("")}>Clear search</button>
+              </div>
+            ) : null}
             <div className={gallery.grid}>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "rail")} aria-haspopup="dialog" aria-label="Open Preview Rail web preview">
+              <button className={gallery.tile} hidden={!matches("Preview Rail", "Vertical and horizontal navigation · switch inside")} onClick={(event) => openComponent(event, "rail")} aria-haspopup="dialog" aria-label="Open Preview Rail web preview">
                 <div className={gallery.study} aria-hidden="true">
                   <div className={gallery.miniRail}>
                     {[0, 1, 2].map((tick) => <span key={tick} className={gallery.tick} />)}
@@ -408,7 +452,7 @@ export default function NativeletSite({
                   <ArrowUpRight size={20} aria-hidden="true" />
                 </div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "capsule")} aria-haspopup="dialog" aria-label="Open Morph Capsule web preview">
+              <button className={gallery.tile} hidden={!matches("Morph Capsule", "Idle, compact and expanded · tap or drag inside")} onClick={(event) => openComponent(event, "capsule")} aria-haspopup="dialog" aria-label="Open Morph Capsule web preview">
                 <div className={gallery.study} aria-hidden="true">
                   <div className={gallery.miniCapsule}><span>Focus session</span><strong>24:10</strong></div>
                 </div>
@@ -417,43 +461,43 @@ export default function NativeletSite({
                   <ArrowUpRight size={20} aria-hidden="true" />
                 </div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "toast")} aria-haspopup="dialog" aria-label="Open Toast Stack web preview">
+              <button className={gallery.tile} hidden={!matches("Toast Stack", "Queue, swipe, pause and undo · feedback that feels right")} onClick={(event) => openComponent(event, "toast")} aria-haspopup="dialog" aria-label="Open Toast Stack web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniToasts}><span>✓ Saved to collection <b>Undo</b></span><span>A little less to carry.</span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 03</span><strong>Toast Stack</strong><small>Queue, swipe, pause and undo · feedback that feels right</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "glass")} aria-haspopup="dialog" aria-label="Open Liquid Tabs web preview">
+              <button className={gallery.tile} hidden={!matches("Liquid Tabs", "A floating tab bar · native iOS glass with fallbacks")} onClick={(event) => openComponent(event, "glass")} aria-haspopup="dialog" aria-label="Open Liquid Tabs web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniGlass}><span>⌂<small>Home</small></span><span>◇<small>Explore</small></span><span>♡<small>Saved</small></span><span>○<small>You</small></span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 04</span><strong>Liquid Tabs</strong><small>A floating tab bar · native iOS glass with fallbacks</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "swipe")} aria-haspopup="dialog" aria-label="Open Swipe Row web preview">
+              <button className={gallery.tile} hidden={!matches("Swipe Row", "Swipe to reveal actions · full-swipe commit with undo")} onClick={(event) => openComponent(event, "swipe")} aria-haspopup="dialog" aria-label="Open Swipe Row web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniSwipe}><span className={gallery.miniSwipeAction}>Delete</span><span className={gallery.miniSwipeRow}><b>Asha Rao</b><small>Lunch on Thursday?</small></span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 05</span><strong>Swipe Row</strong><small>Swipe to reveal actions · full-swipe commit with undo</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "expand")} aria-haspopup="dialog" aria-label="Open Expanding Card web preview">
+              <button className={gallery.tile} hidden={!matches("Expanding Card", "Tap to expand into a detail view · drag down to dismiss")} onClick={(event) => openComponent(event, "expand")} aria-haspopup="dialog" aria-label="Open Expanding Card web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniExpand}><span className={gallery.miniExpandBack} /><span className={gallery.miniExpandCard}><small>THE DAILY LIST</small><b>Slow mornings</b></span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 06</span><strong>Expanding Card</strong><small>Tap to expand into a detail view · drag down to dismiss</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "sort")} aria-haspopup="dialog" aria-label="Open Drag to Sort web preview">
+              <button className={gallery.tile} hidden={!matches("Drag to Sort", "Lift, make a gap, scroll the edge · drop to settle")} onClick={(event) => openComponent(event, "sort")} aria-haspopup="dialog" aria-label="Open Drag to Sort web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniSort}><span>01 · Sketch the idea <b>⠿</b></span><span>02 · Pick a direction <b>⠿</b></span><span>03 · Build the prototype <b>⠿</b></span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 07</span><strong>Drag to Sort</strong><small>Lift, make a gap, scroll the edge · drop to settle</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "carousel")} aria-haspopup="dialog" aria-label="Open Stacked Carousel web preview">
+              <button className={gallery.tile} hidden={!matches("Stacked Carousel", "Depth, tilt and a spring settle · swipe or focus a card")} onClick={(event) => openComponent(event, "carousel")} aria-haspopup="dialog" aria-label="Open Stacked Carousel web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniCarousel}><span>≋</span><span>↗<small>Take the long way</small></span><span>☾</span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 08</span><strong>Stacked Carousel</strong><small>Depth, tilt and a spring settle · swipe or focus a card</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "gooey")} aria-haspopup="dialog" aria-label="Open Gooey Menu web preview">
+              <button className={gallery.tile} hidden={!matches("Gooey Menu", "Actions pull out like liquid · tap the plus")} onClick={(event) => openComponent(event, "gooey")} aria-haspopup="dialog" aria-label="Open Gooey Menu web preview">
                 <div className={gallery.study} aria-hidden="true"><svg width="0" height="0" style={{ position: "absolute" }}><filter id="nativelet-mini-goo" colorInterpolationFilters="sRGB"><feGaussianBlur stdDeviation="6" /><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 24 -11" /></filter></svg><div className={gallery.miniGooeyWrap}><div className={gallery.miniGooey}><i /><i /><i /><i /><b /></div><em className={gallery.miniGooeyPlus}>+</em></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 09</span><strong>Gooey Menu</strong><small>Actions pull out like liquid · tap the plus</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "ripple")} aria-haspopup="dialog" aria-label="Open Theme Reveal web preview">
+              <button className={gallery.tile} hidden={!matches("Theme Reveal", "A theme switch that spreads from your tap")} onClick={(event) => openComponent(event, "ripple")} aria-haspopup="dialog" aria-label="Open Theme Reveal web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniRipple}><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 10</span><strong>Theme Reveal</strong><small>A theme switch that spreads from your tap</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "lens")} aria-haspopup="dialog" aria-label="Open Glass Lens web preview">
+              <button className={gallery.tile} hidden={!matches("Glass Lens", "A lens that trails your finger")} onClick={(event) => openComponent(event, "lens")} aria-haspopup="dialog" aria-label="Open Glass Lens web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniLens}><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 11</span><strong>Glass Lens</strong><small>A lens that trails your finger</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} onClick={(event) => openComponent(event, "chart")} aria-haspopup="dialog" aria-label="Open Scrub Chart web preview">
+              <button className={gallery.tile} hidden={!matches("Scrub Chart", "A smooth trend, a reading under your finger")} onClick={(event) => openComponent(event, "chart")} aria-haspopup="dialog" aria-label="Open Scrub Chart web preview">
                 <div className={gallery.study} aria-hidden="true"><svg width="240" height="150" viewBox="0 0 240 150"><rect width="240" height="150" rx="20" fill="#132d2b"/><path d="M 20 115 C 40 115 40 84 62 84 S 80 100 97 100 S 117 49 139 49 S 155 65 171 65 S 199 27 220 27 L 220 132 L 20 132 Z" fill="#57dfb622"/><path d="M 20 115 C 40 115 40 84 62 84 S 80 100 97 100 S 117 49 139 49 S 155 65 171 65 S 199 27 220 27" fill="none" stroke="#57dfb6" strokeWidth="3"/><line x1="139" x2="139" y1="22" y2="132" stroke="#accec3"/><circle cx="139" cy="49" r="5" fill="#57dfb6"/></svg></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 12</span><strong>Scrub Chart</strong><small>A smooth trend, a reading under your finger</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
