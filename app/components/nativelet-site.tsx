@@ -18,6 +18,7 @@ import {
   Smartphone,
   Layers,
   Sparkles,
+  Star,
   X,
 } from "lucide-react";
 import { PreviewRail } from "./preview-rail";
@@ -75,6 +76,68 @@ const capsuleContent: Record<CapsuleState, React.ReactNode> = {
 };
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 
+const STAR_CACHE_KEY = "nativelet-stars";
+const STAR_TTL_MS = 10 * 60 * 1000;
+
+/* Live star count from the public GitHub API. Returns null until a real number
+   arrives, and stays null if the request fails, so no number is ever invented. */
+function useGithubStars() {
+  const [stars, setStars] = useState<number | null>(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(STAR_CACHE_KEY) ?? "null");
+      if (cached && Date.now() - cached.at < STAR_TTL_MS && Number.isInteger(cached.count)) {
+        setStars(cached.count);
+        return;
+      }
+    } catch {}
+    fetch("https://api.github.com/repos/sandeepannandi/Nativelet", {
+      signal: controller.signal,
+      headers: { Accept: "application/vnd.github+json" },
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const count = data?.stargazers_count;
+        if (Number.isInteger(count) && count >= 0) {
+          setStars(count);
+          try {
+            sessionStorage.setItem(STAR_CACHE_KEY, JSON.stringify({ count, at: Date.now() }));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, []);
+  return stars;
+}
+
+function StarCount({ count }: { count: number }) {
+  const reduce = useReducedMotion();
+  const [shown, setShown] = useState(reduce ? count : 0);
+  useEffect(() => {
+    if (reduce) {
+      setShown(count);
+      return;
+    }
+    let frame = 0;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const t = Math.min(1, (now - start) / 700);
+      setShown(Math.round(count * (1 - Math.pow(1 - t, 3))));
+      if (t < 1) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [count, reduce]);
+  return (
+    <span className={styles.stars} aria-hidden="true">
+      <Star size={13} />
+      {new Intl.NumberFormat("en", { notation: "compact" }).format(shown)}
+    </span>
+  );
+}
+
 const footerItem = {
   hidden: { opacity: 0, y: 18 },
   shown: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
@@ -111,6 +174,7 @@ export default function NativeletSite({
   sources: Record<ComponentId, { name: string; code: string }[]>;
 }) {
   const reduce = useReducedMotion();
+  const stars = useGithubStars();
   const slide = { type: "spring", stiffness: 300, damping: 30, mass: 0.9 } as const;
   const [study, setStudy] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -234,10 +298,15 @@ export default function NativeletSite({
             <a
               href={REPO}
               className={styles.github}
-              aria-label="Nativelet on GitHub"
+              aria-label={
+                stars === null
+                  ? "Nativelet on GitHub"
+                  : `Nativelet on GitHub, ${stars} ${stars === 1 ? "star" : "stars"}`
+              }
             >
               <Github size={17} />
               <span>GitHub</span>
+              {stars !== null && <StarCount count={stars} />}
               <ArrowUpRight size={14} />
             </a>
           </nav>
@@ -799,4 +868,4 @@ export default function NativeletSite({
       </div>
     </MotionConfig>
   );
-                  }
+}

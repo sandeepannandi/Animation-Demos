@@ -1174,3 +1174,19 @@
     grid-column: 1 / -1;
   }
 }
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef3e8;
+  color: #3f5a2a;
+}
+.stars svg {
+  fill: #668c45;
+  stroke: #668c45;
+}
