@@ -154,4 +154,5 @@ function Row({ id, openId, setOpenId, leading, trailing, onUndo, onTap, label, c
       {children}
     </motion.div>
   </motion.div>;
-      }
+}
+// Web adapter: shares swipeLogic.ts with the React Native SwipeRow.
