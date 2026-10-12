@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  lens: { dir: "packages/ui/src/components/glass-lens", files: ["GlassLens.tsx", "lensMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   ripple: { dir: "packages/ui/src/components/ripple-reveal", files: ["RippleReveal.tsx", "rippleMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   gooey: { dir: "packages/ui/src/components/gooey-menu", files: ["GooeyMenu.tsx", "gooeyMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   carousel: { dir: "packages/ui/src/components/stacked-carousel", files: ["StackedCarousel.tsx", "carouselLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -30,6 +31,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    lens: read(components.lens.dir, components.lens.files),
     ripple: read(components.ripple.dir, components.ripple.files),
     gooey: read(components.gooey.dir, components.gooey.files),
     carousel: read(components.carousel.dir, components.carousel.files),
