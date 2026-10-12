@@ -48,6 +48,7 @@ export default function SwipeScreen() {
   const [reduce, setReduce] = useState<boolean | undefined>();
   return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
     <Link href="/glass" style={styles.note}>← Liquid Tabs</Link>
+    <Link href="/cards" style={styles.note}>Next: Expanding Card →</Link>
     <Text accessibilityRole="header" style={styles.title}>{'Swipe to act.\nKeep going to commit.'}</Text>
     <Text style={styles.note}>Swipe right to pin. Swipe left to archive or delete. Pull a full swipe past the line to run the outer action, then undo it for a few seconds. Opening one row closes the others. Screen readers get the same actions from the actions menu. Not device-tested.</Text>
     <SwipeRowGroup><Inbox reduce={reduce} /></SwipeRowGroup>
