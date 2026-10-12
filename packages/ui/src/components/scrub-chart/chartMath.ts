@@ -56,3 +56,10 @@ export function bubbleLeft(x: number, width: number, bubbleWidth = 96) {
   'worklet';
   return clamp(x - bubbleWidth / 2, 0, Math.max(0, width - bubbleWidth));
 }
+
+// A shared clock keeps RN and the SVG adapter on the same staged reveal.
+export function revealPhase(clock: number, start: number, end: number) {
+  'worklet';
+  const t = clamp((clock - start) / Math.max(0.001, end - start), 0, 1);
+  return t * t * (3 - 2 * t);
+}
