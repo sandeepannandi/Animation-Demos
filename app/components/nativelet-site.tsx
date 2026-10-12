@@ -18,7 +18,6 @@ import {
   Smartphone,
   Layers,
   Star,
-  X,
 } from "lucide-react";
 import { HeroShowcase } from "./hero-showcase";
 import { WhatYouGet } from "./what-you-get";
@@ -484,10 +483,7 @@ export default function NativeletSite({
               const box = event.currentTarget.getBoundingClientRect();
               if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeComponent();
             }}>
-              <div className={gallery.dialogTop}>
-                <p id="preview-dialog-description">Web preview of the React Native {meta.title}.</p>
-                <button type="button" className={gallery.close} aria-label="Close component preview" onClick={closeComponent} autoFocus><X size={19} /></button>
-              </div>
+              <p id="preview-dialog-description" className={gallery.srOnly}>Web preview of the React Native {meta.title}. Press Escape or tap outside the dialog to close it.</p>
               <div className={gallery.dialogBody}>
             <div className={styles.workbench}>
               <div className={styles.workbenchHead}>
@@ -741,4 +737,4 @@ export default function NativeletSite({
       </div>
     </MotionConfig>
   );
-                }
+}
