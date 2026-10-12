@@ -151,9 +151,6 @@
 }
 .heroVisual {
   height: 552px;
-  background: #eaf0df;
-  border: 1px solid #dbe4cf;
-  border-radius: 28px;
   position: relative;
   display: flex;
   justify-content: center;
