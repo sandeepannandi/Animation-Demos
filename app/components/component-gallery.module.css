@@ -134,3 +134,7 @@
 .miniGooey i:nth-child(3) { left: 130px; top: 14px; }
 .miniGooey i:nth-child(4) { left: 164px; top: 66px; }
 .miniGooey b { left: 83px; top: 82px; width: 64px; height: 64px; }
+
+.miniRipple { position: relative; width: 230px; height: 150px; border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, #121733, #2a1a4d); }
+.miniRipple i { position: absolute; left: 44px; top: 22px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, #ffa65a 0 38%, #fdcc9e 38% 62%, rgba(255,240,204,.9) 62% 66%, transparent 66% 72%, rgba(255,240,204,.35) 72% 75%, transparent 75%); }
+.miniRipple b { position: absolute; right: -30px; bottom: -40px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #e6668c, transparent 70%); }
