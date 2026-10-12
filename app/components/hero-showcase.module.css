@@ -1,19 +1,50 @@
 .root {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 12px;
   width: calc(100% - 44px);
   max-width: 480px;
-  margin-top: 24px;
+  height: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+  mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent);
+}
+.column {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+.track {
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
+  animation: heroScrollUp 70s linear infinite;
+}
+.column[data-dir="down"] .track {
+  animation-name: heroScrollDown;
+  animation-duration: 80s;
+}
+.set {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 12px;
+}
+@keyframes heroScrollUp {
+  from { transform: translateY(0); }
+  to { transform: translateY(-50%); }
+}
+@keyframes heroScrollDown {
+  from { transform: translateY(-50%); }
+  to { transform: translateY(0); }
 }
 .tile {
+  flex: none;
   position: relative;
   aspect-ratio: 1 / 1.04;
   border-radius: 20px;
   overflow: hidden;
   background: #132d2b;
   color: #d5ece4;
-  box-shadow: 0 18px 36px #25382c1f;
 }
 .name {
   position: absolute;
@@ -217,11 +248,72 @@
   70% { transform: translate(-6px, 38px) scale(1.08, 0.95); }
 }
 
+/* Drag to Sort */
+.drag { background: #17332b; }
+.rows { position: absolute; inset: 16% 14% 28%; display: flex; flex-direction: column; justify-content: space-between; }
+.rows i { height: 24%; border-radius: 8px; background: #2c5a4b; animation: heroRowA 6s ease-in-out infinite; }
+.rows i:nth-child(2) { background: #57dfb6; animation-name: heroRowB; }
+@keyframes heroRowA { 0%, 20%, 80%, 100% { transform: translateY(0); } 40%, 60% { transform: translateY(-120%); } }
+@keyframes heroRowB { 0%, 20%, 80%, 100% { transform: translateY(0); } 40%, 60% { transform: translateY(120%); } }
+
+/* Swipe Row */
+.swipe { background: #132d2b; }
+.swipeAction { position: absolute; left: 14%; right: 14%; top: 36%; height: 26%; border-radius: 12px; background: #d85a4f; }
+.swipeRow { position: absolute; left: 14%; right: 14%; top: 36%; height: 26%; border-radius: 12px; background: #dcefe6; animation: heroSwipe 5s ease-in-out infinite; }
+@keyframes heroSwipe { 0%, 15%, 85%, 100% { transform: translateX(0); } 40%, 60% { transform: translateX(-34%); } }
+
+/* Liquid Tabs */
+.tabs { background: #1a3a2d; }
+.tabBar { position: absolute; left: 10%; right: 10%; top: 38%; height: 24%; border-radius: 999px; background: #0f2a24; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; text-align: center; font-size: 10px; color: #d5ece4; overflow: hidden; }
+.tabBar b { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(33.33% - 5px); border-radius: 999px; background: #2f6b58; animation: heroTab 7s ease-in-out infinite; }
+.tabBar span { position: relative; }
+@keyframes heroTab { 0%, 18% { transform: translateX(0); } 33%, 51% { transform: translateX(100%); } 66%, 85% { transform: translateX(200%); } 100% { transform: translateX(0); } }
+
+/* Stacked Carousel */
+.stack { background: #12302b; }
+.stack i { position: absolute; left: 22%; right: 22%; top: 24%; height: 44%; border-radius: 14px; background: #2c5a4b; transform: translateY(-14%) scale(0.88); }
+.stack i:nth-child(2) { background: #3d7a65; transform: translateY(0) scale(0.94); }
+.stack i:nth-child(3) { background: #57dfb6; transform: translateY(14%); animation: heroDeal 6s ease-in-out infinite; }
+@keyframes heroDeal { 0%, 25%, 100% { transform: translateY(14%) translateX(0); } 50%, 70% { transform: translateY(14%) translateX(38%) rotate(8deg); } }
+
+/* Toast Stack */
+.toast { background: #132d2b; }
+.toast i { position: absolute; left: 14%; right: 14%; height: 16%; border-radius: 10px; background: #2c5a4b; }
+.toast i:nth-child(1) { top: 24%; opacity: 0.45; transform: scale(0.88); }
+.toast i:nth-child(2) { top: 36%; opacity: 0.7; transform: scale(0.94); }
+.toast i:nth-child(3) { top: 50%; background: #57dfb6; animation: heroToast 5s ease-in-out infinite; }
+@keyframes heroToast { 0%, 100% { transform: translateY(0); opacity: 1; } 15% { transform: translateY(-120%); opacity: 0; } 30% { transform: translateY(0); opacity: 1; } }
+
+/* Morph Capsule */
+.capsule { background: #1d4a3a; }
+.pill { position: absolute; left: 50%; top: 40%; height: 18%; width: 28%; border-radius: 999px; background: #0f1f1d; transform: translateX(-50%); animation: heroPill 6s ease-in-out infinite; display: grid; place-items: center; }
+.pill b { width: 28%; height: 24%; border-radius: 999px; background: #57dfb6; }
+@keyframes heroPill { 0%, 20%, 100% { width: 28%; } 45%, 65% { width: 70%; } }
+
+/* Expanding Card */
+.expand { background: #17332b; }
+.card { position: absolute; left: 22%; right: 22%; top: 22%; height: 26%; border-radius: 14px; background: #dcefe6; animation: heroCard 6s ease-in-out infinite; padding: 10px; }
+.card b { display: block; width: 50%; height: 8px; border-radius: 4px; background: #132d2b; }
+.card u { display: block; margin-top: 8px; width: 80%; height: 6px; border-radius: 3px; background: #9ab8ab; text-decoration: none; }
+@keyframes heroCard { 0%, 20%, 100% { height: 26%; } 45%, 65% { height: 50%; } }
+
+/* Preview Rail */
+.rail { background: #1a3a2d; }
+.railTrack { position: absolute; left: 0; top: 30%; height: 38%; display: flex; gap: 10px; padding-left: 12%; animation: heroRail 8s ease-in-out infinite; }
+.railTrack i { flex: none; width: 34%; min-width: 64px; border-radius: 12px; background: #2c5a4b; }
+.railTrack i:nth-child(2) { background: #3d7a65; }
+.railTrack i:nth-child(3) { background: #57dfb6; }
+@keyframes heroRail { 0%, 15%, 100% { transform: translateX(0); } 45%, 65% { transform: translateX(-90px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .track { animation: none; }
+}
 @media (max-width: 760px) {
   .root {
     width: calc(100% - 28px);
     gap: 9px;
   }
+  .set { gap: 9px; padding-bottom: 9px; }
   .tile {
     border-radius: 16px;
   }
