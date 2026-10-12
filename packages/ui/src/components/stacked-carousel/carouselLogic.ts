@@ -12,5 +12,5 @@ export function dragPosition(start: number, dx: number, count: number, stride = 
 }
 export function depth(distance: number) {
   const d = clamp(distance, -3, 3), a = Math.abs(d);
-  return { x: d * 66, y: a * 15, scale: Math.max(0.72, 1 - a * 0.12), opacity: Math.max(0, 1 - a * 0.32), tilt: -d * 14 };
+  return { x: d * 66, y: a * 15, scale: Math.max(0.72, 1 - a * 0.12), opacity: Math.max(0, Math.min(1, 3 - a)), tilt: -d * 14 };
 }
