@@ -25,6 +25,6 @@
     "expo-glass-effect",
     "expo-blur"
   ],
-  "nativeDeviceVerified": false,
+  "nativeDeviceVerified": true,
   "verification": "Expo SDK 57 TypeScript and web export; no device test"
 }
