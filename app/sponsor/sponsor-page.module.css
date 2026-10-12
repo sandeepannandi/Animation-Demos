@@ -43,6 +43,29 @@
 .header nav a.current {
   color: #357961;
 }
+.github {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #dce1d7;
+  padding: 10px 13px;
+  border-radius: 8px;
+}
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef3e8;
+  color: #3f5a2a;
+}
+.stars svg {
+  fill: #668c45;
+  stroke: #668c45;
+}
 .main {
   max-width: 920px;
   margin: 0 auto;
@@ -264,7 +287,17 @@
   .wordmark {
     font-size: 21px;
   }
-  .hideSmall {
+  .header nav {
+    gap: 15px;
+    font-size: 11px;
+  }
+  .github {
+    border: 0;
+    padding: 10px 0;
+    gap: 5px;
+  }
+  .github > span:nth-of-type(1),
+  .github svg:last-child {
     display: none;
   }
   .hero {
