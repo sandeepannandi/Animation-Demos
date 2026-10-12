@@ -1,6 +1,6 @@
-# Ripple Reveal
+# Theme Reveal
 
-Original tap-to-reveal transition. Touch a themed surface and a second theme spreads out from your finger, with a wave that rides the front of the reveal and fades as it travels. The effect is a Skia runtime shader (SkSL) driven by one Reanimated value. No copied demo code or assets.
+A theme-switch transition, like a dark and light mode change that spreads out from the tap. The component is exported as `RippleReveal` and lives in `ripple-reveal/`; only its display name is Theme Reveal. Original tap-to-reveal transition. Touch a themed surface and a second theme spreads out from your finger, with a wave that rides the front of the reveal and fades as it travels. The effect is a Skia runtime shader (SkSL) driven by one Reanimated value. No copied demo code or assets.
 
 Copy `RippleReveal.tsx` and `rippleMath.ts` together and keep LICENSE.
 
