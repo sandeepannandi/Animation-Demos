@@ -1069,3 +1069,32 @@
   fill: #668c45;
   stroke: #668c45;
 }
+
+/* Hero showcase: label above and caption below the columns, never overlapping them. */
+.heroVisual {
+  padding: 40px 0 62px;
+  box-sizing: border-box;
+}
+.visualLabel {
+  top: 8px;
+  left: 22px;
+}
+.visualCaption {
+  bottom: 14px;
+  left: 22px;
+  right: 22px;
+  padding-top: 0;
+  background: transparent;
+  font-size: 11px;
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .visualLabel {
+    left: 14px;
+  }
+  .visualCaption {
+    left: 14px;
+    right: 14px;
+    font-size: 10px;
+  }
+}
