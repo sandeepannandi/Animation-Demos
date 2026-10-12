@@ -290,7 +290,7 @@ export default function NativeletSite({
         <header className={styles.header}>
           <a href="#" className={styles.wordmark} aria-label="Nativelet home">
             <span className={styles.mark}>n.</span> nativelet
-            <span className={styles.alpha}>playground</span>
+            <span className={styles.alpha}>React Native</span>
           </a>
           <nav aria-label="Main navigation">
             <a href="#components">Components</a>
@@ -318,8 +318,8 @@ export default function NativeletSite({
               animate={{ opacity: 1, y: 0 }}
             >
               <p className={styles.eyebrow}>
-                <span className={styles.dot} /> AN OPEN-SOURCE INTERFACE
-                PLAYGROUND
+                <span className={styles.dot} /> OPEN-SOURCE REACT NATIVE
+                INTERACTION COMPONENTS
               </p>
               <h1 id="hero-title">
                 Small interactions.
@@ -332,18 +332,16 @@ export default function NativeletSite({
                 </span>
               </h1>
               <p className={styles.intro}>
-                Exploring the details that make an interface feel alive. A
-                growing playground, with React Native components and blocks in
-                mind.
+                Exploring the details that make an interface feel alive. React
+                Native components with source code you can copy and use.
               </p>
               <div className={styles.actions}>
                 <a href="#components" className={styles.primary}>
-                  Explore the playground <ArrowUpRight size={19} />
+                  Explore the components <ArrowUpRight size={19} />
                 </a>
               </div>
               <p className={styles.status}>
-                <Code2 size={15} /> Web preview available. Native library in the
-                making.
+                <Code2 size={15} /> Web previews of real React Native source.
               </p>
             </motion.div>
             <div className={styles.heroVisual}>
@@ -390,7 +388,7 @@ export default function NativeletSite({
           >
             <div className={styles.sectionHeading}>
               <div>
-                <p className={styles.eyebrow}>THE PLAYGROUND</p>
+                <p className={styles.eyebrow}>THE COMPONENTS</p>
                 <h2 id="component-title">
                   A small start.
                   <br />
@@ -694,7 +692,7 @@ export default function NativeletSite({
               <a className={styles.wordmark} href="#">
                 <span className={styles.mark}>n.</span> nativelet
               </a>
-              <p>An open-source playground by Sandeepan Nandi.</p>
+              <p>Open-source React Native interaction components by Sandeepan Nandi.</p>
             </motion.div>
             <motion.nav
               className={styles.footerCol}
