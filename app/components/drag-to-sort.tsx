@@ -50,4 +50,4 @@ export function DragToSortPreview() {
     </div>
     <p className={styles.help} id="sort-help">Grab the dotted handle. Arrows reorder when focused. Escape cancels.</p><p className={styles.log} role="status">{message}</p>
   </div>;
-                                 }
+        }
