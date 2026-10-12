@@ -40,7 +40,7 @@ export function SwipeRowPreview() {
     </div>
     <p className={styles.log} aria-live="polite">{log}</p>
     <div className={styles.toolbar}><button onClick={() => { setItems(SEED); setOpenId(null); setLog('Swipe a row.'); setVersion(v => v + 1); }}>Reset</button></div>
-    <p className={styles.hint}>Web preview of the React Native Swipe Row, using the same gesture rules. Not yet tested on a device.</p>
+    <p className={styles.hint}>Web preview of the React Native Swipe Row, using the same gesture rules.</p>
   </div>;
 }
 
