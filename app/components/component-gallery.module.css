@@ -138,3 +138,8 @@
 .miniRipple { position: relative; width: 230px; height: 150px; border-radius: 18px; overflow: hidden; background: linear-gradient(180deg, #121733, #2a1a4d); }
 .miniRipple i { position: absolute; left: 44px; top: 22px; width: 150px; height: 150px; border-radius: 50%; background: radial-gradient(circle, #ffa65a 0 38%, #fdcc9e 38% 62%, rgba(255,240,204,.9) 62% 66%, transparent 66% 72%, rgba(255,240,204,.35) 72% 75%, transparent 75%); }
 .miniRipple b { position: absolute; right: -30px; bottom: -40px; width: 120px; height: 120px; border-radius: 50%; background: radial-gradient(circle, #e6668c, transparent 70%); }
+
+.miniLens { position: relative; width: 230px; height: 150px; border-radius: 18px; overflow: hidden; background: radial-gradient(circle at 85% 15%, rgba(250,158,97,.8), transparent 60%), linear-gradient(135deg, #0f2933, #52338c); background-size: auto; }
+.miniLens::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.5) 1.6px, transparent 2px); background-size: 14px 14px; }
+.miniLens i { position: absolute; left: 92px; top: 34px; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.5), rgba(255,255,255,.08) 45%, transparent 70%); border: 2px solid rgba(255,255,255,.65); box-shadow: 0 8px 18px rgba(0,0,0,.3), inset 0 0 14px rgba(255,255,255,.35); backdrop-filter: blur(1px) saturate(1.5); }
+.miniLens b { position: absolute; left: 34px; top: 54px; width: 70px; height: 70px; border-radius: 50%; border: 2.4px solid #ffeb99; }

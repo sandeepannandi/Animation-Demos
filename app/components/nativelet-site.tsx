@@ -29,16 +29,18 @@ import { SwipeRowPreview } from "./swipe-row";
 import { StackedCarouselPreview } from "./stacked-carousel";
 import { GooeyMenuPreview } from "./gooey-menu";
 import { RippleRevealPreview } from "./ripple-reveal";
+import { GlassLensPreview } from "./glass-lens";
 import { DragToSortPreview } from "./drag-to-sort";
 import { ExpandingCardPreview } from "./expanding-card";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens";
 const META = {
   gooey: { title: "Gooey Menu", number: "09", folder: "gooey-menu", note: "Real React Native source. Copy GooeyMenu.tsx and gooeyMath.ts together and keep LICENSE. Needs @shopify/react-native-skia, react-native-reanimated and react-native-worklets. Tap the plus and the actions pull out of it like drops of liquid, then merge back in. Slow motion plays the spring about four times slower so you can watch the goo form. Reduce Motion swaps the spring for a short timing. The web preview shares the geometry and uses an SVG blur and colour matrix instead of Skia, so it is not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion · SVG filter. Source: React Native · Skia" },
   carousel: { title: "Stacked Carousel", number: "08", folder: "stacked-carousel", note: "Real React Native source. Copy StackedCarousel.tsx and carouselLogic.ts together and keep LICENSE. Core RN only. Drag with velocity snap, tap a side card, or use next/previous actions and keyboard arrows. Finite, short collections, no autoplay. The web preview shares the math, not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion. Source: React Native" },
+  lens: { title: "Glass Lens", number: "11", folder: "glass-lens", note: "Real React Native source. Copy GlassLens.tsx and lensMath.ts together and keep LICENSE. Needs @shopify/react-native-skia, react-native-reanimated and react-native-worklets. Drag the lens and it trails your finger on a spring, stretches the way it moves and bends the scene under it, with a colour fringe and a lit rim, all in one Skia runtime shader. Arrow keys and screen reader actions nudge it. Reduce Motion removes the lag, stretch and fringe. The web preview runs the same maths on a 2D canvas instead of Skia, so it is not the native render. Not yet tested on a device.", footer: "Preview: React · Canvas 2D. Source: React Native · Skia" },
   ripple: { title: "Ripple Reveal", number: "10", folder: "ripple-reveal", note: "Real React Native source. Copy RippleReveal.tsx and rippleMath.ts together and keep LICENSE. Needs @shopify/react-native-skia, react-native-reanimated and react-native-worklets. Tap the card and a second theme spreads out from your finger as a Skia runtime shader, with a wave that rides the front and fades out. Reduce Motion swaps the wave for a short cross-fade. The web preview runs the same maths on a 2D canvas instead of Skia, so it is not the native render. Not yet tested on a device.", footer: "Preview: React · Canvas 2D. Source: React Native · Skia" },
   sort: { title: "Drag to Sort", number: "07", folder: "drag-to-sort", note: "Real React Native source. Copy DragToSort.tsx and sortLogic.ts together and keep LICENSE. Core RN only. Grab a handle to lift a row, move past a neighbor to open a gap, hold near an edge to scroll, then release to settle. Cancel restores the starting order. Screen reader Move up/down actions and web keyboard arrows are included. Fixed-height, non-virtualized list. The web preview shares reorder and edge-scroll rules, not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion. Source: React Native" },
   expand: { title: "Expanding Card", number: "06", folder: "expanding-card", note: "Real React Native source. Copy ExpandingCard.tsx and expandingLogic.ts together and keep the LICENSE. No animation or navigation dependency, only measureInWindow and Animated. Tap a card to grow it into a detail view, then drag down to shrink it back. Pass safe-area insets from your app. The web adapter shares the geometry and gesture rules, not the native render. See README for accessibility and device-test limits.", footer: "Preview: React · Framer Motion. Source: React Native" },
@@ -512,6 +514,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniRipple}><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 10</span><strong>Ripple Reveal</strong><small>A second theme spreads from your tap</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "lens")} aria-haspopup="dialog" aria-label="Open Glass Lens web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniLens}><i /><b /></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 11</span><strong>Glass Lens</strong><small>A lens that trails your finger</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -570,7 +576,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
