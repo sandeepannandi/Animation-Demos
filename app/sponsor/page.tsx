@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArrowUpRight, Github, Heart, Star, GitPullRequest } from "lucide-react";
 import styles from "./sponsor-page.module.css";
+import { SponsorHeader } from "./sponsor-header";
 
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 const SPONSOR_URL = "https://github.com/sponsors/sandeepannandi";
@@ -45,22 +46,7 @@ export default function SponsorPage() {
       <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <header className={styles.header}>
-        <a href="/" className={styles.wordmark} aria-label="Nativelet home">
-          <span className={styles.mark}>n.</span> nativelet
-        </a>
-        <nav aria-label="Main navigation">
-          <a href="/#components" className={styles.hideSmall}>
-            Components
-          </a>
-          <a href="/sponsor" className={styles.current} aria-current="page">
-            Sponsor
-          </a>
-          <a href={REPO} className={styles.hideSmall}>
-            GitHub
-          </a>
-        </nav>
-      </header>
+      <SponsorHeader />
 
       <main id="main" className={styles.main}>
         <section className={styles.hero} aria-labelledby="sponsor-title">
