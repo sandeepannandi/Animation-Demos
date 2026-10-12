@@ -53,11 +53,11 @@ export default function SponsorPage() {
           <a href="/#components" className={styles.hideSmall}>
             Components
           </a>
-          <a href={REPO} className={styles.hideSmall}>
-            GitHub
-          </a>
           <a href="/sponsor" className={styles.current} aria-current="page">
             Sponsor
+          </a>
+          <a href={REPO} className={styles.hideSmall}>
+            GitHub
           </a>
         </nav>
       </header>

@@ -32,8 +32,8 @@ export default function Privacy() {
         The header shows the repository&apos;s star count. Your browser requests it directly from
         the public GitHub API (api.github.com), so GitHub receives your IP address as described
         in <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub&apos;s privacy statement</a>.
-        The number is kept in your browser&apos;s session storage for ten minutes and is not sent
-        to us. If the request fails, no number is shown.
+        The number is fetched fresh on each page load, is not stored in your browser, and is not
+        sent to us. If the request fails, no number is shown.
       </p>
       <h2>Links to other sites</h2>
       <p>
