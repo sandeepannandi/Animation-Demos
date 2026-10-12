@@ -23,6 +23,7 @@ export function LegalPage({
         {children}
       </main>
       <footer className={styles.footer}>
+        <a href="/sponsor">Sponsor</a>
         <a href="/terms">Terms of Service</a>
         <a href="/privacy">Privacy Policy</a>
         <a href="https://github.com/sandeepannandi/Nativelet">GitHub</a>
