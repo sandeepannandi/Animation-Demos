@@ -1,0 +1,11 @@
+.root { padding: 24px 16px; background: #f4f6ef; border-top: 1px solid #dde5d7; display: flex; flex-direction: column; align-items: center; overflow: hidden; }
+.header { width: 300px; max-width: 100%; margin-bottom: 16px; }
+.header small { color: #526b58; font-size: 9px; letter-spacing: 1.5px; }
+.header h3 { color: #193f30; font-size: 25px; font-weight: 600; letter-spacing: -.8px; margin: 8px 0 0; line-height: 1.2; }
+.stage { width: 300px; max-width: 100%; position: relative; border-radius: 22px; background: #132d2b; overflow: hidden; touch-action: none; cursor: crosshair; outline: none; }
+.stage:focus-visible { outline: 2px solid #204835; outline-offset: 3px; }
+.stage svg { width: 100%; display: block; }
+.bubble { position: absolute; top: 9px; width: 32%; height: 30px; display: flex; justify-content: center; align-items: center; border-radius: 10px; background: #e0f7eb; font-size: 12px; font-weight: 600; color: #173c31; pointer-events: none; }
+.controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+.controls button { padding: 12px 14px; min-height: 44px; border-radius: 14px; background: #e6edde; font-size: 12px; color: #31513b; }
+.note { text-align: center; color: #526b58; font-size: 11px; margin: 14px 0 0; line-height: 1.6; }
