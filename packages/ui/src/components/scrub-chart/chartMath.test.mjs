@@ -15,3 +15,18 @@ test('nearest sample snaps and clamps at both ends', () => { assert.equal(m.near
 test('curve clamps x outside the plot', () => { assert.equal(m.curveY(-100,g.points,g.segments),g.points[0].y); assert.equal(m.curveY(500,g.points,g.segments),g.points.at(-1).y); });
 test('bubble never overflows the chart', () => { assert.equal(m.bubbleLeft(18,300),0); assert.equal(m.bubbleLeft(282,300),204); assert.equal(m.bubbleLeft(150,300),102); });
 test('area closes only down to the plot baseline', () => { assert.ok(g.area.endsWith(`L 282 190 L 18 190 Z`)); assert.ok(g.line.includes(' C ')); });
+
+test('reveal phase is bounded, finite and complete at either end', () => {
+  for (const [start,end] of [[0,.72],[.16,.86],[.62,1]]) {
+    assert.equal(m.revealPhase(-1,start,end),0); assert.equal(m.revealPhase(2,start,end),1);
+    assert.equal(m.revealPhase(start,start,end),0); assert.equal(m.revealPhase(end,start,end),1);
+    assert.equal(m.revealPhase(NaN,start,end),0);
+    let prev=0; for(let i=0;i<=100;i++){const n=m.revealPhase(i/100,start,end);assert.ok(n>=prev&&n<=1);prev=n;}
+  }
+});
+test('staged reveal leaves line ahead of area and cursor', () => {
+  for(let i=0;i<=100;i++){const t=i/100;assert.ok(m.revealPhase(t,0,.72)>=m.revealPhase(t,.16,.86));assert.ok(m.revealPhase(t,.16,.86)>=m.revealPhase(t,.62,1));}
+});
+test('spring overshoot cannot move the displayed point or bubble outside bounds', () => {
+  for(const x of [-1000,0,18,150,282,300,1000]){const cx=m.clamp(x,g.left,g.right);assert.ok(cx>=g.left&&cx<=g.right);assert.ok(Number.isFinite(m.curveY(cx,g.points,g.segments)));assert.ok(m.bubbleLeft(cx,300)>=0&&m.bubbleLeft(cx,300)<=204);}
+});
