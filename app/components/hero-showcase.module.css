@@ -4,7 +4,7 @@
   gap: 12px;
   width: calc(100% - 44px);
   max-width: 480px;
-  margin-top: 8px;
+  margin-top: 24px;
 }
 .tile {
   position: relative;
