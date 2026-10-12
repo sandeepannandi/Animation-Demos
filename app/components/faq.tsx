@@ -1,4 +1,5 @@
 import styles from "./faq.module.css";
+import { FaqItem } from "./faq-item";
 
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 
@@ -47,22 +48,16 @@ export function Faq() {
       <p className={styles.eyebrow}>FAQ</p>
       <h2 id="faq-title">Questions, answered plainly.</h2>
       <div className={styles.list}>
-        {faqs.map((f) => (
-          <details key={f.q} className={styles.item}>
-            <summary>
-              <span>{f.q}</span>
-              <i aria-hidden="true" />
-            </summary>
-            <p>
-              {f.a}
-              {f.href ? (
-                <>
-                  {" "}
-                  <a href={f.href}>{f.link}</a>
-                </>
-              ) : null}
-            </p>
-          </details>
+        {faqs.map((f, i) => (
+          <FaqItem key={f.q} q={f.q} index={i}>
+            {f.a}
+            {f.href ? (
+              <>
+                {" "}
+                <a href={f.href}>{f.link}</a>
+              </>
+            ) : null}
+          </FaqItem>
         ))}
       </div>
       <script
