@@ -855,6 +855,8 @@ export default function NativeletSite({
               <a href={`${REPO}/blob/main/LICENSE`}>
                 MIT license <ArrowUpRight size={14} />
               </a>
+              <a href="/terms">Terms of Service</a>
+              <a href="/privacy">Privacy Policy</a>
             </motion.nav>
           </div>
           <div className={styles.footerWord} aria-hidden="true">
