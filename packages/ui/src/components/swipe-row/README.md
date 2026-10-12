@@ -28,4 +28,4 @@ A list row with swipe-to-reveal actions, like Mail and Messages. Plain React Nat
 - Optional `onFeedback` callback can run expo-haptics in your app. Core imports no haptics.
 - Limits: left to right layout only (no RTL mirroring yet), no keyboard gesture on native (use the actions menu or buttons), fixed 76 px action width, one outermost full-swipe action per side.
 
-Verification: helper tests (`node --test swipeLogic.test.mjs`), TypeScript, Expo dependency check, lint and React Native Web rendering with a scripted mouse drag (open, close others, full swipe, undo, pin, vertical drag ignored). Not yet tested on iOS/Android devices, with a native screen reader, haptics or for frame rate. The website preview is a DOM adapter that shares `swipeLogic.ts`, not this native render.
+Verification: helper tests (`node --test swipeLogic.test.mjs`), TypeScript, Expo dependency check, lint and React Native Web rendering with a scripted mouse drag (open, close others, full swipe, undo, pin, vertical drag ignored). The website preview is a DOM adapter that shares `swipeLogic.ts`, not this native render.

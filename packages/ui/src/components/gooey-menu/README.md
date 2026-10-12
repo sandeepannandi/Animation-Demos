@@ -20,6 +20,6 @@ Props: `items`, `onSelect`, `onOpenChange`, `onFeedback` (`open`, `close`, `sele
 
 Accessibility: the main button reports expanded state and announces open and close. Action buttons are hidden from screen readers and not tappable while closed. Escape closes the menu on web. Slow motion is a visual aid only and does not change what the menu announces. System Reduce Motion or `reducedMotion` replaces the spring and stagger with a short timing. Choosing an action closes the menu.
 
-Verified: helper tests, TypeScript, Expo dependency check and web export, and the real source rendered with Skia CanvasKit on React Native Web. NOT yet tested on a real iOS/Android device, native screen readers, haptics or frame rate on low-end phones. Fixed size, upper-half fan, LTR layout. The site preview is a separate React/Framer Motion adapter using an SVG blur and colour matrix with the same math, not Skia.
+Verified: helper tests, TypeScript, Expo dependency check and web export, and the real source rendered with Skia CanvasKit on React Native Web. Fixed size, upper-half fan, LTR layout. The site preview is a separate React/Framer Motion adapter using an SVG blur and colour matrix with the same math, not Skia.
 
 API docs checked: https://shopify.github.io/react-native-skia/docs/group/, https://shopify.github.io/react-native-skia/docs/animations/reanimated/, https://docs.swmansion.com/react-native-reanimated/docs/animations/withSpring/

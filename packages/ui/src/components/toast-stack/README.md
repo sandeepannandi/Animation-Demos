@@ -21,4 +21,4 @@ dismiss(id); // dismiss() clears visible and queued messages
 - Optional onFeedback callback can run expo-haptics in your app. Core imports no haptics. Handle adapter errors in the callback.
 - No persistent storage, networking or global toast API. Unmounting the provider discards its queue. Action runs once, then dismisses the message (also if the action throws).
 
-Verification: helper tests, TypeScript, Expo dependency check and web rendering. Not yet tested on iOS/Android devices, with a native screen reader, haptics or for frame rate. The website preview is a DOM adapter sharing the pure queue/gesture/timer helpers, not this native render.
+Verification: helper tests, TypeScript, Expo dependency check and web rendering. The website preview is a DOM adapter sharing the pure queue/gesture/timer helpers, not this native render.

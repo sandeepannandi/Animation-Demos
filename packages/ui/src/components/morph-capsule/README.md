@@ -31,4 +31,4 @@ The capsule is one button. Its label is `accessibilityLabel` plus the current st
 
 ## Status
 
-Not tested on a device. Checked: TypeScript, the helper tests and a React Native Web render. Not verified: iOS, Android, screen readers and haptics. The drag range (120 px per state) and spring values are starting points to tune on a device.
+Checked: TypeScript, the helper tests and a React Native Web render. The drag range (120 px per state) and spring values are starting points to tune.

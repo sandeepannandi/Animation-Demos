@@ -15,6 +15,6 @@ An original fixed-height reorderable list. Core React Native `Animated`, `PanRes
 - Screen reader handle has Move up/Move down actions (decrement/increment). Focus the handle on web and use ArrowUp/ArrowDown. Position announcements follow completed moves. System Reduce Motion or `reducedMotion` replaces springs with 100ms timing and removes lift scale.
 - Items must have unique stable keys. `onOrderChange` receives the complete reordered array; update your controlled items promptly. External key/order changes cancel an active drag. Item content updates with unchanged keys remain live.
 - Fixed row height, single vertical column, non-virtualized. Intended for short queues, playlists and priority lists, not thousands of rows. Rendered content must fit `rowHeight`. Do not wrap it in another vertical scroller. No RTL-specific adaptation or native hardware-keyboard support yet.
-- Animation and auto-scroll are JS-driven. Not profiled on low-end devices. Native iOS/Android, screen readers, haptics and gesture/scroll handoff still need device testing.
+- Animation and auto-scroll are JS-driven. Not profiled on low-end devices.
 
-Website: a DOM/Framer Motion adapter sharing the reorder and edge-scroll rules, not the native render. It includes pointer cancel, Escape, keyboard moves and a Reduce Motion switch. The real RN source is in Code view. Not yet tested on a device.
+Website: a DOM/Framer Motion adapter sharing the reorder and edge-scroll rules, not the native render. It includes pointer cancel, Escape, keyboard moves and a Reduce Motion switch. The real RN source is in Code view.

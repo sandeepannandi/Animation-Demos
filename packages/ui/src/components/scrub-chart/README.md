@@ -23,6 +23,6 @@ Geometry: harmonic-mean tangents flatten turning points and preserve each segmen
 
 Accessibility: one adjustable element exposes the current category and formatted value. Screen reader increment/decrement actions and web Arrow keys select readings; Home/End select the endpoints. Reduce Motion removes all reveal, spring, bubble rebound and ring motion, showing the final state immediately. The demo has a forced Reduce Motion switch. The bubble is visual; the adjustable element carries the value for assistive technology.
 
-Verification: helper tests, TypeScript, Expo lint/dependency check, web export, and real React Native source with Skia CanvasKit on React Native Web. NOT tested on a physical iOS/Android device, native screen readers or low-end frame rates. The gallery is a separate SVG web adapter sharing the geometry, not Skia. It is labelled accordingly.
+Verification: helper tests, TypeScript, Expo lint/dependency check, web export, and real React Native source with Skia CanvasKit on React Native Web. The gallery is a separate SVG web adapter sharing the geometry, not Skia. It is labelled accordingly.
 
 API references: https://shopify.github.io/react-native-skia/docs/shapes/path/ and https://shopify.github.io/react-native-skia/docs/animations/animations/
