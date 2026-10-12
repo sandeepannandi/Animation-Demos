@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  sort: { dir: "packages/ui/src/components/drag-to-sort", files: ["DragToSort.tsx", "sortLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
   glass: { dir: "packages/ui/src/components/liquid-tabs", files: ["LiquidTabs.tsx", "README.md", "LICENSE"] },
   expand: { dir: "packages/ui/src/components/expanding-card", files: ["ExpandingCard.tsx", "expandingLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
   swipe: { dir: "packages/ui/src/components/swipe-row", files: ["SwipeRow.tsx", "swipeLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -26,6 +27,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    sort: read(components.sort.dir, components.sort.files),
     glass: read(components.glass.dir, components.glass.files),
     expand: read(components.expand.dir, components.expand.files),
     swipe: read(components.swipe.dir, components.swipe.files),
