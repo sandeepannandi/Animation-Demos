@@ -41,10 +41,7 @@
   color: #357961;
 }
 .header nav a.current {
-  border: 1px solid #dce1d7;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #fff;
+  color: #357961;
 }
 .main {
   max-width: 920px;
