@@ -15,7 +15,6 @@ import {
   Check,
   Copy,
   Code2,
-  Smartphone,
   Layers,
   Star,
 } from "lucide-react";
@@ -376,9 +375,6 @@ export default function NativeletSite({
             </span>
             <span>
               <Code2 size={17} /> Explore the source
-            </span>
-            <span>
-              <Smartphone size={17} /> Native is the next chapter
             </span>
           </div>
           <section
