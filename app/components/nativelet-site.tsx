@@ -21,6 +21,7 @@ import {
 import { HeroShowcase } from "./hero-showcase";
 import { WhatYouGet } from "./what-you-get";
 import { Faq } from "./faq";
+import { Sponsor, SPONSOR_URL } from "./sponsor";
 import { PreviewRail } from "./preview-rail";
 import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
 import { LiquidTabsPreview } from "./liquid-tabs";
@@ -706,6 +707,7 @@ export default function NativeletSite({
           </section>
           <WhatYouGet />
           <Faq />
+          <Sponsor />
           <section className={styles.endnote}>
             <span aria-hidden="true">✳</span>
             <h2>
@@ -757,6 +759,9 @@ export default function NativeletSite({
               </a>
               <a href={`${REPO}/blob/main/LICENSE`}>
                 MIT license <ArrowUpRight size={14} />
+              </a>
+              <a href={SPONSOR_URL}>
+                Sponsor <ArrowUpRight size={14} />
               </a>
               <a href="/terms">Terms of Service</a>
               <a href="/privacy">Privacy Policy</a>
