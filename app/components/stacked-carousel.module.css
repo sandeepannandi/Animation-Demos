@@ -1,0 +1,17 @@
+.root { padding: 20px 0 24px; background: #f4f6ef; overflow: hidden; border-top: 1px solid #dde5d7; }
+.stage { height: 375px; width: 100%; position: relative; perspective: 900px; touch-action: pan-y; cursor: grab; user-select: none; outline-offset: -4px; }
+.stage:active { cursor: grabbing; }
+.card { position: absolute; top: 12px; left: 50%; margin-left: -135px; width: 270px; height: 300px; padding: 24px; border-radius: 24px; box-shadow: 0 12px 22px #183c2d20; display: flex; flex-direction: column; justify-content: space-between; color: #193d2c; }
+.card > span { font-size: 10px; letter-spacing: 1.5px; }
+.glyph { font-size: 70px; line-height: 1; font-weight: 400; }
+.card h4 { font-size: 27px; line-height: 1.1; letter-spacing: -1px; font-weight: 650; }
+.card p { font-size: 13px; color: #49614e; margin-top: 10px; }
+.card small { font-size: 11px; display: flex; justify-content: space-between; }
+.dots { display: flex; justify-content: center; }
+.dots button { width: 30px; height: 44px; display: grid; place-items: center; }
+.dots span { width: 6px; height: 6px; border-radius: 6px; background: #204835; }
+.controls { display: flex; justify-content: center; align-items: center; gap: 12px; font-size: 12px; }
+.controls button, .note button { padding: 12px; min-height: 44px; border-radius: 14px; background: #e6edde; }
+.controls button:disabled { opacity: .4; cursor: default; }
+.note { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 14px 16px 0; font-size: 11px; color: #526b58; }
+@media (max-width: 520px) { .card { width: 220px; margin-left: -110px; padding: 20px; } .card h4 { font-size: 24px; } }

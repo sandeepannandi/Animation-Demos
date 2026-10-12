@@ -116,3 +116,10 @@
 .miniSort span { padding: 12px 16px; border-radius: 12px; background: #fff; color: #42644b; font-size: 11px; box-shadow: 0 2px 6px #173c2c0b; }
 .miniSort span:nth-child(2) { transform: scale(1.04) rotate(-2deg); box-shadow: 0 10px 22px #173c2c22; }
 .miniSort b { float: right; color: #8c9e87; }
+
+.miniCarousel { position: relative; width: 230px; height: 170px; perspective: 800px; }
+.miniCarousel > span { position: absolute; top: 15px; width: 130px; height: 150px; padding: 28px 16px; border-radius: 18px; background: #cfe1e9; color: #204835; font-size: 46px; box-shadow: 0 12px 24px #183c2d18; }
+.miniCarousel > span:first-child { left: 0; transform: scale(.84) rotateY(-20deg); }
+.miniCarousel > span:last-child { right: 0; background: #ded4e9; transform: scale(.84) rotateY(20deg); }
+.miniCarousel > span:nth-child(2) { left: 50px; top: 0; background: #f1d9c3; z-index: 2; }
+.miniCarousel small { display: block; font-size: 11px; font-weight: 600; margin-top: 8px; }
