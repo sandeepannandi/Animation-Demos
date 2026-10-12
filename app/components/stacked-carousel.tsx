@@ -35,4 +35,5 @@ export function StackedCarouselPreview() {
     <div className={styles.controls}><button disabled={active===0} onClick={()=>settle(selected.current-1)} aria-label="Previous card">← Previous</button><span role="status" aria-live="polite" data-carousel-status>{active+1} / 5</span><button disabled={active===4} onClick={()=>settle(selected.current+1)} aria-label="Next card">Next →</button></div>
     <div className={styles.note}><span>Drag or swipe. Tap a side card to focus.</span><button aria-pressed={forcedReduce} onClick={()=>setForcedReduce(!forcedReduce)}>Motion: {reduce?'reduced':'system'}</button></div>
   </div>;
-    }
+}
+// End of Stacked Carousel web preview.
