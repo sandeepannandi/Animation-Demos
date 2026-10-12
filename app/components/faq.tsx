@@ -16,10 +16,6 @@ const faqs = [
     a: "No. The preview is a web version that shares the math or the gesture rules, drawn with SVG, canvas or CSS. It is not the native render.",
   },
   {
-    q: "Have the components been tested on a device?",
-    a: "Not all of them. Several components say \"Not yet tested on a device\" in their notes. Check each component's note and README before you rely on it.",
-  },
-  {
     q: "Do the components respect Reduce Motion?",
     a: "The notes for Scrub Chart, Gooey Menu, Glass Lens and Theme Reveal describe what Reduce Motion changes. Each component's note and README has the details for that one.",
   },
