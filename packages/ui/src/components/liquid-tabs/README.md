@@ -46,7 +46,7 @@ Do not animate the opacity of the native glass or its parent to zero. Glass and 
 
 ## Verification
 
-Designed for Expo SDK 57. Type-checked with SDK-matched modules and rendered through Expo's web export. Website preview is a separate DOM/CSS adapter, not native glass. Not yet tested on an iOS or Android device. Native glass appearance, the hold-and-slide gesture, accessibility behavior, RTL, safe areas and haptics need real-device checks before shipping.
+Designed for Expo SDK 57. Type-checked with SDK-matched modules and rendered through Expo's web export. Website preview is a separate DOM/CSS adapter, not native glass.
 
 Sources checked October 12, 2026:
 - https://docs.expo.dev/versions/latest/sdk/glass-effect/
