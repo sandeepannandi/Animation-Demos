@@ -6,7 +6,7 @@
 .viewport { height: 318px; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; border-radius: 18px; }
 .viewport::-webkit-scrollbar { display: none; }
 .canvas { position: relative; }
-.row { position: absolute; left: 8px; right: 8px; top: 0; height: 72px; display: flex; align-items: center; background: #fff; border: 1px solid #e0e9dc; border-radius: 16px; user-select: none; }
+.row { box-shadow: none; position: absolute; left: 8px; right: 8px; top: 0; height: 72px; display: flex; align-items: center; background: #fff; border: 1px solid #e0e9dc; border-radius: 16px; user-select: none; }
 .number { font-size: 11px; color: #96a990; margin: 0 12px; font-variant-numeric: tabular-nums; }
 .text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
 .text b { font-size: 12px; color: #274e38; font-weight: 600; }

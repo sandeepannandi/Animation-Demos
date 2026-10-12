@@ -36,7 +36,7 @@ export function DragToSortPreview() {
       <div ref={viewport} className={styles.viewport} data-testid="sort-viewport" onScroll={refresh}>
         <div className={styles.canvas} style={{ height: order.length * STEP - 10 }} role="list" aria-label="Tasks in priority order">
           {order.map((id, index) => { const task = TASKS.find(t => t.id === id)!; const lifted = active?.id === id; const slot = active ? slotFor(index, active.from, active.to) : index;
-            return <motion.div key={id} role="listitem" data-row={id} data-slot={slot} className={styles.row} initial={false} animate={{ y: lifted ? active.top : slot * STEP, scale: lifted && !reduce ? 1.035 : 1, boxShadow: lifted ? '0 12px 28px #173c2c30' : '0 2px 4px #173c2c05' }} transition={lifted && !active.settling ? { y: { duration: 0 }, scale: transition, boxShadow: transition } : transition} style={{ zIndex: lifted ? 10 : 0 }}>
+            return <motion.div key={id} role="listitem" data-row={id} data-slot={slot} className={styles.row} initial={false} animate={{ y: lifted ? active.top : slot * STEP, scale: lifted && !reduce ? 1.035 : 1 }} transition={lifted && !active.settling ? { y: { duration: 0 }, scale: transition } : transition} style={{ zIndex: lifted ? 10 : 0 }}>
               <span className={styles.number}>{String(slot + 1).padStart(2,'0')}</span><span className={styles.text}><b>{task.title}</b><small>{task.subtitle}</small></span>
               <button ref={node => { handles.current[id] = node; }} className={styles.handle} aria-label={`Reorder ${task.title}, position ${slot + 1} of ${order.length}`} aria-describedby="sort-help" data-handle={id} onKeyDown={e => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { e.preventDefault(); shift(id, e.key === 'ArrowUp' ? -1 : 1); } }}
                 onPointerDown={e => { if (e.button !== 0 || drag.current) return; e.preventDefault(); e.currentTarget.setPointerCapture(e.pointerId); const el = viewport.current!; const from = order.indexOf(id); const d: Drag = { id, from, to: from, startY: e.clientY, dy: 0, startScroll: el.scrollTop, localY: e.clientY - el.getBoundingClientRect().top, top: from * STEP, settling: false, pointer: e.pointerId }; drag.current = d; setActive({ ...d }); setMessage(`Lifted ${task.title}. Escape cancels.`); last.current = performance.now(); frameId.current = requestAnimationFrame(tick); }}
@@ -50,4 +50,4 @@ export function DragToSortPreview() {
     </div>
     <p className={styles.help} id="sort-help">Grab the dotted handle. Arrows reorder when focused. Escape cancels.</p><p className={styles.log} role="status">{message}</p>
   </div>;
-}
+        }
