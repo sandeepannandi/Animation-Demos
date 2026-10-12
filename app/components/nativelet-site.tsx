@@ -25,12 +25,14 @@ import { PreviewRail } from "./preview-rail";
 import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
 import { LiquidTabsPreview } from "./liquid-tabs";
 import { ToastStackPreview } from "./toast-stack";
+import { SwipeRowPreview } from "./swipe-row";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe";
 const META = {
+  swipe: { title: "Swipe Row", number: "05", folder: "swipe-row", note: "Real React Native source. Copy SwipeRow.tsx and swipeLogic.ts together and keep the LICENSE. No gesture or animation dependency. Swipe right to pin, left to archive or delete, past the line to commit, then undo. The web adapter shares the gesture rules, not the native render. See README for accessibility and device-test limits.", footer: "Preview: React · Framer Motion. Source: React Native" },
   glass: { title: "Liquid Tabs", number: "04", folder: "liquid-tabs", note: "Real React Native source. Install expo-glass-effect and expo-blur with expo install. Keep LICENSE. iOS native glass needs availability checks; Android uses an opaque fallback. Hold the active tab, then slide to switch. See README for integration and device-test limits.", footer: "Preview: CSS glass study. Source: React Native · Expo" },
   toast: { title: "Toast Stack", number: "03", folder: "toast-stack", note: "React Native source for Expo. Copy ToastStack.tsx and toastLogic.ts together and keep the LICENSE. The web adapter shares the queue, timer and gesture helpers, not the native render. Pass safe-area insets from your app.", footer: "Preview: React · Framer Motion. Source: React Native" },
   rail: {
@@ -476,6 +478,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniGlass}><span>⌂<small>Home</small></span><span>◇<small>Explore</small></span><span>♡<small>Saved</small></span><span>○<small>You</small></span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 04</span><strong>Liquid Tabs</strong><small>A floating tab bar · native iOS glass with fallbacks</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "swipe")} aria-haspopup="dialog" aria-label="Open Swipe Row web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniSwipe}><span className={gallery.miniSwipeAction}>Delete</span><span className={gallery.miniSwipeRow}><b>Asha Rao</b><small>Lunch on Thursday?</small></span></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 05</span><strong>Swipe Row</strong><small>Swipe to reveal actions · full-swipe commit with undo</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -534,7 +540,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
