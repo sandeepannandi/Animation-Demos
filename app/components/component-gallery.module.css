@@ -106,3 +106,8 @@
 .miniSwipeRow { position: absolute; inset: 0 84px 0 0; transform: translateX(-4px); padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 3px; border-radius: 16px 0 0 16px; }
 .miniSwipeRow b { font-size: 13px; color: #193f30; }
 .miniSwipeRow small { font-size: 11px; color: #61705a; }
+.miniExpand { position: relative; width: 260px; max-width: 100%; height: 120px; }
+.miniExpandBack { position: absolute; left: 14px; right: 14px; top: 0; height: 100px; border-radius: 18px; background: #2f6f5a; opacity: .55; transform: scale(.94); }
+.miniExpandCard { position: absolute; left: 0; right: 0; top: 18px; height: 100px; border-radius: 22px; background: #d9892b; color: #fff; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; box-shadow: 0 8px 22px #173b2926; }
+.miniExpandCard small { font-size: 8px; font-weight: 700; letter-spacing: 1px; opacity: .8; }
+.miniExpandCard b { font-size: 19px; letter-spacing: -.5px; }
