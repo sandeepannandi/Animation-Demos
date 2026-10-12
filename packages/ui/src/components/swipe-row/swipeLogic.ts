@@ -109,4 +109,5 @@ export function isHorizontalIntent(dx: number, dy: number) {
 /** The action a full swipe commits: the one nearest the screen edge on that side. */
 export function outermostIndex(side: SwipeSide, count: number) {
   return side === 'leading' ? 0 : count - 1;
-    }
+}
+// Shared by SwipeRow.tsx and the web preview.
