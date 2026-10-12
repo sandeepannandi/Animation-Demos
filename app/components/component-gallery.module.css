@@ -144,3 +144,61 @@
 .miniLens::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(rgba(255,255,255,.5) 1.6px, transparent 2px); background-size: 14px 14px; }
 .miniLens i { position: absolute; left: 92px; top: 34px; width: 92px; height: 92px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.5), rgba(255,255,255,.08) 45%, transparent 70%); border: 2px solid rgba(255,255,255,.65); box-shadow: 0 8px 18px rgba(0,0,0,.3), inset 0 0 14px rgba(255,255,255,.35); backdrop-filter: blur(1px) saturate(1.5); }
 .miniLens b { position: absolute; left: 34px; top: 54px; width: 70px; height: 70px; border-radius: 50%; border: 2.4px solid #ffeb99; }
+
+.tile[hidden] {
+  display: none;
+}
+.searchRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  margin: 0 0 22px;
+}
+.searchLabel {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.search {
+  flex: 1 1 280px;
+  max-width: 420px;
+  height: 46px;
+  padding: 0 16px;
+  border: 1px solid #cfd8c4;
+  border-radius: 999px;
+  background: #fff;
+  color: inherit;
+  font: inherit;
+  font-size: 15px;
+}
+.search:focus-visible {
+  outline: 2px solid #668c45;
+  outline-offset: 2px;
+}
+.searchCount {
+  margin: 0;
+  font-size: 13px;
+  color: #566b60;
+}
+.empty {
+  padding: 40px 0;
+  text-align: center;
+  color: #566b60;
+}
+.empty p {
+  margin: 0 0 14px;
+}
+.empty button {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #cfd8c4;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
