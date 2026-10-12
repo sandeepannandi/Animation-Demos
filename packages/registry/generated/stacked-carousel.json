@@ -41,5 +41,5 @@
     "reactNative": "0.86.3",
     "web": "0.21.2"
   },
-  "nativeDeviceVerified": false
+  "nativeDeviceVerified": true
 }
