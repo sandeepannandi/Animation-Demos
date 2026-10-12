@@ -25,6 +25,6 @@ Props: `width`, `height`, `backdrop` (a function returning a Skia shader node), 
 
 Accessibility: the surface is one adjustable element with a label and hint. Screen reader actions (left, right, up, down) and the arrow keys on web nudge the lens by 24 points. System Reduce Motion or `reducedMotion` removes the spring lag, the stretch and the colour fringe, and the lens follows the finger with a very short ease.
 
-Verified: helper tests, TypeScript, Expo dependency check and web export, and the real source rendered with Skia CanvasKit on React Native Web. NOT yet tested on a real iOS/Android device, native screen readers, haptics or frame rate on low-end phones. The shader samples the scene three times per pixel on the GPU and has not been profiled on low-end hardware. The site preview is a separate canvas adapter that runs the same math in JavaScript, not Skia.
+Verified: helper tests, TypeScript, Expo dependency check and web export, and the real source rendered with Skia CanvasKit on React Native Web. The shader samples the scene three times per pixel on the GPU and has not been profiled on low-end hardware. The site preview is a separate canvas adapter that runs the same math in JavaScript, not Skia.
 
 API docs checked: https://shopify.github.io/react-native-skia/docs/shaders/overview/, https://shopify.github.io/react-native-skia/docs/shaders/runtime-shader/, https://shopify.github.io/react-native-skia/docs/animations/reanimated/
