@@ -20,6 +20,7 @@ export default function CardsScreen() {
   const [reduce, setReduce] = useState<boolean | undefined>();
   return <ExpandingCardHost insets={insets} onFeedback={haptic} reducedMotion={reduce} style={styles.host}>
     <ScrollView style={styles.page} contentContainerStyle={[styles.content, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 40 }]}>
+      <Link href="/sort" style={styles.note}>Drag to Sort →</Link>
       <Link href="/swipe" style={styles.note}>← Swipe Row</Link>
       <Text accessibilityRole="header" style={styles.title}>{'Tap to open.\nDrag down to leave.'}</Text>
       <Text style={styles.note}>The card grows from where it sits. Its hero and title are the same elements before and after. Drag the open card down to shrink it back, or use Close, Escape, Android back or the screen reader escape gesture.</Text>
