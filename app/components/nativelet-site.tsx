@@ -77,35 +77,22 @@ const capsuleContent: Record<CapsuleState, React.ReactNode> = {
 };
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 
-const STAR_CACHE_KEY = "nativelet-stars";
-const STAR_TTL_MS = 10 * 60 * 1000;
-
-/* Live star count from the public GitHub API. Returns null until a real number
-   arrives, and stays null if the request fails, so no number is ever invented. */
+/* Live star count from the public GitHub API, fetched fresh on every page load
+   (no cache). Returns null until a real number arrives, and stays null if the
+   request fails or is rate limited, so no number is ever invented. */
 function useGithubStars() {
   const [stars, setStars] = useState<number | null>(null);
   useEffect(() => {
     const controller = new AbortController();
-    try {
-      const cached = JSON.parse(sessionStorage.getItem(STAR_CACHE_KEY) ?? "null");
-      if (cached && Date.now() - cached.at < STAR_TTL_MS && Number.isInteger(cached.count)) {
-        setStars(cached.count);
-        return;
-      }
-    } catch {}
     fetch("https://api.github.com/repos/sandeepannandi/Nativelet", {
       signal: controller.signal,
+      cache: "no-store",
       headers: { Accept: "application/vnd.github+json" },
     })
       .then((response) => (response.ok ? response.json() : null))
       .then((data) => {
         const count = data?.stargazers_count;
-        if (Number.isInteger(count) && count >= 0) {
-          setStars(count);
-          try {
-            sessionStorage.setItem(STAR_CACHE_KEY, JSON.stringify({ count, at: Date.now() }));
-          } catch {}
-        }
+        if (Number.isInteger(count) && count >= 0) setStars(count);
       })
       .catch(() => {});
     return () => controller.abort();
@@ -114,27 +101,10 @@ function useGithubStars() {
 }
 
 function StarCount({ count }: { count: number }) {
-  const reduce = useReducedMotion();
-  const [shown, setShown] = useState(reduce ? count : 0);
-  useEffect(() => {
-    if (reduce) {
-      setShown(count);
-      return;
-    }
-    let frame = 0;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / 700);
-      setShown(Math.round(count * (1 - Math.pow(1 - t, 3))));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [count, reduce]);
   return (
     <span className={styles.stars} aria-hidden="true">
       <Star size={13} />
-      {new Intl.NumberFormat("en", { notation: "compact" }).format(shown)}
+      {new Intl.NumberFormat("en", { notation: "compact" }).format(count)}
     </span>
   );
 }
@@ -316,6 +286,9 @@ export default function NativeletSite({
           </a>
           <nav aria-label="Main navigation">
             <a href="#components">Components</a>
+            <a href="/sponsor" className={styles.sponsorLink}>
+              Sponsor
+            </a>
             <a
               href={REPO}
               className={styles.github}
@@ -329,9 +302,6 @@ export default function NativeletSite({
               <span>GitHub</span>
               {stars !== null && <StarCount count={stars} />}
               <ArrowUpRight size={14} />
-            </a>
-            <a href="/sponsor" className={styles.sponsorLink}>
-              Sponsor
             </a>
           </nav>
         </header>
