@@ -51,3 +51,11 @@ export function layout(distance: number, mainRadius: number, itemRadius: number,
 export function gooMatrix(gain = 24, cut = 11) {
   return [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, gain, -cut];
 }
+
+/** Slow motion plays the same spring stretched in time by this factor. */
+export const SLOW_FACTOR = 4;
+/** Spring settings for opening and closing. Stretching time by k divides stiffness by k squared and damping by k, so the wobble keeps its shape. */
+export function springConfig(slow = false, factor = SLOW_FACTOR) {
+  const k = slow && Number.isFinite(factor) && factor > 1 ? factor : 1;
+  return { stiffness: 170 / (k * k), damping: 14 / k, mass: 1 };
+}
