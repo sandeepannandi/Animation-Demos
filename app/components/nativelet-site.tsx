@@ -22,7 +22,6 @@ import {
 } from "lucide-react";
 import { HeroShowcase } from "./hero-showcase";
 import { WhatYouGet } from "./what-you-get";
-import { Faq } from "./faq";
 import { PreviewRail } from "./preview-rail";
 import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
 import { LiquidTabsPreview } from "./liquid-tabs";
@@ -673,7 +672,6 @@ export default function NativeletSite({
             </dialog>
           </section>
           <WhatYouGet />
-          <Faq />
           <section className={styles.endnote}>
             <span aria-hidden="true">✳</span>
             <h2>
@@ -726,6 +724,9 @@ export default function NativeletSite({
               <a href={`${REPO}/blob/main/LICENSE`}>
                 MIT license <ArrowUpRight size={14} />
               </a>
+              <a href={SPONSOR_URL}>
+                Sponsor <ArrowUpRight size={14} />
+              </a>
               <a href="/terms">Terms of Service</a>
               <a href="/privacy">Privacy Policy</a>
             </motion.nav>
@@ -741,4 +742,4 @@ export default function NativeletSite({
       </div>
     </MotionConfig>
   );
-}
+                          }
