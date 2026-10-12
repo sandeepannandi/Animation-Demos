@@ -747,33 +747,6 @@
   border-bottom: 1px solid #a0b18d;
   padding-bottom: 6px;
 }
-.footer {
-  margin: 0 5.5%;
-  border-top: 1px solid #dce4d6;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 28px 0;
-}
-.footer .wordmark {
-  font-size: 19px;
-}
-.footer .mark {
-  width: 29px;
-  height: 29px;
-  font-size: 22px;
-}
-.footer p {
-  font-size: 10px;
-  color: #5b6a53;
-  margin-right: auto;
-}
-.footer > a:not(.wordmark) {
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
 @media (min-width: 1450px) {
   .hero {
     gap: 80px;
@@ -817,9 +790,6 @@
   }
   .detailCard h4 {
     font-size: 20px;
-  }
-  .footer {
-    gap: 15px;
   }
 }
 @media (max-width: 760px) {
@@ -1035,24 +1005,6 @@
     font-size: 11px;
     min-height: 44px;
   }
-  .footer {
-    margin: 0 6%;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 25px 0;
-  }
-  .footer p {
-    flex-basis: 100%;
-    order: 4;
-    margin: 0;
-    font-size: 9px;
-  }
-  .footer .wordmark {
-    margin-right: auto;
-  }
-  .footer > a:not(.wordmark) {
-    min-height: 44px;
-  }
 }
 /* Reserve a separate caption row so the study never obscures its status. */
 .heroVisual {
@@ -1118,7 +1070,107 @@
   .demoNavigation > p {
     font-size: 11px;
   }
-  .footer p {
-    font-size: 11px;
+}
+
+.footer {
+  margin: 0 5.5%;
+  border-top: 1px solid #dce4d6;
+  padding: 44px 0 0;
+  overflow: hidden;
+}
+.footerTop {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 32px;
+}
+.footerBrand p {
+  font-size: 12px;
+  color: #5b6a53;
+  margin: 14px 0 0;
+  max-width: 260px;
+  line-height: 1.5;
+}
+.footer .wordmark {
+  font-size: 19px;
+}
+.footer .mark {
+  width: 29px;
+  height: 29px;
+  font-size: 22px;
+}
+.footerCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.footerCol h3 {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #668c45;
+  margin: 0 0 4px;
+}
+.footerCol a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #26301f;
+  padding-bottom: 2px;
+}
+.footerCol a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #668c45;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.footerCol a svg:last-child {
+  transition: transform 0.25s ease;
+}
+.footerCol a:hover::after,
+.footerCol a:focus-visible::after {
+  transform: scaleX(1);
+}
+.footerCol a:hover svg:last-child,
+.footerCol a:focus-visible svg:last-child {
+  transform: translate(2px, -2px);
+}
+.footerWord {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+  font-size: clamp(56px, 17.5vw, 250px);
+  line-height: 0.95;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  color: #dce4d6;
+  user-select: none;
+}
+.footerMask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+.footerMask > span {
+  display: inline-block;
+}
+.footerMask:nth-child(odd) > span {
+  color: #cdd9c3;
+}
+@media (max-width: 760px) {
+  .footerTop {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footerBrand {
+    grid-column: 1 / -1;
   }
 }

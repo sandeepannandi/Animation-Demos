@@ -74,6 +74,15 @@ const capsuleContent: Record<CapsuleState, React.ReactNode> = {
   expanded: <span style={{ display: "flex", height: "100%", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4 }}><span style={{ fontSize: 10, letterSpacing: 1.5, fontWeight: 700, color: "#9fc7b0" }}>FOCUS SESSION</span><span style={{ fontSize: 44, fontWeight: 700, letterSpacing: -1.5, lineHeight: 1 }}>24:10</span><span style={{ fontSize: 12, color: "#9fc7b0" }}>Tap or drag to collapse</span></span>,
 };
 const REPO = "https://github.com/sandeepannandi/Nativelet";
+
+const footerItem = {
+  hidden: { opacity: 0, y: 18 },
+  shown: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
+};
+const footerLetter = {
+  hidden: { y: "105%" },
+  shown: { y: "0%", transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] as const } },
+};
 const studies = ["Focus", "Listen", "Move"] as const;
 const sections = [
   {
@@ -737,19 +746,57 @@ export default function NativeletSite({
             </a>
           </section>
         </main>
-        <footer className={styles.footer}>
-          <a className={styles.wordmark} href="#">
-            <span className={styles.mark}>n.</span> nativelet
-          </a>
-          <p>An open-source playground by Sandeepan Nandi.</p>
-          <a href={`${REPO}/blob/main/LICENSE`}>
-            MIT license <ArrowUpRight size={14} />
-          </a>
-          <a href={REPO}>
-            <Github size={16} /> GitHub
-          </a>
-        </footer>
+        <motion.footer
+          className={styles.footer}
+          initial="hidden"
+          whileInView="shown"
+          viewport={{ once: true, amount: 0.25 }}
+          transition={{ staggerChildren: 0.07 }}
+        >
+          <div className={styles.footerTop}>
+            <motion.div className={styles.footerBrand} variants={footerItem}>
+              <a className={styles.wordmark} href="#">
+                <span className={styles.mark}>n.</span> nativelet
+              </a>
+              <p>An open-source playground by Sandeepan Nandi.</p>
+            </motion.div>
+            <motion.nav
+              className={styles.footerCol}
+              aria-label="Explore"
+              variants={footerItem}
+            >
+              <h3>Explore</h3>
+              <a href="#components">Components</a>
+              <a href={`${REPO}/tree/main/packages/ui/src/components`}>
+                Source <ArrowUpRight size={14} />
+              </a>
+            </motion.nav>
+            <motion.nav
+              className={styles.footerCol}
+              aria-label="Project"
+              variants={footerItem}
+            >
+              <h3>Project</h3>
+              <a href={REPO}>
+                <Github size={15} /> GitHub <ArrowUpRight size={14} />
+              </a>
+              <a href={`${REPO}/issues`}>
+                Issues <ArrowUpRight size={14} />
+              </a>
+              <a href={`${REPO}/blob/main/LICENSE`}>
+                MIT license <ArrowUpRight size={14} />
+              </a>
+            </motion.nav>
+          </div>
+          <div className={styles.footerWord} aria-hidden="true">
+            {"nativelet".split("").map((letter, index) => (
+              <span key={index} className={styles.footerMask}>
+                <motion.span variants={footerLetter}>{letter}</motion.span>
+              </span>
+            ))}
+          </div>
+        </motion.footer>
       </div>
     </MotionConfig>
   );
-}
+                  }
