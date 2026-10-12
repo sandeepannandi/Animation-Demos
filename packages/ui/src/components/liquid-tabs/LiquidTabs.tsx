@@ -12,7 +12,7 @@ export type LiquidTabsProps = {
   bottomInset?: number;
   reducedMotion?: boolean;
   reduceTransparency?: boolean;
-  /** Milliseconds the active tab must be held before the bar expands for sliding. */
+  /** Milliseconds the active tab must be held before its selection lens expands for sliding. */
   holdDelay?: number;
   /** Optional haptic adapter: fires when the hold starts and each time the slide lands on a new tab. */
   onFeedback?: () => void;
@@ -20,10 +20,11 @@ export type LiquidTabsProps = {
 
 /**
  * Controlled, floating tab bar. Place after screen content; reserve 92 + bottomInset px.
- * Tap switches tabs. Holding the active tab expands the bar with a spring and starts a
- * slide: drag left or right to move the selection across tabs, release to settle. Taps,
+ * Tap switches tabs. Holding the active tab expands only the selection lens with a bouncy spring and
+ * starts a slide: drag left or right to move the lens across tabs, release and it settles
+ * into the tab where it stopped with a small bounce. The bar itself never changes size. Taps,
  * the keyboard and screen readers keep working without the gesture; Reduce Motion drops
- * the springs but keeps the slide.
+ * the springs and the bounce but keeps the slide.
  */
 export function LiquidTabs({ tabs, activeId, onTabChange, bottomInset = 0, reducedMotion, reduceTransparency, holdDelay = 280, onFeedback }: LiquidTabsProps) {
   const [width, setWidth] = useState(0);
@@ -59,7 +60,7 @@ export function LiquidTabs({ tabs, activeId, onTabChange, bottomInset = 0, reduc
   const animateExpand = useCallback((toValue: number) => {
     expand.stopAnimation();
     if (gesture.current.reduce) expand.setValue(toValue);
-    else Animated.spring(expand, { toValue, stiffness: 260, damping: 24, mass: 0.8, useNativeDriver: false }).start();
+    else Animated.spring(expand, { toValue, stiffness: 300, damping: 11, mass: 0.8, useNativeDriver: true }).start();
   }, [expand]);
   const measureTrack = useCallback(() => {
     trackLeft.current = -1;
@@ -86,7 +87,7 @@ export function LiquidTabs({ tabs, activeId, onTabChange, bottomInset = 0, reduc
     const toValue = Math.max(0, gesture.current.index) * gesture.current.cell;
     position.stopAnimation();
     if (gesture.current.reduce || gesture.current.cell <= 0) position.setValue(toValue);
-    else Animated.spring(position, { toValue, stiffness: 280, damping: 27, mass: 0.85, useNativeDriver: true }).start();
+    else Animated.spring(position, { toValue, stiffness: 340, damping: 15, mass: 0.8, useNativeDriver: true }).start();
     animateExpand(0);
   }, [animateExpand, position]);
   const pan = useMemo(() => PanResponder.create({
@@ -124,15 +125,16 @@ export function LiquidTabs({ tabs, activeId, onTabChange, bottomInset = 0, reduc
   useEffect(() => () => { scrub.current = false; position.stopAnimation(); expand.stopAnimation(); }, [expand, position]);
   if (!tabs.length) return null;
   const nativeGlass = !opaque && Platform.OS === 'ios' && isGlassEffectAPIAvailable() && isLiquidGlassAvailable();
-  const trackMargin = expand.interpolate({ inputRange: [0, 1], outputRange: [6, 10] });
-  const tabHeight = expand.interpolate({ inputRange: [0, 1], outputRange: [60, 78] });
+  // Only the lens grows (transform, so layout and the bar stay put); 1.1 / 1.12 stays inside the 6px track margin.
+  const lensScaleX = expand.interpolate({ inputRange: [0, 1], outputRange: [1, 1.1] });
+  const lensScaleY = expand.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] });
   return <View style={[styles.anchor, { bottom: Math.max(0, bottomInset) + 12 }]}>
     <View style={styles.shell}>
       {nativeGlass ? <GlassView pointerEvents="none" style={StyleSheet.absoluteFill} glassEffectStyle="regular" colorScheme="light" />
         : !opaque && Platform.OS === 'ios' ? <BlurView pointerEvents="none" tint="light" intensity={65} style={StyleSheet.absoluteFill} />
         : <View pointerEvents="none" style={[StyleSheet.absoluteFill, styles.opaque]} />}
-      <Animated.View ref={track} {...pan.panHandlers} style={[styles.track, { margin: trackMargin }]} onLayout={event => setWidth(event.nativeEvent.layout.width)}>
-        {index >= 0 && cell > 0 && <Animated.View pointerEvents="none" style={[styles.selection, { width: cell, transform: [{ translateX: position }] }]} />}
+      <View ref={track} {...pan.panHandlers} style={styles.track} onLayout={event => setWidth(event.nativeEvent.layout.width)}>
+        {index >= 0 && cell > 0 && <Animated.View pointerEvents="none" style={[styles.selection, { width: cell, transform: [{ translateX: position }, { scaleX: lensScaleX }, { scaleY: lensScaleY }] }]} />}
         {tabs.map(tab => {
           const selected = tab.id === activeId;
           return <Pressable key={tab.id} accessibilityRole="tab" accessibilityLabel={tab.label}
@@ -141,13 +143,13 @@ export function LiquidTabs({ tabs, activeId, onTabChange, bottomInset = 0, reduc
             onPress={() => { if (!selected) { onTabChange(tab.id); onFeedback?.(); } else endScrub(); /* long hold without a slide ends here */ }}
             onLongPress={selected && !tab.disabled ? beginScrub : undefined} delayLongPress={holdDelay}
             style={({ pressed }) => [styles.tab, pressed && !scrubbing && styles.pressed, tab.disabled && styles.disabled]}>
-            <Animated.View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={[styles.tabInner, { minHeight: tabHeight }]}>
+            <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" style={styles.tabInner}>
               {tab.icon(selected)}
               <Text numberOfLines={1} style={[styles.label, selected && styles.activeLabel]}>{tab.label}</Text>
-            </Animated.View>
+            </View>
           </Pressable>;
         })}
-      </Animated.View>
+      </View>
     </View>
   </View>;
 }
