@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, fanAngles, itemAngle, itemProgress, itemPose, mainRotation, layout, gooMatrix } from './gooeyMath.ts';
+import { clamp, fanAngles, itemAngle, itemProgress, itemPose, mainRotation, layout, gooMatrix, springConfig, SLOW_FACTOR } from './gooeyMath.ts';
 const g = { distance: 100, mainRadius: 30, itemRadius: 24, start: -160, end: -20, stagger: 0.3, originX: 0, originY: 0 };
 test('fan angles stay in the upper half and sort', () => { assert.deepEqual(fanAngles(-20, -160), { start: -160, end: -20 }); assert.deepEqual(fanAngles(40, -400), { start: -180, end: 0 }); });
 test('items spread evenly; one item points to the middle', () => { assert.equal(itemAngle(0, 3, -160, -20), -160); assert.equal(itemAngle(1, 3, -160, -20), -90); assert.equal(itemAngle(2, 3, -160, -20), -20); assert.equal(itemAngle(0, 1, -160, -20), -90); });
@@ -9,3 +9,4 @@ test('overshoot is bounded, below zero is not extra travel', () => { assert.equa
 test('pose: hidden when closed, on the arc when open', () => { const closed = itemPose(0, 1, 3, g); assert.equal(closed.radius, 0); assert.equal(closed.x, 0); const open = itemPose(1, 1, 3, g); assert.ok(Math.abs(open.x) < 1e-9); assert.ok(Math.abs(open.y + 100) < 1e-9); assert.equal(open.radius, 24); });
 test('main rotation and layout', () => { assert.equal(mainRotation(0), 0); assert.equal(mainRotation(1), 45); assert.equal(mainRotation(9), 58.5); const l = layout(100, 30, 24, 20); assert.equal(l.width, 288); assert.equal(l.originX, 144); assert.equal(l.originY, 150); assert.equal(l.height, 200); });
 test('invalid input is finite; goo matrix thresholds alpha', () => { assert.equal(clamp(NaN, 0, 1), 0); assert.ok(Number.isFinite(itemPose(NaN, 0, 0, g).x)); assert.equal(gooMatrix().length, 20); assert.deepEqual(gooMatrix(10, 4).slice(15), [0, 0, 0, 10, -4]); });
+test('slow motion stretches the spring in time and keeps its shape', () => { assert.deepEqual(springConfig(), { stiffness: 170, damping: 14, mass: 1 }); assert.deepEqual(springConfig(false), springConfig()); const s = springConfig(true); assert.equal(SLOW_FACTOR, 4); assert.equal(s.stiffness, 170 / 16); assert.equal(s.damping, 3.5); const ratio = (c) => c.damping / Math.sqrt(c.stiffness * c.mass); assert.ok(Math.abs(ratio(s) - ratio(springConfig())) < 1e-9); assert.deepEqual(springConfig(true, NaN), springConfig()); assert.deepEqual(springConfig(true, 0.5), springConfig()); });
