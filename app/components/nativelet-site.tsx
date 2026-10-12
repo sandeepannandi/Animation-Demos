@@ -344,8 +344,6 @@ export default function NativeletSite({
               </p>
             </motion.div>
             <div className={styles.heroVisual}>
-              <div className={styles.visualGrid} aria-hidden="true" />
-              <div className={styles.orbit} aria-hidden="true" />
               <span className={styles.visualLabel}>
                 LIVE WEB PREVIEWS
               </span>
