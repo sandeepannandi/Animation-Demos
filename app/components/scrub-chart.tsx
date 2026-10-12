@@ -49,12 +49,12 @@ export function ScrubChartPreview() {
         <motion.path d={g.area} fill="url(#nativelet-chart-fill)" clipPath="url(#nativelet-chart-clip)" style={{ opacity: areaOpacity }}/>
         <motion.path ref={line} d={g.line} fill="none" stroke="#57dfb6" strokeWidth={3} strokeLinecap="round" strokeDasharray={length} style={{ strokeDashoffset: offset }}/>
         <motion.g style={{ opacity: entrance }}><motion.line x1={cx} x2={cx} y1={g.top} y2={g.bottom} stroke="#a5cec4"/>
-          {!reduce && <motion.circle key={`pulse-${index}-${replay}`} cx={cx} cy={cy} fill="#57dfb6" initial={{ r: 9, opacity: .28 }} animate={{ r: 19, opacity: 0 }} transition={{ duration: .55, ease: 'easeOut', delay: index === 0 ? .9 : 0 }}/>}<motion.circle cx={cx} cy={cy} r={10} fill="#57dfb633"/><motion.circle cx={cx} cy={cy} r={4.5} fill="#57dfb6"/><motion.circle cx={cx} cy={cy} r={2} fill="#132d2b"/></motion.g>
+          {!reduce && <motion.circle key={`pulse-${index}-${replay}`} cx={cx} cy={cy} fill="#57dfb6" initial={{ r: 9, opacity: .28 }} animate={{ r: 19, opacity: 0 }} transition={{ duration: .55, ease: 'easeOut', delay: clock.get() < .62 ? .9 : 0 }}/>}<motion.circle cx={cx} cy={cy} r={10} fill="#57dfb633"/><motion.circle cx={cx} cy={cy} r={4.5} fill="#57dfb6"/><motion.circle cx={cx} cy={cy} r={2} fill="#132d2b"/></motion.g>
         <text x={18} y={211} fill="#accec3" fontSize={11}>Mon</text><text x={282} y={211} textAnchor="end" fill="#accec3" fontSize={11}>Sun</text>
       </svg>
-      <motion.div className={styles.bubble} style={{ left: bubbleX, opacity: entrance, y: bubbleY }}><motion.span key={`${index}-${reduce}`} initial={{ scale: reduce ? 1 : .94 }} animate={{ scale: 1 }} transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 360, damping: 18 }}>{point.label} · {point.value} pts</motion.span></motion.div>
+      <motion.div className={styles.bubble} style={{ left: bubbleX, opacity: entrance, y: bubbleY }}><motion.span style={{ display: 'inline-block' }} key={`${index}-${reduce}`} initial={{ scale: reduce ? 1 : .94 }} animate={{ scale: 1 }} transition={reduce ? { duration: 0 } : { type: 'spring', stiffness: 360, damping: 18 }}>{point.label} · {point.value} pts</motion.span></motion.div>
     </div>
-    <div className={styles.controls}><button onClick={() => setReplay(v=>v+1)}>Replay</button><button aria-pressed={forced} onClick={() => setForced(v=>!v)}>Motion: {reduce ? 'reduced' : 'system'}</button></div>
+    <div className={styles.controls}><button onClick={() => { setIndex(0); setReplay(v=>v+1); }}>Replay</button><button aria-pressed={forced} onClick={() => setForced(v=>!v)}>Motion: {reduce ? 'reduced' : 'system'}</button></div>
     <p className={styles.note}>Drag, or focus and use the arrow keys.<br/>SVG adapter, not Skia. Source uses Skia + Reanimated.</p>
   </div>;
-}
+        }
