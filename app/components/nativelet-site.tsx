@@ -313,7 +313,6 @@ export default function NativeletSite({
         <header className={styles.header}>
           <a href="#" className={styles.wordmark} aria-label="Nativelet home">
             <span className={styles.mark}>n.</span> nativelet
-            <span className={styles.alpha}>React Native</span>
           </a>
           <nav aria-label="Main navigation">
             <a href="#components">Components</a>
@@ -330,6 +329,9 @@ export default function NativeletSite({
               <span>GitHub</span>
               {stars !== null && <StarCount count={stars} />}
               <ArrowUpRight size={14} />
+            </a>
+            <a href="/sponsor" className={styles.sponsorLink}>
+              Sponsor
             </a>
           </nav>
         </header>
@@ -760,9 +762,7 @@ export default function NativeletSite({
               <a href={`${REPO}/blob/main/LICENSE`}>
                 MIT license <ArrowUpRight size={14} />
               </a>
-              <a href={SPONSOR_URL}>
-                Sponsor <ArrowUpRight size={14} />
-              </a>
+              <a href="/sponsor">Sponsor</a>
               <a href="/terms">Terms of Service</a>
               <a href="/privacy">Privacy Policy</a>
             </motion.nav>
