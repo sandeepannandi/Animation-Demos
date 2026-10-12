@@ -70,4 +70,4 @@ export function RippleRevealPreview() {
     <div className={styles.note}><span>Tap anywhere on the card.</span><button aria-pressed={forcedReduce} onClick={() => setForcedReduce(!forcedReduce)}>Motion: {reduce ? 'reduced' : 'system'}</button></div>
   </div>;
 }
-// End of Ripple Reveal web preview.
+// End of Theme Reveal web preview.
