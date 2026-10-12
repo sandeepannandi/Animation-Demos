@@ -447,7 +447,7 @@ export default function NativeletSite({
                 </h2>
               </div>
               <p>
-                Four React Native components with web previews.
+                React Native components with interactive web previews.
                 <br />
                 Open one to try it and copy its React Native source.
               </p>
@@ -728,7 +728,7 @@ export default function NativeletSite({
                 </span>
                 <span>
                   <strong>Web playground</strong>
-                  <small>Available now · Preview Rail, Morph Capsule</small>
+                  <small>Available now · explore the component gallery</small>
                 </span>
                 <span className={styles.now}>NOW</span>
               </div>
@@ -738,7 +738,7 @@ export default function NativeletSite({
                 </span>
                 <span>
                   <strong>React Native components</strong>
-                  <small>Planned · not available yet</small>
+                  <small>Source available · not yet device-tested</small>
                 </span>
               </div>
               <div>
