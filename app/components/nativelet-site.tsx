@@ -26,13 +26,15 @@ import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule
 import { LiquidTabsPreview } from "./liquid-tabs";
 import { ToastStackPreview } from "./toast-stack";
 import { SwipeRowPreview } from "./swipe-row";
+import { DragToSortPreview } from "./drag-to-sort";
 import { ExpandingCardPreview } from "./expanding-card";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort";
 const META = {
+  sort: { title: "Drag to Sort", number: "07", folder: "drag-to-sort", note: "Real React Native source. Copy DragToSort.tsx and sortLogic.ts together and keep LICENSE. Core RN only. Grab a handle to lift a row, move past a neighbor to open a gap, hold near an edge to scroll, then release to settle. Cancel restores the starting order. Screen reader Move up/down actions and web keyboard arrows are included. Fixed-height, non-virtualized list. The web preview shares reorder and edge-scroll rules, not the native render. Not yet tested on a device.", footer: "Preview: React · Framer Motion. Source: React Native" },
   expand: { title: "Expanding Card", number: "06", folder: "expanding-card", note: "Real React Native source. Copy ExpandingCard.tsx and expandingLogic.ts together and keep the LICENSE. No animation or navigation dependency, only measureInWindow and Animated. Tap a card to grow it into a detail view, then drag down to shrink it back. Pass safe-area insets from your app. The web adapter shares the geometry and gesture rules, not the native render. See README for accessibility and device-test limits.", footer: "Preview: React · Framer Motion. Source: React Native" },
   swipe: { title: "Swipe Row", number: "05", folder: "swipe-row", note: "Real React Native source. Copy SwipeRow.tsx and swipeLogic.ts together and keep the LICENSE. No gesture or animation dependency. Swipe right to pin, left to archive or delete, past the line to commit, then undo. The web adapter shares the gesture rules, not the native render. See README for accessibility and device-test limits.", footer: "Preview: React · Framer Motion. Source: React Native" },
   glass: { title: "Liquid Tabs", number: "04", folder: "liquid-tabs", note: "Real React Native source. Install expo-glass-effect and expo-blur with expo install. Keep LICENSE. iOS native glass needs availability checks; Android uses an opaque fallback. Hold the active tab, then slide to switch. See README for integration and device-test limits.", footer: "Preview: CSS glass study. Source: React Native · Expo" },
@@ -488,6 +490,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniExpand}><span className={gallery.miniExpandBack} /><span className={gallery.miniExpandCard}><small>THE DAILY LIST</small><b>Slow mornings</b></span></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 06</span><strong>Expanding Card</strong><small>Tap to expand into a detail view · drag down to dismiss</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} onClick={(event) => openComponent(event, "sort")} aria-haspopup="dialog" aria-label="Open Drag to Sort web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniSort}><span>01 · Sketch the idea <b>⠿</b></span><span>02 · Pick a direction <b>⠿</b></span><span>03 · Build the prototype <b>⠿</b></span></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 07</span><strong>Drag to Sort</strong><small>Lift, make a gap, scroll the edge · drop to settle</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -546,7 +552,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
