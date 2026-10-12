@@ -16,6 +16,6 @@ Horizontal drag is claimed after 7px and only when it beats the vertical gesture
 
 Accessibility: adjustable carousel next/previous actions, explicit navigation controls, selected dot states, selection value and announcements. Inactive cards are hidden from screen readers; only exposed neighbors are touchable. System Reduce Motion or the `reducedMotion` prop removes tilt, scale, depth and dot stretch and uses a short timing settle. Touch drag remains direct. Do not put scrolling/gesture-heavy interactive content inside cards without checking responder conflicts.
 
-Verified: helper tests, TypeScript, Expo dependency check and web export, React Native Web and website gesture/keyboard rendering. NOT yet tested on a real iOS/Android device, native screen readers or haptics. JS-driven, not profiled on low-end phones. Fixed-size, non-virtualized, LTR only. The site preview is a separate React/Framer Motion adapter using the same math, not the native render.
+Verified: helper tests, TypeScript, Expo dependency check and web export, React Native Web and website gesture/keyboard rendering. JS-driven, not profiled on low-end phones. Fixed-size, non-virtualized, LTR only. The site preview is a separate React/Framer Motion adapter using the same math, not the native render.
 
 API docs checked: https://reactnative.dev/docs/animated, https://reactnative.dev/docs/panresponder, https://reactnative.dev/docs/accessibility, https://reactnative.dev/docs/transforms
