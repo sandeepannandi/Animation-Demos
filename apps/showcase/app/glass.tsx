@@ -16,6 +16,7 @@ export default function GlassScreen() {
   return <View style={[styles.page, { paddingTop: insets.top + 24 }]}>
     <View style={[styles.content, { paddingBottom: 92 + insets.bottom }]}>
       <Link href="/toasts">← Toast Stack</Link>
+      <Link href="/swipe">Next: Swipe Row →</Link>
       <Text style={styles.title}>A little room to wander.</Text>
       <Text style={styles.label}>Selected: {tabs.find(tab => tab.id === activeId)?.label}</Text>
       <View style={styles.art}><View style={styles.hill} /></View>

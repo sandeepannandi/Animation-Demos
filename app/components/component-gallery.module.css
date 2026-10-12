@@ -101,3 +101,8 @@
 .miniGlass > span { flex:1; padding:10px 2px; text-align:center; font-size:23px; color:#315a49; }
 .miniGlass > span:first-child { background:#ffffffb8; border-radius:25px; }
 .miniGlass small { display:block; margin-top:4px; font-size:8px; }
+.miniSwipe { position: relative; width: 260px; max-width: 100%; height: 68px; border-radius: 16px; overflow: hidden; background: #b84a4a; box-shadow: 0 5px 20px #173b2915; }
+.miniSwipeAction { position: absolute; right: 0; top: 0; bottom: 0; width: 84px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+.miniSwipeRow { position: absolute; inset: 0 84px 0 0; transform: translateX(-4px); padding: 14px 16px; background: #fff; display: flex; flex-direction: column; gap: 3px; border-radius: 16px 0 0 16px; }
+.miniSwipeRow b { font-size: 13px; color: #193f30; }
+.miniSwipeRow small { font-size: 11px; color: #61705a; }
