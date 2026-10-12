@@ -21,7 +21,7 @@ const items = [
   },
   {
     title: "Honest previews",
-    body: "The previews here run on the web. The React Native versions are not yet tested on a device, and the page says so.",
+    body: "The previews here run on the web as an SVG, canvas or CSS adapter. They are not the native Skia render, and the page says so.",
   },
 ];
 
