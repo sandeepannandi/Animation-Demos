@@ -17,10 +17,10 @@ import {
   Code2,
   Smartphone,
   Layers,
-  Sparkles,
   Star,
   X,
 } from "lucide-react";
+import { HeroShowcase } from "./hero-showcase";
 import { PreviewRail } from "./preview-rail";
 import { MorphCapsule, CAPSULE_STATES, type CapsuleState } from "./morph-capsule";
 import { LiquidTabsPreview } from "./liquid-tabs";
@@ -176,8 +176,6 @@ export default function NativeletSite({
   const reduce = useReducedMotion();
   const stars = useGithubStars();
   const slide = { type: "spring", stiffness: 300, damping: 30, mass: 0.9 } as const;
-  const [study, setStudy] = useState(0);
-  const [playing, setPlaying] = useState(false);
   const [active, setActive] = useState("focus");
   const [panel, setPanel] = useState<"preview" | "code">("preview");
   const [source, setSource] = useState(0);
@@ -351,144 +349,13 @@ export default function NativeletSite({
               <div className={styles.visualGrid} aria-hidden="true" />
               <div className={styles.orbit} aria-hidden="true" />
               <span className={styles.visualLabel}>
-                INTERACTION STUDY / 001
+                LIVE WEB PREVIEWS
               </span>
-              <motion.div
-                className={styles.floatingNote}
-                animate={!reduce && !paused ? { y: [0, -8, 0] } : { y: 0 }}
-                transition={{ duration: 5, repeat: Infinity }}
-              >
-                <Sparkles size={15} /> A softer kind of software
-              </motion.div>
-              <div className={styles.phone}>
-                <div className={styles.phoneTop}>
-                  <span>9:41</span>
-                  <span className={styles.island} />
-                  <span>•••</span>
-                </div>
-                <div className={styles.phoneContent}>
-                  <div className={styles.phoneTitle}>
-                    <span>
-                      Make room
-                      <br />
-                      <strong>for your day.</strong>
-                    </span>
-                    <span className={styles.avatar}>n.</span>
-                  </div>
-                  <div
-                    className={styles.phoneTabs}
-                    role="group"
-                    aria-label="Choose a design study"
-                  >
-                    {studies.map((s, i) => (
-                      <button
-                        key={s}
-                        aria-pressed={study === i}
-                        onClick={() => setStudy(i)}
-                      >
-                        {study === i && (
-                          <motion.span
-                            layoutId="study-tab"
-                            className={styles.tabPill}
-                            transition={slide}
-                          />
-                        )}
-                        <span>{s}</span>
-                      </button>
-                    ))}
-                  </div>
-                  <AnimatePresence mode="wait" initial={false}>
-                    <motion.div
-                      key={study}
-                      initial={reduce ? false : { opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: reduce ? 0 : -8 }}
-                      transition={{ duration: 0.22 }}
-                    >
-                      <div className={styles.art} aria-hidden="true">
-                        <motion.div
-                          className={styles.petal}
-                          animate={
-                            !reduce && !paused
-                              ? { rotate: [0, 180] }
-                              : { rotate: 0 }
-                          }
-                          transition={{
-                            duration: 25,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        >
-                          <i />
-                          <i />
-                          <i />
-                          <i />
-                        </motion.div>
-                        <span>
-                          {study === 0
-                            ? "Find your quiet."
-                            : study === 1
-                              ? "Stay in the rhythm."
-                              : "Take a fresh turn."}
-                        </span>
-                      </div>
-                      <div className={styles.phoneCard}>
-                        <span className={styles.smallLabel}>
-                          {study === 0
-                            ? "A MOMENT FOR YOU"
-                            : study === 1
-                              ? "ON REPEAT"
-                              : "A CHANGE OF PACE"}
-                        </span>
-                        <h3>
-                          {study === 0
-                            ? "Less noise. More now."
-                            : study === 1
-                              ? "Slow Sunday"
-                              : "A walk, without a plan."}
-                        </h3>
-                        <div className={styles.track}>
-                          <span>
-                            {study === 1
-                              ? "Illustrative player · no audio"
-                              : "Interactive design study"}
-                          </span>
-                          <button
-                            aria-label={
-                              playing
-                                ? "Pause design animation"
-                                : "Play design animation"
-                            }
-                            aria-pressed={playing}
-                            onClick={() => setPlaying(!playing)}
-                          >
-                            {playing ? <Pause size={18} /> : <Play size={18} />}
-                          </button>
-                        </div>
-                        <div className={styles.progress}>
-                          <motion.span
-                            animate={{ width: playing ? "82%" : "32%" }}
-                            transition={{ duration: reduce ? 0 : 1.5 }}
-                          />
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                  <div className={styles.phoneBottom}>
-                    <span>
-                      <span className={styles.smallLabel}>YOUR SPACE</span>
-                      <br />
-                      One thing at a time.
-                    </span>
-                    <ArrowUpRight size={20} />
-                  </div>
-                </div>
-                <div className={styles.homeIndicator} />
-              </div>
+              <HeroShowcase paused={paused} />
               <div className={styles.visualCaption}>
                 <span>
-                  <span className={styles.dot} /> Web design study, not an RN
-                  component
+                  <span className={styles.dot} /> Looping web previews, not the native
+                  Skia render
                 </span>
                 <button
                   onClick={() => setPaused(!paused)}
