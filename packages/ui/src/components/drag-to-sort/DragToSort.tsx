@@ -69,6 +69,7 @@ export function DragToSort<T>({ items, keyExtractor, labelExtractor, renderItem,
     const target = cancel ? d.from : d.to;
     // Keep the lifted row above its neighbors until its settle is complete.
     next.forEach((id, i) => spring(value(id, i), i * latest.current.step, id === d.id ? () => {
+      if (drag.current !== d) return;
       drag.current = null; setActiveId(null); setOrder(next); lift.setValue(0);
       if (!cancel && d.from !== d.to) { const byId = new Map(latest.current.items.map(item => [latest.current.keyExtractor(item), item])); latest.current.onOrderChange(next.map(id => byId.get(id)!)); }
       announce(d.id, target);
