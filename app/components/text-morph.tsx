@@ -7,7 +7,7 @@ import {
   makeConfig,
   pageColor,
 } from "../../packages/ui/src/components/text-morph/textMorphMath";
-import { lighthouseImage } from "../../packages/ui/src/components/text-morph/scene";
+import { PICTURE_PRESETS } from "../../packages/ui/src/components/text-morph/scene";
 import { LIGHTHOUSE_TEXT } from "../../packages/ui/src/components/text-morph/lighthouseText";
 import styles from "./text-morph.module.css";
 
@@ -29,7 +29,17 @@ export function TextMorphPreview() {
   const reducedRef = useRef(reduced);
   reducedRef.current = reduced;
   const cfg = useMemo(() => makeConfig(W), []);
-  const image = useMemo(() => lighthouseImage(192), []);
+  const [selected, setSelected] = useState(0);
+  const preset = PICTURE_PRESETS[selected];
+  const image = useMemo(() => PICTURE_PRESETS[selected].image(192), [selected]);
+  const choose = (index: number) => {
+    if (index === selected) return;
+    // A new picture always starts from the page, including during a drag/flight.
+    Object.assign(s.current, { p: 0, from: 0, to: 0, start: 0, drag: false });
+    setMorphed(false);
+    setData(null);
+    setSelected(index);
+  };
   const [data, setData] = useState<ReturnType<typeof buildMorph> | null>(null);
 
   useEffect(() => {
@@ -153,7 +163,13 @@ export function TextMorphPreview() {
     <div className={styles.wrap}>
       <div className={styles.header}>
         <span className={styles.kicker}>TEXT MORPH</span>
-        <span className={styles.state}>{morphed ? "a lighthouse" : "a page"}</span>
+        <span className={styles.state}>{morphed ? `a ${preset.name.toLowerCase()}` : "a page"}</span>
+      </div>
+      <div className={styles.choices} role="group" aria-label="Choose a picture">
+        {PICTURE_PRESETS.map((picture, index) => (
+          <button key={picture.id} className={styles.choice} aria-pressed={selected === index}
+            onClick={() => choose(index)}>{picture.name}</button>
+        ))}
       </div>
       <canvas
         ref={canvasRef}
@@ -161,7 +177,7 @@ export function TextMorphPreview() {
         height={H}
         className={styles.canvas}
         role="img"
-        aria-label={morphed ? "A lighthouse under a full moon, made of letters" : "A paragraph about a lighthouse keeper"}
+        aria-label={morphed ? preset.label : "A paragraph about a lighthouse keeper"}
       />
       <button className={styles.button} onClick={() => setMorphed((v) => !v)}>
         {morphed ? "Back to the page" : "Turn into a picture"}

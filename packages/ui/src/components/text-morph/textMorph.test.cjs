@@ -61,3 +61,19 @@ test('picture glyphs gather where the picture is bright',()=>{
   // disc area ~0.04, sky corner area 0.06: a bright disc should hold more glyphs.
   assert(moon>sky*2,'moon '+moon+' vs sky corner '+sky);
 });
+
+
+test('three distinct opaque original presets rebuild exact picture targets',()=>{
+  assert.equal(scene.PICTURE_PRESETS.length,3);
+  const pictures=scene.PICTURE_PRESETS.map(p=>p.image(48));
+  for(const picture of pictures){
+    assert.equal(picture.data.length,48*48*4);
+    for(let i=3;i<picture.data.length;i+=4)assert.equal(picture.data[i],255);
+    const next=m.buildMorph(text,picture,cfg,()=>cfg.fontSize*0.55);
+    assert.equal(next.count,d.count);
+    const frame=new Array(next.count*7);m.layoutGlyphs(1,next,[.1,.1,.1],frame);
+    for(let i=0;i<next.count;i++){assert.equal(frame[i*7],next.ex[i]);assert.equal(frame[i*7+1],next.ey[i]);}
+  }
+  assert.notDeepEqual(pictures[0].data,pictures[1].data);
+  assert.notDeepEqual(pictures[1].data,pictures[2].data);
+});
