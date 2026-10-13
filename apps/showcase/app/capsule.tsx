@@ -20,6 +20,14 @@ export default function CapsuleScreen() {
     <Link href="/" style={styles.back}>← Preview Rail</Link>
     <Link href="/toasts">Next: Toast Stack →</Link><Text accessibilityRole="header" style={styles.title}>{'A pill that\nchanges its mind.'}</Text>
     <Text style={styles.subtitle}>Tap to step up. Drag down to expand and up to collapse. Grab it mid-morph.</Text>
+    <View style={styles.options}>
+      {(['idle', 'compact', 'expanded'] as const).map(name => (
+        <Pressable key={name} accessibilityRole="button" accessibilityState={{ selected: state === name }} onPress={() => setState(name)} style={[styles.option, state === name && styles.optionOn]}><Text style={[styles.optionText, state === name && styles.optionTextOn]}>{name}</Text></Pressable>
+      ))}
+      <Pressable accessibilityRole="button" onPress={() => setReduce(reduce === true ? undefined : true)} style={styles.option}>
+        <Text style={styles.optionText}>{reduce === true ? 'Motion: reduced' : 'Motion: system'}</Text>
+      </Pressable>
+    </View>
     <View style={styles.demo}>
       <Text style={styles.platform}>{Platform.OS === 'web' ? 'React Native Web preview' : 'Native demo'}</Text>
       <MorphCapsule state={state} onStateChange={setState} content={content} reducedMotion={reduce}
@@ -27,26 +35,19 @@ export default function CapsuleScreen() {
         onFeedback={() => { if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {}); }} />
       <Text style={styles.note}>State: {state}</Text>
     </View>
-    <View style={styles.options}>
-      {(['idle', 'compact', 'expanded'] as const).map(name => (
-        <Pressable key={name} accessibilityRole="button" onPress={() => setState(name)} style={styles.option}><Text style={styles.optionText}>{name}</Text></Pressable>
-      ))}
-      <Pressable accessibilityRole="button" onPress={() => setReduce(reduce === true ? undefined : true)} style={styles.option}>
-        <Text style={styles.optionText}>{reduce === true ? 'Motion: reduced' : 'Motion: system'}</Text>
-      </Pressable>
-    </View>
     <Text style={styles.note}>Not device-verified: iOS, Android, screen readers and haptics. Optional haptics run only on native.</Text>
   </ScrollView></SafeAreaView>;
 }
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#f6f8f4' }, content: { width: '100%', maxWidth: 820, alignSelf: 'center', padding: 24, paddingTop: 42, gap: 24 },
-  back: { color: '#456345', fontSize: 13 }, title: { fontSize: 44, lineHeight: 48, letterSpacing: -1.8, fontWeight: '700', color: '#193f30' },
-  subtitle: { color: '#4b6053', fontSize: 16, lineHeight: 25 }, demo: { backgroundColor: '#fff', borderRadius: 28, padding: 20, gap: 24, borderWidth: 1, borderColor: '#d5e1d2' },
-  platform: { fontSize: 11, color: '#52654f' }, note: { color: '#4b6053', fontSize: 13, lineHeight: 22 },
+  back: { color: '#456345', fontSize: 13, fontFamily: 'Geist-Regular' }, title: { fontSize: 44, lineHeight: 48, letterSpacing: -1.8, fontFamily: 'Geist-Bold', color: '#193f30' },
+  subtitle: { color: '#4b6053', fontSize: 16, lineHeight: 25, fontFamily: 'Geist-Regular' }, demo: { backgroundColor: '#fff', borderRadius: 28, padding: 20, gap: 24, borderWidth: 1, borderColor: '#d5e1d2' },
+  platform: { fontSize: 11, color: '#52654f', fontFamily: 'Geist-Regular' }, note: { color: '#4b6053', fontSize: 13, lineHeight: 22, fontFamily: 'Geist-Regular' },
   options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, option: { paddingHorizontal: 12, minHeight: 44, borderRadius: 14, backgroundColor: '#e6edde', justifyContent: 'center' },
-  optionText: { fontSize: 12, color: '#31513b', fontWeight: '600' },
+  optionText: { fontSize: 12, color: '#31513b', fontFamily: 'Geist-SemiBold' },
+  optionOn: { backgroundColor: '#12291f' }, optionTextOn: { color: '#fff' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 16 },
   row: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20 },
-  light: { color: '#ffffff', fontSize: 13, fontWeight: '600' }, eyebrow: { color: '#9fc7b0', fontSize: 10, letterSpacing: 1.5, fontWeight: '700' },
-  time: { color: '#ffffff', fontSize: 44, fontWeight: '700', letterSpacing: -1.5 }, hint: { color: '#9fc7b0', fontSize: 12 },
+  light: { color: '#ffffff', fontSize: 13, fontFamily: 'Geist-SemiBold' }, eyebrow: { color: '#9fc7b0', fontSize: 10, letterSpacing: 1.5, fontFamily: 'Geist-Bold' },
+  time: { color: '#ffffff', fontSize: 44, fontFamily: 'Geist-Bold', letterSpacing: -1.5 }, hint: { color: '#9fc7b0', fontSize: 12, fontFamily: 'Geist-Regular' },
 });
