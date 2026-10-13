@@ -2,7 +2,11 @@ name: Android emulator smoke
 on:
   workflow_dispatch:
   push:
+<<<<<<< HEAD
     branches: [ci/android-emulator-smoke, ci/android-core-interactions]
+=======
+    branches: [ci/android-emulator-smoke, "parity/**"]
+>>>>>>> origin/main
 permissions:
   contents: read
 jobs:

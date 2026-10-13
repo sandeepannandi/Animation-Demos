@@ -26,13 +26,25 @@ adb shell input swipe 150 1640 150 2000 900; sleep 1; shot rail-b
 adb shell input swipe 150 2000 150 1700 900; sleep 1; shot rail-c
 report rail-drag rail-a rail-b
 open nativelet-showcase:///sort; shot sort-a
-adb shell input motionevent DOWN 943 615; sleep 0.5; adb shell input motionevent MOVE 943 800; sleep 0.5; shot sort-held
-adb shell input motionevent MOVE 943 1000; sleep 0.5; shot sort-held2
-adb shell input motionevent UP 943 1000; sleep 1.5; shot sort-released
+adb shell input motionevent DOWN 900 824; sleep 0.5; adb shell input motionevent MOVE 900 900; sleep 0.3; adb shell input motionevent MOVE 900 1100; sleep 0.5; shot sort-held
+adb shell input motionevent UP 900 1100; sleep 1.5; shot sort-released
 report sort-motionevent sort-a sort-released
-# Cancel attempts: hold a drag, then tap Cancel reorder with a second injected touch (may not register as a second pointer)
+# Cancel: hold a drag, locate the Cancel reorder button from the accessibility tree, tap it with a second injected touch
 open nativelet-showcase:///sort; shot cancel-a
-adb shell input motionevent DOWN 943 615; sleep 0.5; adb shell input motionevent MOVE 943 800; sleep 0.5; shot cancel-held
-adb shell input tap 540 1497; sleep 1; shot cancel-after-tap
-adb shell input motionevent UP 943 800; sleep 1.5; shot cancel-released
+adb shell input motionevent DOWN 900 824; sleep 0.5; adb shell input motionevent MOVE 900 1000; sleep 0.5; shot cancel-held
+adb shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; adb pull /sdcard/u.xml "$OUT/ui-held.xml" >/dev/null 2>&1
+B=$(python3 - "$OUT/ui-held.xml" <<'PY'
+import re,sys
+x=open(sys.argv[1]).read()
+for m in re.finditer(r'<node[^>]*>',x):
+    n=m.group(0)
+    if 'Cancel reorder' in n:
+        b=re.search(r'bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"',n)
+        if b:
+            a=[int(v) for v in b.groups()]; print((a[0]+a[2])//2,(a[1]+a[3])//2); break
+PY
+)
+echo "cancel button at: ${B:-not found}" | tee -a "$OUT/summary.txt"
+[ -n "$B" ] && adb shell input tap $B; sleep 1; shot cancel-after-tap
+adb shell input motionevent UP 900 1000; sleep 1.5; shot cancel-released
 report sort-cancel-tap cancel-a cancel-released
