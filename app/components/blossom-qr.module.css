@@ -1,0 +1,50 @@
+.wrap {
+  width: min(100%, 320px);
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: #254b37;
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+.motion {
+  border: 1px solid #dce5d6;
+  border-radius: 20px;
+  padding: 8px 12px;
+  font-size: 10px;
+  letter-spacing: 0;
+  color: #315444;
+  background: #f3f6ee;
+  cursor: pointer;
+}
+.stage {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  touch-action: none;
+  cursor: grab;
+  border-radius: 16px;
+  background: #eef3e8;
+  outline-offset: 6px;
+}
+.stage:active {
+  cursor: grabbing;
+}
+.action {
+  align-self: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 22px;
+  background: #14231b;
+  color: #f4f7ef;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
