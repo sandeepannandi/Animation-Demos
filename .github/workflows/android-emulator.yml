@@ -56,7 +56,9 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: false
-          script: bash scripts/android-smoke.sh apk/*.apk
+          script: |
+            bash scripts/android-smoke.sh apk/*.apk
+            bash scripts/android-gestures.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
