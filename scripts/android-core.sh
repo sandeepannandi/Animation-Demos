@@ -4,7 +4,7 @@
 set -u
 OUT=smoke-out/core; mkdir -p "$OUT"
 PKG=$(adb shell pm list packages | grep -i nativelet | sed 's/package://' | head -1 | tr -d '\r')
-open() { adb shell am force-stop "$PKG"; adb logcat -c; adb shell am start -W -a android.intent.action.VIEW -d "nativelet-showcase:///$1" "$PKG" >/dev/null 2>&1; sleep 8; }
+open() { U="nativelet-showcase:///$1"; [ "$1" = index ] && U="nativelet-showcase://"; adb shell am force-stop "$PKG"; adb logcat -c; adb shell am start -W -a android.intent.action.VIEW -d "$U" "$PKG" >/dev/null 2>&1; sleep 8; }
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; }
 tap() { adb shell input tap "$1" "$2"; sleep "${3:-1.2}"; }
 report() { A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
@@ -31,7 +31,7 @@ open toasts; shot toasts-a; tap 540 652 1; shot toasts-b; tap 540 828 1; shot to
 # Orbit QR: Turn into QR
 open orbit; shot orbit-a; tap 540 1622 4; shot orbit-b; report orbit-qr orbit-a orbit-b
 # Light on Painting: drag the bulb, swipe to the next painting
-open light; shot light-a; adb shell input swipe 626 1055 380 1055 600; sleep 1; shot light-b; adb shell input swipe 900 1500 200 1500 300; sleep 1.5; shot light-c; report light-bulb light-a light-b
+open light; shot light-a; adb shell input swipe 626 1055 380 1055 600; sleep 1; shot light-b; adb shell input swipe 900 1100 200 1100 300; sleep 1.5; shot light-c; report light-bulb light-a light-b
 # Preview Rail: drag along the rail
 open index; shot rail-a; adb shell input swipe 188 1650 188 1950 800; sleep 1; shot rail-b; report rail-drag rail-a rail-b
 # Gooey Menu: open, tap an item, then close
