@@ -38,14 +38,16 @@ import { PageCurlPreview } from "./page-curl";
 import { OrbitQRPreview } from "./orbit-qr";
 import { BlossomQRPreview } from "./blossom-qr";
 import { LightPaintingPreview } from "./light-painting";
+import { TextMorphPreview } from "./text-morph";
 import { PinchGalleryPreview } from "./pinch-gallery";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit" | "blossom" | "light";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit" | "blossom" | "light" | "morph";
 const META = {
   orbit: { title: "Orbit QR", number: "15", folder: "orbit-qr", note: "Original React Native Skia component. Copy OrbitQR.tsx and orbitMath.ts together and keep LICENSE. Pass any QR matrix; the Example uses the MIT-licensed qrcode-generator. Tiles on a sphere rotate under your finger, then a top-down wave lands each one on its module while rotation and perspective unwind to zero. The final frame is a flat code with a quiet zone; tests decode it with jsQR at several sizes. Toggle again to reverse from wherever it is. Not device-tested. Web preview shares the maths and draws with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
+  morph: { title: "Text Morph", number: "18", folder: "text-morph", note: "Original React Native Skia component. Copy TextMorph.tsx and textMorphMath.ts together and keep LICENSE. Give it a paragraph, RGBA pixels and a loaded Skia font. Every non-space character is laid out on a page, then flies on its own curved, staggered path to one point of the picture, sampled by brightness and spread apart so letters do not pile up. Tap toggles, drag scrubs, release settles, and both end frames are exact. Latin text only: one advance per character, no kerning or shaping. The Example draws an original procedural lighthouse and bundles Geist (SIL OFL). Drawn with one drawText per glyph per frame, not profiled, and not tested on a device. Web preview shares the maths and draws with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
   light: { title: "Light on Painting", number: "17", folder: "light-painting", note: "Original React Native Skia component. Copy LightPainting.tsx, lightMath.ts and paintings.ts together and keep LICENSE. A bulb hangs from a cord in front of a painting in a dark room; drag the bulb and the scene relights from its position, with raised brushwork throwing shadows through a depth map. Swing is a fixed-timestep Verlet rope, so motion is identical on web and native. Swipe across the painting for the next one. Both paintings are original procedural scenes with authored depth - no third-party artwork. Not device-tested, and no frame-rate claim. Web preview shares the maths and shades per pixel with WebGL (Canvas 2D fallback), not Skia.", footer: "Preview: React · WebGL adapter (Canvas 2D fallback). Source: React Native · Skia · Reanimated" },
   blossom: { title: "Blossom QR", number: "16", folder: "blossom-qr", note: "Original React Native Skia component. Copy BlossomQR.tsx and blossomMath.ts together and keep LICENSE. Pass any QR matrix; the Example uses the MIT-licensed qrcode-generator. Every module is a column in an isometric scene: a blossom canopy on a trunk, with the code's dark modules as grass around it. The camera tilts to top-down while the columns sink, and the last frame is a flat code with a quiet zone that tests decode with jsQR. Drag turns the tree. Toggle again to reverse from wherever it is. Drawn per frame as one Skia vertex mesh. Not device-tested, and no frame-rate claim. Web preview shares the maths and draws triangles with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
   curl: { title: "Page Curl", number: "14", folder: "page-curl", note: "Original React Native Skia pager. Copy PageCurl.tsx and curlMath.ts together and keep LICENSE. Prepared page textures wrap around a cylinder with a visible back and moving shadow. Drag either edge, then release to advance or return. Snapshot helper captures RN Views before gestures; frozen content, not live controls. Not device-tested. Web preview shares the shader maths, not the native render.", footer: "Preview: React · WebGL adapter. Source: React Native · Skia · Reanimated" },
@@ -166,6 +168,8 @@ const COMPONENT_NAMES: [string, string][] = [
   ["Page Curl", "A curved fold, a paper back, a turn that follows your finger"],
   ["Orbit QR", "A sphere of tiles that lands as a scannable code"],
   ["Blossom QR", "A voxel blossom tree that flattens into a scannable code"],
+  ["Light on Painting", "A bulb on a cord relights the scene as you drag it"],
+  ["Text Morph", "A paragraph whose letters fly into a picture and back"],
 ];
 
 export default function NativeletSite({
@@ -508,6 +512,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniLight}><i /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 17</span><strong>Light on Painting</strong><small>A bulb on a cord relights the scene as you drag it</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} hidden={!matches("Text Morph", "A paragraph whose letters fly into a picture and back")} onClick={(event) => openComponent(event, "morph")} aria-haspopup="dialog" aria-label="Open Text Morph web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniMorph}>{"lighthouse keeper wiped the glass".split("").map((c, i) => <i key={i}>{c}</i>)}</div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 18</span><strong>Text Morph</strong><small>A paragraph whose letters fly into a picture and back</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -563,7 +571,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
