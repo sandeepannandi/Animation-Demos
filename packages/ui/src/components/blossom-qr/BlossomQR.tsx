@@ -24,7 +24,9 @@ import {
 import {
   CREAM,
   ISO_YAW,
+  SEAM,
   buildScene,
+  flatSquares,
   layoutScene,
   makeConfig,
   type Modules,
@@ -129,7 +131,19 @@ export function BlossomQR({
           );
           paint.setMaskFilter(null);
         }
-        if (count > 0) {
+        if (p >= 1) {
+          const rectCount = flatSquares(scene, cfg, pos, rgb);
+          const side = cfg.cell + SEAM;
+          for (let i = 0; i < rectCount; i += 1) {
+            paint.setColor(
+              Float32Array.of(rgb[i * 3], rgb[i * 3 + 1], rgb[i * 3 + 2], 1),
+            );
+            canvas.drawRect(
+              Skia.XYWHRect(pos[i * 2], pos[i * 2 + 1], side, side),
+              paint,
+            );
+          }
+        } else if (count > 0) {
           const verts = Skia.MakeVertices(
             VertexMode.Triangles,
             points,
