@@ -2,7 +2,7 @@ import { Link } from "expo-router";
 import { Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Example from "../../../packages/ui/src/components/genie-dismiss/Example";
-export default function MorphScreen() {
+export default function GenieScreen() {
   const inset = useSafeAreaInsets();
   return (
     <View
@@ -20,8 +20,8 @@ export default function MorphScreen() {
         <Example />
       </View>
       <Text style={{ padding: 24, color: "#637e6b", fontSize: 12 }}>
-        Text that lifts off the page and becomes a picture. Not tested on a
-        physical device.
+        A textured card that funnels into a target. Native view capture and
+        physical-device performance are unverified.
       </Text>
     </View>
   );

@@ -5,7 +5,7 @@ import { WithSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
 // Skia on web loads CanvasKit (WebAssembly). Keep the version in step with canvaskit-wasm in the lockfile.
 const canvasKit =
   "https://cdn.jsdelivr.net/npm/canvaskit-wasm@0.41.0/bin/full/canvaskit.wasm";
-export default function MorphScreen() {
+export default function GenieScreen() {
   // Static export renders in Node, where CanvasKit must not load. Mount Skia in the browser only.
   const browser = useSyncExternalStore(
     () => () => {},

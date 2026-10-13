@@ -82,7 +82,8 @@ export function GenieDismiss({
     [grid, image],
   );
   const destination = useRef(minimized),
-    pendingNotify = useRef(false);
+    pendingNotify = useRef(false),
+    revision = useRef(0);
   const mounted = useRef(true),
     dragging = useRef(false),
     start = useRef(0);
@@ -107,14 +108,19 @@ export function GenieDismiss({
     );
     return () => {
       mounted.current = false;
+      revision.current++;
       sub.remove();
       cancelAnimation(progress);
     };
   }, [progress]);
-  const commit = (value: boolean) => {
-    if (mounted.current) latest.current.onMinimizedChange(value);
+  const commit = (value: boolean, generation: number) => {
+    if (mounted.current && generation === revision.current) {
+      pendingNotify.current = false;
+      latest.current.onMinimizedChange(value);
+    }
   };
   const settle = (value: boolean, notify = false) => {
+    const generation = ++revision.current;
     destination.current = value;
     pendingNotify.current = notify;
     cancelAnimation(progress);
@@ -132,7 +138,7 @@ export function GenieDismiss({
         easing: Easing.inOut(Easing.cubic),
       },
       (done) => {
-        if (done && notify) runOnJS(commit)(value);
+        if (done && notify) runOnJS(commit)(value, generation);
       },
     );
   };
@@ -146,6 +152,7 @@ export function GenieDismiss({
   // New content/layout cancels stale gestures and uses the current controlled endpoint.
   useEffect(() => {
     dragging.current = false;
+    revision.current++;
     destination.current = minimized;
     pendingNotify.current = false;
     cancelAnimation(progress);
@@ -166,11 +173,13 @@ export function GenieDismiss({
       PanResponder.create({
         onStartShouldSetPanResponder: (e) => e.nativeEvent.touches.length === 1,
         onPanResponderGrant: () => {
+          revision.current++;
           cancelAnimation(progress);
           dragging.current = true;
           start.current = progress.value;
         },
         onPanResponderMove: (_, g) => {
+          if (!dragging.current) return;
           progress.value = scrub(
             start.current,
             g.dy,
@@ -178,6 +187,7 @@ export function GenieDismiss({
           );
         },
         onPanResponderRelease: (_, g) => {
+          if (!dragging.current) return;
           dragging.current = false;
           const next =
             Math.abs(g.dy) < 4
