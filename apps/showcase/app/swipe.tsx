@@ -58,10 +58,10 @@ export default function SwipeScreen() {
 }
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#f6f8f4' }, content: { width: '100%', maxWidth: 560, alignSelf: 'center', padding: 24, paddingTop: 32, gap: 20 },
-  title: { fontSize: 38, lineHeight: 42, letterSpacing: -1.5, fontWeight: '700', color: '#193f30' }, note: { color: '#4b6053', fontSize: 13, lineHeight: 22 },
+  title: { fontSize: 38, lineHeight: 42, letterSpacing: -1.5, fontFamily: 'Geist-Bold', color: '#193f30' }, note: { color: '#4b6053', fontSize: 13, lineHeight: 22, fontFamily: 'Geist-Regular' },
   list: { backgroundColor: '#fff', borderRadius: 22, overflow: 'hidden', borderWidth: 1, borderColor: '#d5e1d2' }, divider: { borderBottomWidth: StyleSheet.hairlineWidth, borderColor: '#d5e1d2' },
   rowBody: { paddingHorizontal: 20, paddingVertical: 14, gap: 3 }, rowHead: { flexDirection: 'row', justifyContent: 'space-between' },
-  from: { fontSize: 15, fontWeight: '700', color: '#193f30' }, time: { fontSize: 12, color: '#6b7c68' }, subject: { fontSize: 14, color: '#2c4a3a' }, preview: { fontSize: 13, color: '#61705a' },
-  glyph: { fontSize: 20, color: '#fff' }, empty: { padding: 28, textAlign: 'center', color: '#61705a' }, log: { fontSize: 12, color: '#486045' },
-  option: { alignSelf: 'flex-start', paddingHorizontal: 14, minHeight: 44, borderRadius: 14, backgroundColor: '#e6edde', justifyContent: 'center' }, optionText: { fontSize: 12, color: '#31513b', fontWeight: '600' },
+  from: { fontSize: 15, fontFamily: 'Geist-Bold', color: '#193f30' }, time: { fontSize: 12, color: '#6b7c68', fontFamily: 'Geist-Regular' }, subject: { fontSize: 14, color: '#2c4a3a', fontFamily: 'Geist-Regular' }, preview: { fontSize: 13, color: '#61705a', fontFamily: 'Geist-Regular' },
+  glyph: { fontSize: 20, color: '#fff', fontFamily: 'Geist-Regular' }, empty: { padding: 28, textAlign: 'center', color: '#61705a' }, log: { fontSize: 12, color: '#486045', fontFamily: 'Geist-Regular' },
+  option: { alignSelf: 'flex-start', paddingHorizontal: 14, minHeight: 44, borderRadius: 14, backgroundColor: '#e6edde', justifyContent: 'center' }, optionText: { fontSize: 12, color: '#31513b', fontFamily: 'Geist-SemiBold' },
 });
