@@ -2,7 +2,8 @@ import Head from 'expo-router/head';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts } from 'expo-font';
-import { fontSources } from '../src/fonts';
+import { fontSources, installDefaultFont } from '../src/fonts';
+installDefaultFont();
 export default function RootLayout() {
   const [loaded, error] = useFonts(fontSources);
   if (!loaded && !error) return null;
