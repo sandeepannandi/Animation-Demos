@@ -112,13 +112,18 @@ function inside(s: Shape, x: number, y: number): boolean {
   return dx * dx + dy * dy <= 1;
 }
 
-/** Rasterize albedo + depth at size x size. Painter's order: later shapes win. */
-export function rasterize(p: Painting, size: number): RasterizedPainting {
-  const albedo = new Uint8ClampedArray(size * size * 4);
-  const depth = new Float32Array(size * size);
-  const k = 100 / size;
-  for (let y = 0; y < size; y++) {
-    for (let x = 0; x < size; x++) {
+/**
+ * Rasterize albedo + depth at size x size. Painter's order: later shapes win.
+ * Supersampled ss x ss per pixel and box-filtered down, so silhouettes are
+ * smooth instead of stair-stepped after upscaling.
+ */
+export function rasterize(p: Painting, size: number, ss = 2): RasterizedPainting {
+  const hi = size * ss;
+  const hiAlbedo = new Float32Array(hi * hi * 3);
+  const hiDepth = new Float32Array(hi * hi);
+  const k = 100 / hi;
+  for (let y = 0; y < hi; y++) {
+    for (let x = 0; x < hi; x++) {
       const sx = (x + 0.5) * k;
       const sy = (y + 0.5) * k;
       let c = p.wall.color;
@@ -129,12 +134,34 @@ export function rasterize(p: Painting, size: number): RasterizedPainting {
           d = s.depth;
         }
       }
-      const i = y * size + x;
-      albedo[i * 4] = c[0];
-      albedo[i * 4 + 1] = c[1];
-      albedo[i * 4 + 2] = c[2];
-      albedo[i * 4 + 3] = 255;
-      depth[i] = d;
+      const i = y * hi + x;
+      hiAlbedo[i * 3] = c[0];
+      hiAlbedo[i * 3 + 1] = c[1];
+      hiAlbedo[i * 3 + 2] = c[2];
+      hiDepth[i] = d;
+    }
+  }
+  const albedo = new Uint8ClampedArray(size * size * 4);
+  const depth = new Float32Array(size * size);
+  const n = ss * ss;
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      let r = 0, g = 0, b = 0, d = 0;
+      for (let dy = 0; dy < ss; dy++) {
+        for (let dx = 0; dx < ss; dx++) {
+          const i = (y * ss + dy) * hi + (x * ss + dx);
+          r += hiAlbedo[i * 3];
+          g += hiAlbedo[i * 3 + 1];
+          b += hiAlbedo[i * 3 + 2];
+          d += hiDepth[i];
+        }
+      }
+      const o = y * size + x;
+      albedo[o * 4] = r / n;
+      albedo[o * 4 + 1] = g / n;
+      albedo[o * 4 + 2] = b / n;
+      albedo[o * 4 + 3] = 255;
+      depth[o] = d / n;
     }
   }
   return { name: p.name, size, albedo, depth };

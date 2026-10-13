@@ -20,10 +20,16 @@ procedural scenes with hand-authored depth maps - no third-party artwork.
 
 ## Notes
 
-Shading runs on the JS thread into a 160px buffer at ~30fps and is upscaled
-by Skia with linear sampling. That keeps one tested maths implementation
-across web and native instead of an unverified shader port. Not device-tested;
-no frame-rate claim. Reduced-motion users get a static bulb with the scene
+Shading runs in a SkSL runtime shader (`shaders.ts`): albedo and depth are
+uploaded once per painting as 256px textures, then every frame each pixel is
+lit on the GPU - lambert from the depth-gradient normal, distance falloff,
+and a 3-tap penumbra of occlusion marches. The same lighting model is
+implemented by `shadeBuffer()` in `lightMath.ts`, which the Node tests pin
+and which serves as the CPU fallback when a runtime effect cannot compile
+(160px buffer at ~30fps, upscaled by Skia). The web adapter shades with
+WebGL using the same model and falls back to Canvas 2D the same way.
+Verified through the Expo web CanvasKit build; not device-tested, no
+frame-rate claim. Reduced-motion users get a static bulb with the scene
 still lit from it.
 
 MIT licensed - see LICENSE.

@@ -147,6 +147,8 @@ export interface ShadeParams {
   bulbZ: number; // bulb height above the painting plane, in depth units
   intensity: number;
   ambient: number;
+  /** Light kept in full shadow, 0..1. Default 0.14. */
+  shadowFloor?: number;
   out: Uint8ClampedArray; // RGBA, written
 }
 
@@ -184,6 +186,31 @@ export function inShadow(
   return false;
 }
 
+/**
+ * Penumbra: average several marches started at small offsets perpendicular
+ * to the light direction. Returns 0 (fully shadowed) .. 1 (fully lit).
+ */
+export function shadowFactor(
+  depth: Float32Array,
+  size: number,
+  px: number,
+  py: number,
+  pd: number,
+  bulb: Vec,
+  bulbZ: number,
+): number {
+  const dx = bulb.x - px;
+  const dy = bulb.y - py;
+  const dist = Math.hypot(dx, dy) || 1;
+  const ox = (-dy / dist) * 0.9;
+  const oy = (dx / dist) * 0.9;
+  let lit = 0;
+  for (const [oxx, oyy] of [[0, 0], [ox, oy], [-ox, -oy]] as const) {
+    if (!inShadow(depth, size, px + oxx, py + oyy, pd, bulb, bulbZ)) lit++;
+  }
+  return lit / 3;
+}
+
 /** Relight the whole painting from one bulb position. */
 export function shadeBuffer(p: ShadeParams): void {
   const { size, albedo, depth, bulb, bulbZ, intensity, ambient, out } = p;
@@ -208,7 +235,8 @@ export function shadeBuffer(p: ShadeParams): void {
       const ll = Math.hypot(lx, ly, lz);
       const lambert = Math.max(0, (nx * lx + ny * ly + nnz * lz) / ll);
       const falloff = 1 / (1 + (ll * ll) / (size * size * 0.9));
-      const shadow = inShadow(depth, size, x, y, d, bulb, bulbZ) ? 0.12 : 1;
+      const floor = p.shadowFloor ?? 0.14;
+      const shadow = floor + (1 - floor) * shadowFactor(depth, size, x, y, d, bulb, bulbZ);
       const light = ambient + intensity * lambert * falloff * shadow;
 
       const a = i * 4;
