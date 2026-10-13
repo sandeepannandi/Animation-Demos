@@ -48,3 +48,13 @@ echo "cancel button at: ${B:-not found}" | tee -a "$OUT/summary.txt"
 [ -n "$B" ] && adb shell input tap $B; sleep 1; shot cancel-after-tap
 adb shell input motionevent UP 900 1000; sleep 1.5; shot cancel-released
 report sort-cancel-tap cancel-a cancel-released
+# Drag to Sort commit check on the current layout (handle x=900, rows at y 824 / 1036): three input styles, final order read after a long settle
+open nativelet-showcase:///sort; shot sortx-a
+adb shell input draganddrop 900 824 900 1100 1500; sleep 4; shot sortx-draganddrop
+open nativelet-showcase:///sort
+adb shell input motionevent DOWN 900 824; sleep 0.6; adb shell input motionevent MOVE 900 900; sleep 0.4; adb shell input motionevent MOVE 900 1100; sleep 1.0; adb shell input motionevent UP 900 1100; sleep 4; shot sortx-motion-noshot
+open nativelet-showcase:///sort
+adb shell input swipe 900 824 900 1100 1200; sleep 4; shot sortx-swipe
+report sortx-draganddrop sortx-a sortx-draganddrop
+report sortx-motion-noshot sortx-a sortx-motion-noshot
+report sortx-swipe sortx-a sortx-swipe
