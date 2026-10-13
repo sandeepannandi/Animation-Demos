@@ -108,3 +108,62 @@ export function lighthouseImage(size = 192): PixelImage {
   }
   return { width: size, height: size, data };
 }
+
+// Two more original, bold scenes. No downloaded photos or third-party artwork.
+function rocket(u: number, v: number): RGB {
+  let c = mix(hex(0x080e2d), hex(0x252b53), v);
+  if (star(u, v)) c = hex(0xdce8ff);
+  // Exhaust plume, fins, body, pointed nose and a blue porthole.
+  if (v > 0.66 && v < 0.95 && Math.abs(u - 0.5) < (0.95 - v) * 0.38)
+    c = Math.abs(u - 0.5) < (0.94 - v) * 0.16 ? hex(0xffec92) : hex(0xf48142);
+  if (v > 0.48 && v < 0.76 && Math.abs(u - 0.5) < 0.1 + (v - 0.48) * 0.5)
+    c = hex(0xf0645d);
+  if (v >= 0.27 && v < 0.69 && Math.abs(u - 0.5) < 0.105)
+    c = u < 0.52 ? hex(0xf5ecdc) : hex(0xb9c5db);
+  if (v > 0.09 && v < 0.27 && Math.abs(u - 0.5) < (v - 0.09) * 0.59)
+    c = hex(0xf0645d);
+  const d = Math.hypot(u - 0.5, v - 0.39);
+  if (d < 0.068) c = hex(0xf4bf65);
+  if (d < 0.047) c = hex(0x4eaacb);
+  return c;
+}
+function mountains(u: number, v: number): RGB {
+  let c = mix(hex(0x321c44), hex(0xa44e59), v);
+  if (Math.hypot(u - 0.77, v - 0.22) < 0.12) c = hex(0xffd485);
+  // Back range, a tall snowy peak, a smaller foreground peak and lake.
+  const back = 0.38 + Math.abs(u - 0.73) * 0.58;
+  if (v > back) c = hex(0x715887);
+  const ridge = 0.22 + Math.abs(u - 0.35) * 1.1;
+  if (v > ridge) {
+    c = u < 0.35 ? hex(0x669caf) : hex(0x365b81);
+    if (v < 0.4 && v < ridge + 0.09 + 0.018 * Math.sin(u * 65)) c = hex(0xf1eee0);
+  }
+  const front = 0.46 + Math.abs(u - 0.72) * 0.85;
+  if (v > front) c = u < 0.72 ? hex(0x75a5a1) : hex(0x477d84);
+  if (v > 0.78) {
+    c = mix(hex(0x559aaa), hex(0x153d60), (v - 0.78) / 0.22);
+    if (Math.sin(v * 145 + Math.sin(u * 18)) > 0.85) c = hex(0x8ec5c9);
+  }
+  return c;
+}
+function renderScene(samplePixel: (u: number, v: number) => RGB, size: number): PixelImage {
+  const data = new Uint8ClampedArray(size * size * 4);
+  for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+    const o = (y * size + x) * 4;
+    const sum = [0, 0, 0];
+    for (let sy = 0; sy < 2; sy++) for (let sx = 0; sx < 2; sx++) {
+      const c = samplePixel((x + (sx + 0.5) / 2) / size, (y + (sy + 0.5) / 2) / size);
+      for (let k = 0; k < 3; k++) sum[k] += c[k];
+    }
+    for (let k = 0; k < 3; k++) data[o + k] = sum[k] / 4;
+    data[o + 3] = 255;
+  }
+  return { width: size, height: size, data };
+}
+export const rocketImage = (size = 192): PixelImage => renderScene(rocket, size);
+export const mountainsImage = (size = 192): PixelImage => renderScene(mountains, size);
+export const PICTURE_PRESETS = [
+  { id: 'lighthouse', name: 'Lighthouse', label: 'A lighthouse, moon, beam and sea made of letters', image: lighthouseImage },
+  { id: 'rocket', name: 'Rocket', label: 'A rocket with a blue porthole and fiery exhaust made of letters', image: rocketImage },
+  { id: 'mountains', name: 'Mountains', label: 'Snowy mountains, a sunset and lake made of letters', image: mountainsImage },
+] as const;

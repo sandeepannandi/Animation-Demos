@@ -21,8 +21,10 @@ curved path with their own delay and spin, and land with no rotation. Both end
 frames are exact. Tap toggles; drag sideways scrubs and release settles to the
 nearer end. Reduced motion shortens the flight to a quick fade.
 
-`scene.ts` draws an original procedural lighthouse so the Example needs no image
-file. Any RGBA pixels work, for example from a Skia image's `readPixels()`.
+`scene.ts` draws three original procedural pictures: Lighthouse, Rocket and
+Mountains. The Example and website offer these three choices; changing a choice
+returns to the page before the next flight. No upload or photo decoder is included.
+The Example needs no image file. Any RGBA pixels work, for example from a Skia image's `readPixels()`.
 
 Limits, stated plainly:
 
