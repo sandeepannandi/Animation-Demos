@@ -38,7 +38,7 @@ open pinch; shot pinch-a; adb shell input tap 985 475; sleep 1.5; shot pinch-b
 report pinch-chip5 pinch-a pinch-b
 # Blossom: tap URL field, type a URL, press the button
 open blossom; shot blossom-a
-adb shell input tap 540 1520; sleep 1; adb shell input keyevent KEYCODE_MOVE_END; for i in $(seq 1 40); do adb shell input keyevent KEYCODE_DEL; done; adb shell input text 'https://example.com'; sleep 1; shot blossom-b
+adb shell input tap 540 1580; sleep 2; shot blossom-k; adb shell input keyevent KEYCODE_MOVE_END; for i in $(seq 1 40); do adb shell input keyevent KEYCODE_DEL; done; adb shell input text 'https://example.com'; sleep 1; shot blossom-b
 adb shell input keyevent KEYCODE_BACK; sleep 1; shot blossom-b2
 adb shell input tap 540 1680; sleep 4; shot blossom-c
 report blossom-edit blossom-a blossom-c
