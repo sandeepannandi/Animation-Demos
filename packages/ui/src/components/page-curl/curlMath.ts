@@ -1,21 +1,44 @@
 export const clamp = (v: number, lo: number, hi: number) => {
-  'worklet'; return Math.min(hi, Math.max(lo, v));
+  "worklet";
+  return Math.min(hi, Math.max(lo, v));
 };
-export function curlGeometry(progress: number, tilt: number, originY: number, width: number) {
-  'worklet';
+export function curlGeometry(
+  progress: number,
+  tilt: number,
+  originY: number,
+  width: number,
+) {
+  "worklet";
   const radius = width * 0.115;
-  const t = clamp(tilt, -0.55, 0.55), k = Math.sqrt(1 + t * t);
-  return { axis: [width + Math.PI * radius / 2 - clamp(progress, 0, 1) * (width + Math.PI * radius + radius), originY], normal: [1 / k, t / k], radius };
+  const t = clamp(tilt, -0.55, 0.55),
+    k = Math.sqrt(1 + t * t);
+  return {
+    axis: [
+      width +
+        (Math.PI * radius) / 2 -
+        clamp(progress, 0, 1) * (width + Math.PI * radius + radius),
+      originY,
+    ],
+    normal: [1 / k, t / k],
+    radius,
+  };
 }
 export function dragProgress(dx: number, width: number, direction: number) {
-  'worklet'; return clamp(-dx * direction / (width * 1.15), 0, 1);
+  "worklet";
+  return clamp((-dx * direction) / (width * 1.15), 0, 1);
 }
-export function shouldTurn(progress: number, velocityX: number, direction: number) {
-  'worklet'; const v = -velocityX * direction;
+export function shouldTurn(
+  progress: number,
+  velocityX: number,
+  direction: number,
+) {
+  "worklet";
+  const v = -velocityX * direction;
   return v > 0.45 || (v > -0.45 && progress > 0.38);
 }
 export function targetPage(index: number, direction: number, count: number) {
-  'worklet'; return clamp(index + direction, 0, Math.max(0, count - 1));
+  "worklet";
+  return clamp(index + direction, 0, Math.max(0, count - 1));
 }
 // Original inverse projection of a sheet wrapped around a cylinder.
 // Distance from the fold axis projects to r*sin(theta). Two inverse angles
@@ -69,6 +92,6 @@ float2 sourcePoint(float2 p) { return float2(direction < 0.0 ? size.x-p.x : p.x,
 float4 sampleFront(float2 p) { return float4(frontPage.eval(sourcePoint(p))); }
 float4 sampleUnder(float2 p) { return float4(underPage.eval(sourcePoint(p))); }
 float4 sampleBack(float2 p) { return float4(backPage.eval(sourcePoint(p))); }
-${CURL_BODY.replace(/vec2/g, 'float2').replace(/vec3/g, 'float3').replace(/vec4/g, 'float4')}
+${CURL_BODY.replace(/vec2/g, "float2").replace(/vec3/g, "float3").replace(/vec4/g, "float4")}
 half4 main(float2 p) { return half4(renderCurl(sourcePoint(p))); }
 `;
