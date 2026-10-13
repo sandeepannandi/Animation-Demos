@@ -34,13 +34,15 @@ import { ScrubChartPreview } from "./scrub-chart";
 import { GlassLensPreview } from "./glass-lens";
 import { DragToSortPreview } from "./drag-to-sort";
 import { ExpandingCardPreview } from "./expanding-card";
+import { PinchGalleryPreview } from "./pinch-gallery";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch";
 const META = {
   chart: { title: "Scrub Chart", number: "12", folder: "scrub-chart", note: "Original React Native source. Copy ScrubChart.tsx and chartMath.ts together and keep LICENSE. Real Skia paths, gradient fill and draw-in, driven by Reanimated. Drag to explore readings, or use arrow keys and screen reader actions. Reduce Motion removes draw-in and spring. Sample data, equal-spaced categories, fitted vertical domain (not zero baseline). The web preview is a separate SVG adapter, not Skia.", footer: "Preview: React · SVG adapter. Source: React Native · Skia · Reanimated" },
+  pinch: { title: "Pinch Gallery", number: "13", folder: "pinch-gallery", note: "Original React Native source. Copy PinchGallery.tsx and pinchLogic.ts together and keep LICENSE. Core RN only. Pinch with two fingers to change between 2, 3 and 5 columns while the photo under your fingers stays put. Hold a tile, then drag across others to select a range, with auto-scroll near the edges and spring-in checkmarks. Fixed-height, non-virtualized grid. The web preview shares the layout, anchoring and selection rules and adds trackpad pinch, not the native render.", footer: "Preview: React · DOM adapter. Source: React Native" },
   gooey: { title: "Gooey Menu", number: "09", folder: "gooey-menu", note: "Real React Native source. Copy GooeyMenu.tsx and gooeyMath.ts together and keep LICENSE. Needs @shopify/react-native-skia, react-native-reanimated and react-native-worklets. Tap the plus and the actions pull out of it like drops of liquid, then merge back in. Slow motion plays the spring about four times slower so you can watch the goo form. Reduce Motion swaps the spring for a short timing. The web preview shares the geometry and uses an SVG blur and colour matrix instead of Skia, so it is not the native render.", footer: "Preview: React · Framer Motion · SVG filter. Source: React Native · Skia" },
   carousel: { title: "Stacked Carousel", number: "08", folder: "stacked-carousel", note: "Real React Native source. Copy StackedCarousel.tsx and carouselLogic.ts together and keep LICENSE. Core RN only. Drag with velocity snap, tap a side card, or use next/previous actions and keyboard arrows. Finite, short collections, no autoplay. The web preview shares the math, not the native render.", footer: "Preview: React · Framer Motion. Source: React Native" },
   lens: { title: "Glass Lens", number: "11", folder: "glass-lens", note: "Real React Native source. Copy GlassLens.tsx and lensMath.ts together and keep LICENSE. Needs @shopify/react-native-skia, react-native-reanimated and react-native-worklets. Drag the lens and it trails your finger on a spring, stretches the way it moves and bends the scene under it, with a colour fringe and a lit rim, all in one Skia runtime shader. Arrow keys and screen reader actions nudge it. Reduce Motion removes the lag, stretch and fringe. The web preview runs the same maths on a 2D canvas instead of Skia, so it is not the native render.", footer: "Preview: React · Canvas 2D. Source: React Native · Skia" },
@@ -152,6 +154,7 @@ const COMPONENT_NAMES: [string, string][] = [
   ["Theme Reveal", "A theme switch that spreads from your tap"],
   ["Glass Lens", "A lens that trails your finger"],
   ["Scrub Chart", "A smooth trend, a reading under your finger"],
+  ["Pinch Gallery", "Pinch to change density · hold and drag to select"],
 ];
 
 export default function NativeletSite({
@@ -474,6 +477,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><svg width="240" height="150" viewBox="0 0 240 150"><rect width="240" height="150" rx="20" fill="#132d2b"/><path d="M 20 115 C 40 115 40 84 62 84 S 80 100 97 100 S 117 49 139 49 S 155 65 171 65 S 199 27 220 27 L 220 132 L 20 132 Z" fill="#57dfb622"/><path d="M 20 115 C 40 115 40 84 62 84 S 80 100 97 100 S 117 49 139 49 S 155 65 171 65 S 199 27 220 27" fill="none" stroke="#57dfb6" strokeWidth="3"/><line x1="139" x2="139" y1="22" y2="132" stroke="#accec3"/><circle cx="139" cy="49" r="5" fill="#57dfb6"/></svg></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 12</span><strong>Scrub Chart</strong><small>A smooth trend, a reading under your finger</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} hidden={!matches("Pinch Gallery", "Pinch to change density · hold and drag to select")} onClick={(event) => openComponent(event, "pinch")} aria-haspopup="dialog" aria-label="Open Pinch Gallery web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniPinch}><i /><i /><i /><i /><i /><i /><i /><i /><i /></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 13</span><strong>Pinch Gallery</strong><small>Pinch to change density · hold and drag to select</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -529,7 +536,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (

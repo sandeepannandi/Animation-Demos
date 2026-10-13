@@ -4,7 +4,7 @@ const REPO = "https://github.com/sandeepannandi/Nativelet";
 
 const items = [
   {
-    title: "12 interaction components",
+    title: "13 interaction components",
     body: "Each one is a small, focused piece: a chart you scrub, a menu that goes gooey, a lens that follows your finger.",
   },
   {

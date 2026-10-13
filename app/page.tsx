@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  pinch: { dir: "packages/ui/src/components/pinch-gallery", files: ["PinchGallery.tsx", "pinchLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
   chart: { dir: "packages/ui/src/components/scrub-chart", files: ["ScrubChart.tsx", "chartMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   lens: { dir: "packages/ui/src/components/glass-lens", files: ["GlassLens.tsx", "lensMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   ripple: { dir: "packages/ui/src/components/ripple-reveal", files: ["RippleReveal.tsx", "rippleMath.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -32,6 +33,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    pinch: read(components.pinch.dir, components.pinch.files),
     chart: read(components.chart.dir, components.chart.files),
     lens: read(components.lens.dir, components.lens.files),
     ripple: read(components.ripple.dir, components.ripple.files),

@@ -202,3 +202,8 @@
   font: inherit;
   cursor: pointer;
 }
+.miniPinch { width: 150px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; transform: scale(1.04); }
+.miniPinch i { aspect-ratio: 1; border-radius: 4px; background: #8dc2a6; }
+.miniPinch i:nth-child(2n) { background: #6fa98c; }
+.miniPinch i:nth-child(3n) { background: #b7d8c2; }
+.miniPinch i:nth-child(5) { transform: scale(.82); border-radius: 8px; box-shadow: 0 0 0 2px #1f9d6b; }
