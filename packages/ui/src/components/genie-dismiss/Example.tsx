@@ -77,7 +77,7 @@ export default function Example() {
         onPress={() => setMinimized((v) => !v)}
         style={{ paddingVertical: 12, paddingHorizontal: 22, backgroundColor: "#315843", borderRadius: 24 }}
       >
-        <Text style={{ color: "#fff", fontSize: 14 }}>
+        <Text style={{ color: "#fff", fontSize: 14, fontFamily: "Geist-Regular" }}>
           {minimized ? "Restore card" : "Minimize card"}
         </Text>
       </Pressable>
@@ -88,7 +88,7 @@ export default function Example() {
           onPress={() => setSlow((v) => !v)}
           style={{ paddingVertical: 9, paddingHorizontal: 13, borderRadius: 24, backgroundColor: "#eeeade", borderWidth: 1, borderColor: "#c7caba" }}
         >
-          <Text style={{ fontSize: 12, color: "#315843" }}>Slow motion: {slow ? "on" : "off"}</Text>
+          <Text style={{ fontSize: 12, color: "#315843", fontFamily: "Geist-Regular" }}>Slow motion: {slow ? "on" : "off"}</Text>
         </Pressable>
         <Pressable
           accessibilityRole="button"
@@ -98,10 +98,10 @@ export default function Example() {
           }}
           style={{ paddingVertical: 9, paddingHorizontal: 13, borderRadius: 24, backgroundColor: "#eeeade", borderWidth: 1, borderColor: "#c7caba" }}
         >
-          <Text style={{ fontSize: 12, color: "#315843" }}>Target: {left ? "left" : "right"}</Text>
+          <Text style={{ fontSize: 12, color: "#315843", fontFamily: "Geist-Regular" }}>Target: {left ? "left" : "right"}</Text>
         </Pressable>
       </View>
-      <Text style={{ fontSize: 12, color: "#63705f" }}>
+      <Text style={{ fontSize: 12, color: "#63705f", fontFamily: "Geist-Regular" }}>
         Drag down to tuck away. Drag up to bring it back.
       </Text>
     </View>

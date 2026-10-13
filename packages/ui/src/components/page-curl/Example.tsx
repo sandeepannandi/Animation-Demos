@@ -78,13 +78,13 @@ export default function Example() {
   return (
     <View style={{ alignItems: "center", gap: 14, paddingVertical: 14 }}>
       <View style={{ width: 320, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ fontSize: 11, letterSpacing: 1.2, color: "#315444" }}>FIELD NOTES</Text>
+        <Text style={{ fontSize: 11, letterSpacing: 1.2, color: "#315444", fontFamily: "Geist-Regular" }}>FIELD NOTES</Text>
         <Pressable
           accessibilityRole="button"
           onPress={() => setReduce((v) => !v)}
           style={{ paddingVertical: 8, paddingHorizontal: 12, backgroundColor: "#f1f5eb", borderRadius: 20, borderWidth: 1, borderColor: "#d9e0d2" }}
         >
-          <Text style={{ fontSize: 11, color: "#315444" }}>Motion: {reduce ? "reduced" : "system"}</Text>
+          <Text style={{ fontSize: 11, color: "#315444", fontFamily: "Geist-Regular" }}>Motion: {reduce ? "reduced" : "system"}</Text>
         </Pressable>
       </View>
       <PageCurl
@@ -105,7 +105,7 @@ export default function Example() {
         >
           <Text style={{ color: "#214b3b" }}>←</Text>
         </Pressable>
-        <Text style={{ fontSize: 13, color: "#214b3b" }}>
+        <Text style={{ fontSize: 13, color: "#214b3b", fontFamily: "Geist-Medium" }}>
           {String(index + 1).padStart(2, "0")}
           <Text style={{ color: "#8a9c8a" }}> / 03</Text>
         </Text>
