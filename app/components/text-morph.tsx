@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
+  SLOW_FACTOR,
   buildMorph,
   layoutGlyphs,
   makeConfig,
@@ -23,6 +24,9 @@ export function TextMorphPreview() {
   const reduced = Boolean(useReducedMotion());
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [morphed, setMorphed] = useState(false);
+  const [slow, setSlow] = useState(false);
+  const slowRef = useRef(slow);
+  slowRef.current = slow;
   const s = useRef({ p: 0, from: 0, to: 0, start: 0, drag: false, startX: 0, startP: 0, moved: false, lastX: 0, lastT: 0, vx: 0 });
   const morphedRef = useRef(morphed);
   morphedRef.current = morphed;
@@ -67,6 +71,15 @@ export function TextMorphPreview() {
 
   useEffect(() => { settle(morphed ? 1 : 0); }, [morphed, reduced]);
 
+  // Toggling slow motion mid-flight keeps the current position and re-times the rest.
+  useEffect(() => {
+    const st = s.current;
+    if (!st.drag && st.p !== st.to) {
+      st.from = st.p;
+      st.start = performance.now();
+    }
+  }, [slow]);
+
   useEffect(() => {
     if (!data) return;
     const canvas = canvasRef.current;
@@ -78,7 +91,7 @@ export function TextMorphPreview() {
     const draw = (now: number) => {
       const st = s.current;
       if (!st.drag && st.p !== st.to) {
-        const dur = reducedRef.current ? 200 : DURATION;
+        const dur = reducedRef.current ? 200 : DURATION * (slowRef.current ? SLOW_FACTOR : 1);
         const t = Math.min(1, (now - st.start) / dur);
         st.p = st.from + (st.to - st.from) * ease(t);
         if (t >= 1) st.p = st.to;
@@ -181,6 +194,9 @@ export function TextMorphPreview() {
       />
       <button className={styles.button} onClick={() => setMorphed((v) => !v)}>
         {morphed ? "Back to the page" : "Turn into a picture"}
+      </button>
+      <button className={styles.motion} aria-pressed={slow} onClick={() => setSlow((v) => !v)}>
+        Slow motion: {slow ? "on" : "off"}
       </button>
       <p className={styles.hint}>Tap the page, or drag sideways to scrub.</p>
     </div>

@@ -8,6 +8,7 @@ import { LIGHTHOUSE_TEXT } from "./lighthouseText";
 export default function Example() {
   const [morphed, setMorphed] = useState(false);
   const [selected, setSelected] = useState(0);
+  const [slow, setSlow] = useState(false);
   const image = useMemo(() => PICTURE_PRESETS[selected].image(192), [selected]);
   // Any .ttf works. This one is Geist (SIL OFL), kept next to the component.
   const font = useFont(require("./fonts/Geist-Regular.ttf"), 12);
@@ -31,6 +32,7 @@ export default function Example() {
         font={font}
         morphed={morphed}
         onMorphedChange={setMorphed}
+        slowMotion={slow}
         label={PICTURE_PRESETS[selected].label}
       />
       <Pressable
@@ -46,6 +48,9 @@ export default function Example() {
         <Text style={{ color: "#f6f3ec", fontWeight: "600" }}>
           {morphed ? "Back to the page" : "Turn into a picture"}
         </Text>
+      </Pressable>
+      <Pressable accessibilityRole="switch" accessibilityState={{ checked: slow }} accessibilityLabel="Slow motion" onPress={() => setSlow(!slow)} style={{ padding: 10, borderRadius: 20, backgroundColor: slow ? "#345441" : "#e8e4db" }}>
+        <Text style={{ color: slow ? "#fff" : "#345441" }}>Slow motion: {slow ? "on" : "off"}</Text>
       </Pressable>
       <Text style={{ color: "#6b665c", fontSize: 12 }}>
         Tap the page, or drag sideways to scrub.

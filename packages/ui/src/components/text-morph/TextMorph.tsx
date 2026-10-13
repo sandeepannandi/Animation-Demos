@@ -20,6 +20,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import {
+  SLOW_FACTOR,
   buildMorph,
   layoutGlyphs,
   makeConfig,
@@ -41,6 +42,8 @@ export type TextMorphProps = {
   /** Called with the end state a tap or a drag release asks for. */
   onMorphedChange?: (morphed: boolean) => void;
   reducedMotion?: boolean;
+  /** Plays the flight about four times slower so you can watch each letter travel. Ignored while Reduce Motion is on. */
+  slowMotion?: boolean;
   /** Read by screen readers once the picture is shown. */
   label?: string;
   style?: ViewStyle;
@@ -56,6 +59,7 @@ export function TextMorph({
   morphed,
   onMorphedChange,
   reducedMotion,
+  slowMotion = false,
   label = "Picture made of letters",
   style,
 }: TextMorphProps) {
@@ -85,12 +89,13 @@ export function TextMorph({
 
   const progress = useSharedValue(morphed ? 1 : 0);
   const dragStart = useRef(0);
-  const live = useRef({ morphed, cb: onMorphedChange, reduced });
-  live.current = { morphed, cb: onMorphedChange, reduced };
+  const live = useRef({ morphed, cb: onMorphedChange, reduced, slow: slowMotion });
+  live.current = { morphed, cb: onMorphedChange, reduced, slow: slowMotion };
 
   const settle = (to: number) => {
+    const { reduced: r, slow } = live.current;
     progress.value = withTiming(to, {
-      duration: reduced ? 200 : 2200,
+      duration: r ? 200 : slow ? 2200 * SLOW_FACTOR : 2200,
       easing: Easing.inOut(Easing.cubic),
     });
   };
@@ -98,7 +103,7 @@ export function TextMorph({
   useEffect(() => {
     settle(morphed ? 1 : 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [morphed, reduced]);
+  }, [morphed, reduced, slowMotion]);
 
   const picture = useDerivedValue(() => {
     const rect = Skia.XYWHRect(0, 0, cfg.width, cfg.height);
