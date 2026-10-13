@@ -15,6 +15,7 @@ export function installDefaultFont() {
   installed = true;
   const React = require('react');
   const rn = require('react-native');
+  if (rn.Platform.OS === 'web') return;
   const Original = rn.Text;
   const pick = (weight: unknown) => {
     const w = String(weight ?? '400');
