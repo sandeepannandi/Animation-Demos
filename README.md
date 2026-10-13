@@ -174,3 +174,7 @@ This project is licensed under the **MIT License** — see the [LICENSE](LICENSE
 <p align="center">
   Made with ❤️ by <a href="https://github.com/sandeepannandi"><strong>Sandeepan Nandi</strong></a>
 </p>
+
+### Genie Dismiss
+
+A reversible textured Skia mesh that funnels a prepared card image into a target. Drag-scrub, velocity settle, slow motion and Reduce Motion crossfade. Native snapshot helper is explicit; frozen during the warp. Hardware capture and performance remain unverified.
