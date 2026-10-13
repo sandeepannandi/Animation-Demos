@@ -12,14 +12,17 @@ const font = useFont(require("./fonts/Geist-Regular.ttf"), 12);
 
 Props: `text`, `image` (RGBA pixels: `{ width, height, data }`), `size` (width in
 points, height is 1.25x), `font` (a loaded Skia font), `morphed`,
-`onMorphedChange`, `reducedMotion`, `label`.
+`onMorphedChange`, `reducedMotion`, `slowMotion`, `label`.
 
 Every non-space character is laid out on a word-wrapped page, then flies to one
 point of the picture. Points are sampled where the picture is bright and opaque,
 then pushed apart so letters do not pile up; letters leave in reading order, on a
 curved path with their own delay and spin, and land with no rotation. Both end
 frames are exact. Tap toggles; drag sideways scrubs and release settles to the
-nearer end. Reduced motion shortens the flight to a quick fade.
+nearer end. Reduced motion shortens the flight to a quick fade. `slowMotion`
+stretches the same flight about four times so you can watch each letter travel;
+Reduce Motion still wins. Dragging always stays 1:1 with your finger. The Example
+and the website include a Slow motion switch.
 
 `scene.ts` draws three original procedural pictures: Lighthouse, Rocket and
 Mountains. The Example and website offer these three choices; changing a choice

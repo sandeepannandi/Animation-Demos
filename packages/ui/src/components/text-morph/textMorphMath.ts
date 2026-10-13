@@ -188,6 +188,9 @@ export type MorphConfig = {
   margin: number;
 };
 
+/** Slow motion stretches the same flight in time by this factor. */
+export const SLOW_FACTOR = 4;
+
 export function makeConfig(width: number): MorphConfig {
   const fontSize = Math.max(8, width * 0.032);
   return {
