@@ -38,14 +38,16 @@ import { PageCurlPreview } from "./page-curl";
 import { OrbitQRPreview } from "./orbit-qr";
 import { BlossomQRPreview } from "./blossom-qr";
 import { LightPaintingPreview } from "./light-painting";
+import { GenieDismissPreview } from "./genie-dismiss";
 import { TextMorphPreview } from "./text-morph";
 import { PinchGalleryPreview } from "./pinch-gallery";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit" | "blossom" | "light" | "morph";
+type ComponentId = "genie" | "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit" | "blossom" | "light" | "morph";
 const META = {
+  genie: { title: "Genie Dismiss", number: "19", folder: "genie-dismiss", note: "Original React Native Skia textured triangle mesh. Copy GenieDismiss.tsx and genieMath.ts together and keep LICENSE. A frozen card narrows from the bottom, bends toward a target, and tucks into it. Drag down/up to scrub, release to settle, or tap to reverse. Includes slow motion and system Reduce Motion crossfade. Pass a prepared SkImage; native snapshot helper must be called explicitly after layout. Frozen content during the warp, not live controls. Native capture and physical-device performance remain unverified. Website uses a WebGL texture adapter sharing the maths, not Skia.", footer: "Preview: React · WebGL adapter. Source: React Native · Skia · Reanimated" },
   orbit: { title: "Orbit QR", number: "15", folder: "orbit-qr", note: "Original React Native Skia component. Copy OrbitQR.tsx and orbitMath.ts together and keep LICENSE. Pass any QR matrix; the Example uses the MIT-licensed qrcode-generator. Tiles on a sphere rotate under your finger, then a top-down wave lands each one on its module while rotation and perspective unwind to zero. The final frame is a flat code with a quiet zone; tests decode it with jsQR at several sizes. Toggle again to reverse from wherever it is. Not device-tested. Web preview shares the maths and draws with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
   morph: { title: "Text Morph", number: "18", folder: "text-morph", note: "Original React Native Skia component. Copy TextMorph.tsx and textMorphMath.ts together and keep LICENSE. Give it a paragraph, RGBA pixels and a loaded Skia font. Every non-space character is laid out on a page, then flies on its own curved, staggered path to one point of the picture, sampled by brightness and spread apart so letters do not pile up. Tap toggles, drag scrubs, release settles, and both end frames are exact. A slow-motion switch stretches the flight four times so you can watch each letter travel. Latin text only: one advance per character, no kerning or shaping. The Example and website offer three original procedural pictures (lighthouse, rocket, mountains) and bundle Geist (SIL OFL). Drawn with one drawText per glyph per frame, not profiled, and not tested on a device. Web preview shares the maths and draws with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
   light: { title: "Light on Painting", number: "17", folder: "light-painting", note: "Original React Native Skia component. Copy LightPainting.tsx, lightMath.ts and paintings.ts together and keep LICENSE. A bulb hangs from a cord in front of a painting in a dark room; drag the bulb and the scene relights from its position, with raised brushwork throwing shadows through a depth map. Swing is a fixed-timestep Verlet rope, so motion is identical on web and native. Swipe across the painting for the next one. Both paintings are original procedural scenes with authored depth - no third-party artwork. Not device-tested, and no frame-rate claim. Web preview shares the maths and shades per pixel with WebGL (Canvas 2D fallback), not Skia.", footer: "Preview: React · WebGL adapter (Canvas 2D fallback). Source: React Native · Skia · Reanimated" },
@@ -152,6 +154,7 @@ const sections = [
 ];
 
 const COMPONENT_NAMES: [string, string][] = [
+  ["Genie Dismiss", "A textured card funnels into a target · drag to reverse"],
   ["Preview Rail", "Vertical and horizontal navigation · switch inside"],
   ["Morph Capsule", "Idle, compact and expanded · tap or drag inside"],
   ["Toast Stack", "Queue, swipe, pause and undo · feedback that feels right"],
@@ -516,6 +519,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniMorph}>{"lighthouse keeper wiped the glass".split("").map((c, i) => <i key={i}>{c}</i>)}</div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 18</span><strong>Text Morph</strong><small>A paragraph whose letters fly into a picture and back</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} hidden={!matches("Genie Dismiss", "A textured card funnels into a target · drag to reverse")} onClick={(event) => openComponent(event, "genie")} aria-haspopup="dialog" aria-label="Open Genie Dismiss web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniGenie}><span>FIELD NOTES</span><strong>A little room<br />to wander.</strong><i /><b /></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 19</span><strong>Genie Dismiss</strong><small>A textured card funnels into a target · drag to reverse</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -571,7 +578,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (

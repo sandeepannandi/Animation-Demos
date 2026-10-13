@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  genie: { dir: "packages/ui/src/components/genie-dismiss", files: ["GenieDismiss.tsx", "genieMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   blossom: { dir: "packages/ui/src/components/blossom-qr", files: ["BlossomQR.tsx", "blossomMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   morph: { dir: "packages/ui/src/components/text-morph", files: ["TextMorph.tsx", "textMorphMath.ts", "scene.ts", "lighthouseText.ts", "Example.tsx", "README.md", "LICENSE"] },
   light: { dir: "packages/ui/src/components/light-painting", files: ["LightPainting.tsx", "lightMath.ts", "paintings.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -38,6 +39,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    genie: read(components.genie.dir, components.genie.files),
     orbit: read(components.orbit.dir, components.orbit.files),
     blossom: read(components.blossom.dir, components.blossom.files),
     morph: read(components.morph.dir, components.morph.files),
