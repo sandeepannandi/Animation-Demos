@@ -11,7 +11,7 @@ report() { A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" |
   CR=no; adb logcat -d | grep -E 'FATAL EXCEPTION|has died|ANR in' | grep -q "$PKG" && CR=yes
   echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"; }
 # Morph Capsule: compact, expanded, idle chips
-open capsule; shot capsule-a; tap 199 1878; shot capsule-compact; tap 511 1878; shot capsule-expanded; tap 119 1878; shot capsule-idle; report capsule-chips capsule-a capsule-expanded
+open capsule; shot capsule-a; tap 300 1032; shot capsule-compact; tap 528 1032; shot capsule-expanded; tap 120 1032; shot capsule-idle; report capsule-chips capsule-a capsule-expanded
 # Expanding Card: tap to open, drag down to leave
 open cards; shot cards-a; tap 540 1276 2; shot cards-open; adb shell input swipe 540 900 540 2000 500; sleep 1.5; shot cards-closed; report cards-open cards-a cards-open
 # Stacked Carousel: Next, Next, Previous
@@ -27,7 +27,7 @@ open ripple; shot ripple-a; tap 540 1185 3; shot ripple-b; report ripple-switch 
 # Swipe Row: swipe right on first row, then Reset
 open swipe; shot swipe-a; adb shell input swipe 100 1130 800 1130 400; sleep 1; shot swipe-b; report swipe-row swipe-a swipe-b
 # Toast Stack: Save with Undo, Queue five, Position: bottom, Clear all
-open toasts; shot toasts-a; tap 540 652 1; shot toasts-b; tap 540 828 1; shot toasts-c; tap 540 1179 1; tap 540 652 1; shot toasts-d; tap 540 1355 1; shot toasts-e; report toasts-show toasts-a toasts-c
+open toasts; shot toasts-a; tap 192 504 1; shot toasts-b; tap 468 504 1; shot toasts-c; tap 220 640 1; tap 192 504 1; shot toasts-d; tap 508 640 1; shot toasts-e; report toasts-show toasts-a toasts-c
 # Orbit QR: Turn into QR
 open orbit; shot orbit-a; tap 540 1622 4; shot orbit-b; report orbit-qr orbit-a orbit-b
 # Light on Painting: drag the bulb, swipe to the next painting
