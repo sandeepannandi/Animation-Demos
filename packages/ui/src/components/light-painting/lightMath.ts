@@ -48,6 +48,12 @@ export interface StepOptions {
   gravity: number;
   /** Constraint solver iterations per substep. */
   iterations: number;
+  /**
+   * Cord stiffness, 0..1. 1 = inelastic (hard max length). Lower values make
+   * a bungee-style cord that stretches past its rest length when dragged and
+   * springs back on release.
+   */
+  elasticity: number;
 }
 
 const DEFAULT_STEP: StepOptions = {
@@ -55,6 +61,7 @@ const DEFAULT_STEP: StepOptions = {
   damping: 0.985,
   gravity: 1400,
   iterations: 40,
+  elasticity: 1,
 };
 
 /** One fixed Verlet substep. `dt` should always be the same fixed value. */
@@ -74,22 +81,6 @@ export function stepRope(rope: Rope, dt: number, opts: Partial<StepOptions> = {}
     n.y += vy + o.gravity * dt2;
   }
 
-  if (o.dragTarget) {
-    const bulb = nodes[nodes.length - 1];
-    // Follow with lag; cap the per-substep pull so a fast drag tugs the rope
-    // instead of teleporting the bulb and overstretching the anchor link.
-    let mx = (o.dragTarget.x - bulb.x) * 0.45;
-    let my = (o.dragTarget.y - bulb.y) * 0.45;
-    const mag = Math.hypot(mx, my);
-    const cap = rest * 0.4;
-    if (mag > cap) {
-      mx *= cap / mag;
-      my *= cap / mag;
-    }
-    bulb.x += mx;
-    bulb.y += my;
-  }
-
   for (let k = 0; k < o.iterations; k++) {
     nodes[0].x = nodes[0].x; // anchor pinned in place below
     for (let i = 0; i < nodes.length - 1; i++) {
@@ -98,7 +89,7 @@ export function stepRope(rope: Rope, dt: number, opts: Partial<StepOptions> = {}
       let dx = b.x - a.x;
       let dy = b.y - a.y;
       const dist = Math.hypot(dx, dy) || 1e-6;
-      const diff = (dist - rest) / dist;
+      const diff = ((dist - rest) / dist) * o.elasticity;
       if (diff <= 0) continue; // a rope only pulls when taut; slack is free fall
       if (i === 0) {
         // anchor is immovable
@@ -111,6 +102,18 @@ export function stepRope(rope: Rope, dt: number, opts: Partial<StepOptions> = {}
         b.y -= dy * diff * 0.5;
       }
     }
+  }
+
+  if (o.dragTarget) {
+    // Pin the bulb to the finger after solving: the cord stretches instead
+    // of capping the drag. prev keeps the pre-pin position so release keeps
+    // the finger's velocity for a natural fling.
+    const bulb = nodes[nodes.length - 1];
+    const pb = prev[prev.length - 1];
+    pb.x = bulb.x;
+    pb.y = bulb.y;
+    bulb.x = o.dragTarget.x;
+    bulb.y = o.dragTarget.y;
   }
 }
 
@@ -204,7 +207,7 @@ export function shadeBuffer(p: ShadeParams): void {
       const lz = (bulbZ - d) / inv; // depth units -> pixels
       const ll = Math.hypot(lx, ly, lz);
       const lambert = Math.max(0, (nx * lx + ny * ly + nnz * lz) / ll);
-      const falloff = 1 / (1 + (ll * ll) / (size * size * 0.55));
+      const falloff = 1 / (1 + (ll * ll) / (size * size * 0.9));
       const shadow = inShadow(depth, size, x, y, d, bulb, bulbZ) ? 0.12 : 1;
       const light = ambient + intensity * lambert * falloff * shadow;
 

@@ -211,3 +211,5 @@
 .miniOrbit{width:132px;height:132px;display:grid;grid-template-columns:repeat(6,1fr);gap:3px;padding:10px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#e3efdc,#9fc3a5 60%,#2f6b4b)}.miniOrbit i{border-radius:3px;background:#143d2b;opacity:.75}.miniOrbit i:nth-child(3n){opacity:.35}.miniOrbit i:nth-child(5n){opacity:1}
 
 .miniBlossom{position:relative;width:132px;height:132px;background:radial-gradient(ellipse at 50% 88%,#d9c6b4 0 22%,transparent 24%)}.miniBlossom i{position:absolute;left:14px;top:14px;width:104px;height:70px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f7b4cb,#e0608c 55%,#a42d5d);box-shadow:inset 0 -10px 0 #c64a7c}.miniBlossom b{position:absolute;left:60px;top:78px;width:12px;height:30px;background:#6e4529}
+.miniLight{position:relative;width:132px;height:132px;border-radius:10px;background:#0d1017;box-shadow:inset 0 0 0 8px #2c2117}
+.miniLight i{position:absolute;left:34px;top:30px;width:64px;height:64px;border-radius:50%;background:radial-gradient(circle,#ffe9b8 0 12%,rgba(255,226,160,.35) 30%,transparent 70%)}
