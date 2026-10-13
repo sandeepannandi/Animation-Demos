@@ -112,7 +112,7 @@ export function makeConfig(
   const cell = canvas / total;
   const radius = canvas * 0.34;
   const tile =
-    Math.sqrt((4 * Math.PI * radius * radius) / Math.max(1, count)) * 0.82;
+    Math.sqrt((4 * Math.PI * radius * radius) / Math.max(1, count)) * 0.62;
   return {
     canvas,
     radius,
@@ -147,8 +147,6 @@ export function tileProgress(progress: number, y: number, spread: number) {
   return clamp01((progress - delay) / (1 - spread));
 }
 
-export const SPHERE_FROM = [0.62, 0.84, 0.7];
-export const SPHERE_TO = [0.1, 0.43, 0.3];
 export const INK = [0.07, 0.14, 0.1];
 
 /**
@@ -210,11 +208,10 @@ export function paperAlpha(progress: number) {
   return clamp01((progress - 0.55) / 0.4);
 }
 
+/** Tiles stay the same ink on the sphere and in the code; depth reads through perspective. */
 export function tileColor(e: number, depth: number, out: number[]) {
   "worklet";
-  const d = clamp01((depth + 1) / 2);
   for (let k = 0; k < 3; k += 1) {
-    const sphere = SPHERE_TO[k] + (SPHERE_FROM[k] - SPHERE_TO[k]) * d;
-    out[k] = sphere + (INK[k] - sphere) * e;
+    out[k] = INK[k];
   }
 }

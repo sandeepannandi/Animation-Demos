@@ -123,16 +123,10 @@ export function OrbitQR({
           const x = out[i * 5];
           const y = out[i * 5 + 1];
           const side = out[i * 5 + 2];
-          const e = out[i * 5 + 3];
-          tileColor(e, out[i * 5 + 4], rgb);
+          tileColor(out[i * 5 + 3], out[i * 5 + 4], rgb);
           paint.setColor(Float32Array.of(rgb[0], rgb[1], rgb[2], 1));
-          const r = side * 0.5 * (1 - e);
-          canvas.drawRRect(
-            Skia.RRectXY(
-              Skia.XYWHRect(x - side / 2, y - side / 2, side, side),
-              r,
-              r,
-            ),
+          canvas.drawRect(
+            Skia.XYWHRect(x - side / 2, y - side / 2, side, side),
             paint,
           );
         }
