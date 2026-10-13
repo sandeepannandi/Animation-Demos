@@ -31,7 +31,7 @@ open glass; shot glass-a; adb shell input tap 419 2200; sleep 1.5; shot glass-b;
 report glass-tap glass-a glass-b
 # Drag to Sort: long-press a handle and drag down
 open sort; shot sort-a
-adb shell input draganddrop 943 615 943 1000 1500; sleep 1.5; shot sort-b
+adb shell input draganddrop 900 824 900 1100 1500; sleep 1.5; shot sort-b
 report sort-drag sort-a sort-b
 # Pinch Gallery: tap a density chip (true two-finger pinch is not possible with adb input)
 open pinch; shot pinch-a; adb shell input tap 985 475; sleep 1.5; shot pinch-b
