@@ -22,11 +22,17 @@ adb shell input swipe 900 1100 200 1100 300; sleep 1.5; shot light-next
 adb shell input swipe 900 1100 200 1100 300; sleep 1.5; shot light-next2
 report light-next light-a light-next2
 open nativelet-showcase://; shot rail-a
-adb shell input swipe 188 1650 188 1950 800; sleep 1; shot rail-b
-adb shell input swipe 188 1950 188 1700 800; sleep 1; shot rail-c
+adb shell input swipe 150 1640 150 2000 900; sleep 1; shot rail-b
+adb shell input swipe 150 2000 150 1700 900; sleep 1; shot rail-c
 report rail-drag rail-a rail-b
 open nativelet-showcase:///sort; shot sort-a
 adb shell input motionevent DOWN 943 615; sleep 0.5; adb shell input motionevent MOVE 943 800; sleep 0.5; shot sort-held
 adb shell input motionevent MOVE 943 1000; sleep 0.5; shot sort-held2
 adb shell input motionevent UP 943 1000; sleep 1.5; shot sort-released
 report sort-motionevent sort-a sort-released
+# Cancel attempts: hold a drag, then tap Cancel reorder with a second injected touch (may not register as a second pointer)
+open nativelet-showcase:///sort; shot cancel-a
+adb shell input motionevent DOWN 943 615; sleep 0.5; adb shell input motionevent MOVE 943 800; sleep 0.5; shot cancel-held
+adb shell input tap 540 1497; sleep 1; shot cancel-after-tap
+adb shell input motionevent UP 943 800; sleep 1.5; shot cancel-released
+report sort-cancel-tap cancel-a cancel-released
