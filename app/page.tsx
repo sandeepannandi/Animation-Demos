@@ -4,6 +4,7 @@ import NativeletSite from "./components/nativelet-site";
 
 const components = {
   blossom: { dir: "packages/ui/src/components/blossom-qr", files: ["BlossomQR.tsx", "blossomMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  morph: { dir: "packages/ui/src/components/text-morph", files: ["TextMorph.tsx", "textMorphMath.ts", "scene.ts", "lighthouseText.ts", "Example.tsx", "README.md", "LICENSE"] },
   light: { dir: "packages/ui/src/components/light-painting", files: ["LightPainting.tsx", "lightMath.ts", "paintings.ts", "Example.tsx", "README.md", "LICENSE"] },
   orbit: { dir: "packages/ui/src/components/orbit-qr", files: ["OrbitQR.tsx", "orbitMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   curl: { dir: "packages/ui/src/components/page-curl", files: ["PageCurl.tsx", "curlMath.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -39,6 +40,7 @@ export default function Home() {
   const sources = {
     orbit: read(components.orbit.dir, components.orbit.files),
     blossom: read(components.blossom.dir, components.blossom.files),
+    morph: read(components.morph.dir, components.morph.files),
     light: read(components.light.dir, components.light.files),
     curl: read(components.curl.dir, components.curl.files),
     pinch: read(components.pinch.dir, components.pinch.files),
