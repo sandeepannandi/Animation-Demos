@@ -27,17 +27,18 @@ report curl-drag curl-a curl-b
 open gooey; shot gooey-a; adb shell input tap 540 1720; sleep 1.0; shot gooey-b
 report gooey-tap gooey-a gooey-b
 # Liquid tabs: tap Explore, then Saved
-open glass; shot glass-a; adb shell input tap 415 2104; sleep 1.5; shot glass-b; adb shell input tap 700 2104; sleep 1.5; shot glass-c
+open glass; shot glass-a; adb shell input tap 419 2200; sleep 1.5; shot glass-b; adb shell input tap 661 2200; sleep 1.5; shot glass-c
 report glass-tap glass-a glass-b
 # Drag to Sort: long-press a handle and drag down
 open sort; shot sort-a
 adb shell input draganddrop 943 615 943 1000 1500; sleep 1.5; shot sort-b
 report sort-drag sort-a sort-b
 # Pinch Gallery: tap a density chip (true two-finger pinch is not possible with adb input)
-open pinch; shot pinch-a; adb shell input tap 780 420; sleep 1.5; shot pinch-b
+open pinch; shot pinch-a; adb shell input tap 985 475; sleep 1.5; shot pinch-b
 report pinch-chip5 pinch-a pinch-b
 # Blossom: tap URL field, type a URL, press the button
 open blossom; shot blossom-a
-adb shell input tap 540 1520; sleep 1; adb shell input keyevent KEYCODE_MOVE_END; for i in $(seq 1 6); do adb shell input keyevent KEYCODE_DEL; done; adb shell input text 'abc'; sleep 1; shot blossom-b
-adb shell input tap 540 1700; sleep 3; shot blossom-c
+adb shell input tap 540 1520; sleep 1; adb shell input keyevent KEYCODE_MOVE_END; for i in $(seq 1 40); do adb shell input keyevent KEYCODE_DEL; done; adb shell input text 'https://example.com'; sleep 1; shot blossom-b
+adb shell input keyevent KEYCODE_BACK; sleep 1; shot blossom-b2
+adb shell input tap 540 1680; sleep 4; shot blossom-c
 report blossom-edit blossom-a blossom-c
