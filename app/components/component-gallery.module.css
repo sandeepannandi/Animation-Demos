@@ -63,7 +63,7 @@
 .dialogTop { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; gap: 20px; }
 .dialogTop p { margin: 0; font-size: 11px; color: #61705a; line-height: 1.6; }
 .close { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 1px solid #dbe3d3; border-radius: 50%; background: white; color: #294337; }
-.dialogBody { padding: 0 20px 20px; }
+.dialogBody { padding: 20px; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @media (min-width: 761px) and (max-width: 999px) {
   .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
