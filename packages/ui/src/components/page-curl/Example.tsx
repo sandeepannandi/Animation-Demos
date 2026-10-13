@@ -1,15 +1,20 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
-import { Skia, matchFont, ClipOp } from "@shopify/react-native-skia";
+import { Skia, matchFont, ClipOp, useFont } from "@shopify/react-native-skia";
+
+const GEIST = require("../text-morph/fonts/Geist-Regular.ttf");
 import { PageCurl, type PageCurlHandle } from "./PageCurl";
 const COLORS = ["#e6edde", "#dce9eb", "#f0e2ce"];
 export default function Example() {
   const [reduce, setReduce] = useState(false),
     [index, setIndex] = useState(0);
   const pager = useRef<PageCurlHandle>(null);
+  // Geist (OFL, bundled with Text Morph) for the sans text; the demo renders once the font has loaded.
+  const geist17 = useFont(GEIST, 17),
+    geist15 = useFont(GEIST, 15);
   const pages = useMemo(
     () =>
-      COLORS.map((color, i) => {
+      !geist17 || !geist15 ? null : COLORS.map((color, i) => {
         const surface = Skia.Surface.MakeOffscreen(600, 800);
         if (!surface) throw new Error("Unable to prepare page");
         const c = surface.getCanvas(),
@@ -17,10 +22,10 @@ export default function Example() {
         paint.setAntiAlias(true);
         c.clear(Skia.Color(["#e7edde", "#dce9eb", "#f0e2ce"][i]));
         const serif = Platform.OS === "ios" ? "Georgia" : "serif";
-        const small = matchFont({ fontFamily: "sans-serif", fontSize: 17, fontWeight: "500" });
+        const small = geist17;
         const head = matchFont({ fontFamily: serif, fontSize: 49 });
         const body = matchFont({ fontFamily: serif, fontSize: 20 });
-        const foot = matchFont({ fontFamily: "sans-serif", fontSize: 15, fontWeight: "500" });
+        const foot = geist15;
         paint.setColor(Skia.Color("#315444"));
         c.drawText("FIELD NOTES", 48, 70, paint, small);
         c.drawText(["Into the green.", "A slower tide.", "Stay curious."][i], 48, 155, paint, head);
@@ -56,11 +61,11 @@ export default function Example() {
         if (!image) throw new Error("Unable to copy page image");
         return { image, label: `Field notes ${i + 1}` };
       }),
-    [],
+    [geist17, geist15],
   );
   useEffect(
     () => () => {
-      pages.forEach((p) => p.image.dispose());
+      pages?.forEach((p) => p.image.dispose());
     },
     [pages],
   );
@@ -75,6 +80,7 @@ export default function Example() {
     justifyContent: "center" as const,
     opacity: disabled ? 0.45 : 1,
   });
+  if (!pages) return null;
   return (
     <View style={{ alignItems: "center", gap: 14, paddingVertical: 14 }}>
       <View style={{ width: 320, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>

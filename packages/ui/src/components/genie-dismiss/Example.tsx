@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
-import { Skia, matchFont } from "@shopify/react-native-skia";
+import { Skia, matchFont, useFont } from "@shopify/react-native-skia";
+
+const GEIST = require("../text-morph/fonts/Geist-Regular.ttf");
 import { GenieDismiss } from "./GenieDismiss";
 const card = { x: 24, y: 20, width: 292, height: 290 };
 export default function Example() {
@@ -8,7 +10,11 @@ export default function Example() {
     [slow, setSlow] = useState(false),
     [left, setLeft] = useState(false);
   const target = { x: left ? 52 : 288, y: 382 };
+  // Geist (OFL, bundled with Text Morph) for the sans text; the demo renders once the font has loaded.
+  const geist16 = useFont(GEIST, 16),
+    geist18 = useFont(GEIST, 18);
   const image = useMemo(() => {
+    if (!geist16 || !geist18) return null;
     const surface = Skia.Surface.MakeOffscreen(584, 580);
     if (!surface) throw new Error("Unable to prepare card texture");
     const c = surface.getCanvas(),
@@ -18,9 +24,9 @@ export default function Example() {
     paint.setColor(Skia.Color("#e9e6db"));
     c.drawRRect(Skia.RRectXY(Skia.XYWHRect(0, 0, 584, 580), 30, 30), paint);
     const serif = Platform.OS === "ios" ? "Georgia" : "serif";
-    const label = matchFont({ fontFamily: "sans-serif", fontSize: 16, fontWeight: "600" });
+    const label = geist16;
     const title = matchFont({ fontFamily: serif, fontSize: 50, fontWeight: "600" });
-    const note = matchFont({ fontFamily: "sans-serif", fontSize: 18 });
+    const note = geist18;
     paint.setColor(Skia.Color("#315843"));
     c.drawText("FIELD NOTES / 019", 36, 50, paint, label);
     c.drawText("A little room", 36, 124, paint, title);
@@ -41,8 +47,9 @@ export default function Example() {
     paint.dispose();
     if (!copy) throw new Error("Unable to copy card texture");
     return copy;
-  }, []);
-  useEffect(() => () => image.dispose(), [image]);
+  }, [geist16, geist18]);
+  useEffect(() => () => image?.dispose(), [image]);
+  if (!image) return null;
   return (
     <View style={{ alignItems: "center", gap: 10, paddingVertical: 14 }}>
       <View style={{ width: 340, height: 430, borderRadius: 18, overflow: "hidden", backgroundColor: "#f4f1e9" }}>
