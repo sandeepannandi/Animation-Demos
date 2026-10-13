@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { Pressable, Text, View } from "react-native";
-import { Skia } from "@shopify/react-native-skia";
+import { Platform, Pressable, Text, View } from "react-native";
+import { Skia, matchFont, ClipOp } from "@shopify/react-native-skia";
 import { PageCurl, type PageCurlHandle } from "./PageCurl";
 const COLORS = ["#e6edde", "#dce9eb", "#f0e2ce"];
 export default function Example() {
@@ -14,14 +14,39 @@ export default function Example() {
         if (!surface) throw new Error("Unable to prepare page");
         const c = surface.getCanvas(),
           paint = Skia.Paint();
-        c.clear(Skia.Color(color));
-        paint.setColor(Skia.Color("#214b3b"));
-        c.drawRect(Skia.XYWHRect(48, 48, 130, 8), paint);
-        c.drawRect(Skia.XYWHRect(48, 100, 330 - i * 50, 16), paint);
-        paint.setColor(Skia.Color(["#86a887", "#7eacb3", "#c4a47d"][i]));
-        c.drawCircle(310, 435, 185, paint);
-        paint.setColor(Skia.Color("#214b3b"));
-        for (let j = 0; j <= i; j++) c.drawCircle(54 + j * 24, 750, 6, paint);
+        paint.setAntiAlias(true);
+        c.clear(Skia.Color(["#e7edde", "#dce9eb", "#f0e2ce"][i]));
+        const serif = Platform.OS === "ios" ? "Georgia" : "serif";
+        const small = matchFont({ fontFamily: "sans-serif", fontSize: 17, fontWeight: "500" });
+        const head = matchFont({ fontFamily: serif, fontSize: 49 });
+        const body = matchFont({ fontFamily: serif, fontSize: 20 });
+        const foot = matchFont({ fontFamily: "sans-serif", fontSize: 15, fontWeight: "500" });
+        paint.setColor(Skia.Color("#315444"));
+        c.drawText("FIELD NOTES", 48, 70, paint, small);
+        c.drawText(["Into the green.", "A slower tide.", "Stay curious."][i], 48, 155, paint, head);
+        paint.setColor(Skia.Color(["#98b393", "#89afb5", "#cdb18a"][i]));
+        c.drawCircle(305, 430, 186, paint);
+        c.save();
+        const clip = Skia.Path.Make();
+        clip.addCircle(305, 430, 186);
+        c.clipPath(clip, ClipOp.Intersect, true);
+        for (let k = 0; k < 6; k++) {
+          paint.setColor(Skia.Color(["#315e49", "#43767f", "#866b49"][i]));
+          paint.setAlphaf(0.2 + k * 0.07);
+          c.save();
+          c.translate(115 + k * 82, 620 - k * 24);
+          c.rotate(((-0.5 + k * 0.18) * 180) / Math.PI, 0, 0);
+          c.drawOval(Skia.XYWHRect(-125, -200, 250, 400), paint);
+          c.restore();
+        }
+        c.restore();
+        paint.setAlphaf(1);
+        paint.setColor(Skia.Color("#315444"));
+        ["Take the long way home.", "Leave room for quiet.", "Find a little wonder."].forEach((t, k) =>
+          c.drawText(t, 48, 665 + k * 29, paint, body),
+        );
+        c.drawText(`0${i + 1} / 03`, 48, 765, paint, foot);
+        c.drawText("NATIVELET JOURNAL", 365, 765, paint, foot);
         surface.flush();
         const snapshot = surface.makeImageSnapshot();
         const image = snapshot.makeNonTextureImage();
@@ -39,44 +64,61 @@ export default function Example() {
     },
     [pages],
   );
+  const circle = (disabled: boolean) => ({
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#d9e0d2",
+    backgroundColor: "#f6f8f2",
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    opacity: disabled ? 0.45 : 1,
+  });
   return (
-    <View style={{ alignItems: "center", gap: 20 }}>
+    <View style={{ alignItems: "center", gap: 14, paddingVertical: 14 }}>
+      <View style={{ width: 320, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <Text style={{ fontSize: 11, letterSpacing: 1.2, color: "#315444" }}>FIELD NOTES</Text>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setReduce((v) => !v)}
+          style={{ paddingVertical: 8, paddingHorizontal: 12, backgroundColor: "#f1f5eb", borderRadius: 20, borderWidth: 1, borderColor: "#d9e0d2" }}
+        >
+          <Text style={{ fontSize: 11, color: "#315444" }}>Motion: {reduce ? "reduced" : "system"}</Text>
+        </Pressable>
+      </View>
       <PageCurl
         ref={pager}
         onPageChange={setIndex}
         pages={pages}
-        width={300}
-        height={400}
+        width={320}
+        height={426}
         reducedMotion={reduce ? true : undefined}
       />
-      <View style={{ flexDirection: "row", gap: 32, alignItems: "center" }}>
+      <View style={{ width: 320, flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Previous page"
           disabled={index === 0}
           onPress={() => pager.current?.previous()}
-          style={{ padding: 12 }}
+          style={circle(index === 0)}
         >
-          <Text>←</Text>
+          <Text style={{ color: "#214b3b" }}>←</Text>
         </Pressable>
-        <Text>{index + 1} / 3</Text>
+        <Text style={{ fontSize: 13, color: "#214b3b" }}>
+          {String(index + 1).padStart(2, "0")}
+          <Text style={{ color: "#8a9c8a" }}> / 03</Text>
+        </Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Next page"
           disabled={index === 2}
           onPress={() => pager.current?.next()}
-          style={{ padding: 12 }}
+          style={circle(index === 2)}
         >
-          <Text>→</Text>
+          <Text style={{ color: "#214b3b" }}>→</Text>
         </Pressable>
       </View>
-      <Pressable
-        accessibilityRole="button"
-        onPress={() => setReduce((v) => !v)}
-        style={{ padding: 12, backgroundColor: "#e6edde", borderRadius: 20 }}
-      >
-        <Text>Motion: {reduce ? "reduced" : "system"}</Text>
-      </Pressable>
     </View>
   );
 }
