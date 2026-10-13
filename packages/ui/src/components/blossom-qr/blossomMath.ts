@@ -241,3 +241,26 @@ export function layoutScene(progress: number, yaw: number, scene: Scene, cfg: Bl
   }
   return v;
 }
+
+/**
+ * Axis-aligned squares for the finished code. The prism mesh draws each
+ * module as two triangles, which leaves a faint anti-aliased seam along the
+ * diagonal; solid squares keep the end state reliably scannable.
+ * Fills rects with x, y (top left) and rgb with the module colour.
+ */
+export function flatSquares(scene: Scene, cfg: BlossomConfig, rects: number[], rgb: number[]) {
+  'worklet';
+  const n = scene.size;
+  const mid = (n - 1) / 2;
+  const half = cfg.cell / 2 + SEAM / 2;
+  const cx = cfg.canvas / 2;
+  const cy = cfg.canvas / 2;
+  for (let i = 0; i < n * n; i += 1) {
+    rects[i * 2] = cx + (scene.cols[i] - mid) * cfg.cell - half;
+    rects[i * 2 + 1] = cy + (scene.rows[i] - mid) * cfg.cell - half;
+    rgb[i * 3] = scene.flat[i * 3];
+    rgb[i * 3 + 1] = scene.flat[i * 3 + 1];
+    rgb[i * 3 + 2] = scene.flat[i * 3 + 2];
+  }
+  return n * n;
+}

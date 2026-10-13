@@ -5,13 +5,15 @@ import qrcode from "qrcode-generator";
 import {
   CREAM,
   ISO_YAW,
+  SEAM,
   buildScene,
+  flatSquares,
   layoutScene,
   makeConfig,
 } from "../../packages/ui/src/components/blossom-qr/blossomMath";
 import styles from "./blossom-qr.module.css";
 
-const URL_TEXT = "https://nativelet.netlify.app/";
+const DEFAULT_URL = "https://nativelet.netlify.app/";
 const PX = 640;
 const SPREAD = 0.34;
 
@@ -31,8 +33,23 @@ export function BlossomQRPreview() {
   const system = useReducedMotion();
   const [slow, setSlow] = useState(false);
   const [showCode, setShowCode] = useState(false);
+  const [text, setText] = useState(DEFAULT_URL);
+  const [payload, setPayload] = useState(DEFAULT_URL);
   const reduced = Boolean(system);
-  const modules = useMemo(() => encode(URL_TEXT), []);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const v = text.trim();
+      if (!v || v === payload) return;
+      try {
+        encode(v);
+        setPayload(v);
+      } catch {
+        /* keep the last payload that fits a code */
+      }
+    }, 350);
+    return () => clearTimeout(t);
+  }, [text, payload]);
+  const modules = useMemo(() => encode(payload), [payload]);
   const scene = useMemo(() => buildScene(modules), [modules]);
   const cfg = useMemo(() => makeConfig(PX, modules.length), [modules]);
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -74,7 +91,17 @@ export function BlossomQRPreview() {
         ctx.restore();
       }
       const flat = st.progress >= 1;
-      ctx.lineWidth = flat ? 0 : 0.6;
+      if (flat) {
+        const side = cfg.cell + SEAM;
+        const cells = flatSquares(scene, cfg, pos, rgb);
+        for (let c = 0; c < cells; c += 1) {
+          ctx.fillStyle = `rgb(${byte(rgb[c * 3])},${byte(rgb[c * 3 + 1])},${byte(rgb[c * 3 + 2])})`;
+          ctx.fillRect(pos[c * 2], pos[c * 2 + 1], side, side);
+        }
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      ctx.lineWidth = 0.6;
       ctx.lineJoin = "round";
       for (let v = 0; v < count; v += 3) {
         const color = `rgb(${byte(rgb[v * 3])},${byte(rgb[v * 3 + 1])},${byte(rgb[v * 3 + 2])})`;
@@ -110,7 +137,7 @@ export function BlossomQRPreview() {
         height={PX}
         className={styles.stage}
         role="img"
-        aria-label={showCode ? `QR code for ${URL_TEXT}` : "Isometric blossom tree that becomes a QR code. Drag to turn it."}
+        aria-label={showCode ? `QR code for ${payload}` : "Isometric blossom tree that becomes a QR code. Drag to turn it."}
         onPointerDown={(e) => {
           if (s.current.progress > 0.2) return;
           e.currentTarget.setPointerCapture(e.pointerId);
@@ -129,6 +156,15 @@ export function BlossomQRPreview() {
         onPointerCancel={() => {
           s.current.drag = false;
         }}
+      />
+      <input
+        className={styles.payload}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type a link"
+        aria-label="QR content"
+        spellCheck={false}
+        maxLength={200}
       />
       <button className={styles.action} onClick={() => setShowCode((v) => !v)}>
         {showCode ? "Back to tree" : "Turn into QR"}
