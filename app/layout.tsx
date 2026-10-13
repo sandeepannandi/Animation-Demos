@@ -5,7 +5,7 @@ import "./globals.css";
 const siteUrl = "https://nativelet.netlify.app";
 const title = "Nativelet - Open-source React Native components with live previews";
 const description =
-  "Nativelet is an open-source collection of 12 React Native components, from a Skia scrub chart to a liquid tab bar. Try each in a web preview and copy the source. MIT licensed.";
+  "Nativelet is an open-source collection of 13 React Native components, from a Skia scrub chart to a liquid tab bar. Try each in a web preview and copy the source. MIT licensed.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
