@@ -163,7 +163,7 @@ export function TextMorphPreview() {
     <div className={styles.wrap}>
       <div className={styles.header}>
         <span className={styles.kicker}>TEXT MORPH</span>
-        <span className={styles.state}>{morphed ? `a ${preset.name.toLowerCase()}` : "a page"}</span>
+        <span className={styles.state}>{morphed ? (preset.id === "mountains" ? "mountains" : `a ${preset.name.toLowerCase()}`) : "a page"}</span>
       </div>
       <div className={styles.choices} role="group" aria-label="Choose a picture">
         {PICTURE_PRESETS.map((picture, index) => (
