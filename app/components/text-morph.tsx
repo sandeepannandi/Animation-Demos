@@ -133,13 +133,19 @@ export function TextMorphPreview() {
     canvas.addEventListener("pointerdown", down);
     canvas.addEventListener("pointermove", move);
     canvas.addEventListener("pointerup", up);
-    canvas.addEventListener("pointercancel", up);
+    const cancel = () => {
+      const st = s.current;
+      if (!st.drag) return;
+      st.drag = false;
+      settle(morphedRef.current ? 1 : 0);
+    };
+    canvas.addEventListener("pointercancel", cancel);
     return () => {
       cancelAnimationFrame(raf);
       canvas.removeEventListener("pointerdown", down);
       canvas.removeEventListener("pointermove", move);
       canvas.removeEventListener("pointerup", up);
-      canvas.removeEventListener("pointercancel", up);
+      canvas.removeEventListener("pointercancel", cancel);
     };
   }, [data]);
 
