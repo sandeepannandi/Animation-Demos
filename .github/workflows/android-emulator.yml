@@ -2,7 +2,7 @@ name: Android emulator smoke
 on:
   workflow_dispatch:
   push:
-    branches: [ci/android-emulator-smoke, 'parity/**']
+    branches: [ci/android-emulator-smoke]
 permissions:
   contents: read
 jobs:
