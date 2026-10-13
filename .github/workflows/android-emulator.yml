@@ -2,11 +2,7 @@ name: Android emulator smoke
 on:
   workflow_dispatch:
   push:
-<<<<<<< HEAD
-    branches: [ci/android-emulator-smoke, ci/android-core-interactions]
-=======
-    branches: [ci/android-emulator-smoke, "parity/**"]
->>>>>>> origin/main
+    branches: [ci/android-emulator-smoke, "parity/**", ci/android-core-interactions]
 permissions:
   contents: read
 jobs:
@@ -62,8 +58,9 @@ jobs:
           disable-animations: false
           script: |
             bash scripts/android-smoke.sh apk/*.apk
-            bash scripts/android-core2.sh
+            bash scripts/android-gestures.sh
             bash scripts/android-core.sh
+            bash scripts/android-core2.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
