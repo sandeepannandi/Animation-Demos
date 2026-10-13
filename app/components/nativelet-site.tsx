@@ -35,13 +35,15 @@ import { GlassLensPreview } from "./glass-lens";
 import { DragToSortPreview } from "./drag-to-sort";
 import { ExpandingCardPreview } from "./expanding-card";
 import { PageCurlPreview } from "./page-curl";
+import { OrbitQRPreview } from "./orbit-qr";
 import { PinchGalleryPreview } from "./pinch-gallery";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl";
+type ComponentId = "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit";
 const META = {
+  orbit: { title: "Orbit QR", number: "15", folder: "orbit-qr", note: "Original React Native Skia component. Copy OrbitQR.tsx and orbitMath.ts together and keep LICENSE. Pass any QR matrix; the Example uses the MIT-licensed qrcode-generator. Tiles on a sphere rotate under your finger, then a top-down wave lands each one on its module while rotation and perspective unwind to zero. The final frame is a flat code with a quiet zone; tests decode it with jsQR at several sizes. Toggle again to reverse from wherever it is. Not device-tested. Web preview shares the maths and draws with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
   curl: { title: "Page Curl", number: "14", folder: "page-curl", note: "Original React Native Skia pager. Copy PageCurl.tsx and curlMath.ts together and keep LICENSE. Prepared page textures wrap around a cylinder with a visible back and moving shadow. Drag either edge, then release to advance or return. Snapshot helper captures RN Views before gestures; frozen content, not live controls. Not device-tested. Web preview shares the shader maths, not the native render.", footer: "Preview: React · WebGL adapter. Source: React Native · Skia · Reanimated" },
   chart: { title: "Scrub Chart", number: "12", folder: "scrub-chart", note: "Original React Native source. Copy ScrubChart.tsx and chartMath.ts together and keep LICENSE. Real Skia paths, gradient fill and draw-in, driven by Reanimated. Drag to explore readings, or use arrow keys and screen reader actions. Reduce Motion removes draw-in and spring. Sample data, equal-spaced categories, fitted vertical domain (not zero baseline). The web preview is a separate SVG adapter, not Skia.", footer: "Preview: React · SVG adapter. Source: React Native · Skia · Reanimated" },
   pinch: { title: "Pinch Gallery", number: "13", folder: "pinch-gallery", note: "Original React Native source. Copy PinchGallery.tsx and pinchLogic.ts together and keep LICENSE. Core RN only. Pinch with two fingers to change between 2, 3 and 5 columns while the photo under your fingers stays put. Hold a tile, then drag across others to select a range, with auto-scroll near the edges and spring-in checkmarks. Fixed-height, non-virtualized grid. The web preview shares the layout, anchoring and selection rules and adds trackpad pinch, not the native render.", footer: "Preview: React · DOM adapter. Source: React Native" },
@@ -158,6 +160,7 @@ const COMPONENT_NAMES: [string, string][] = [
   ["Scrub Chart", "A smooth trend, a reading under your finger"],
   ["Pinch Gallery", "Pinch to change density · hold and drag to select"],
   ["Page Curl", "A curved fold, a paper back, a turn that follows your finger"],
+  ["Orbit QR", "A sphere of tiles that lands as a scannable code"],
 ];
 
 export default function NativeletSite({
@@ -488,6 +491,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniCurl}><span>FIELD NOTES</span><strong>Into the green.</strong><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 14</span><strong>Page Curl</strong><small>A curved fold, a paper back, a turn that follows your finger</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} hidden={!matches("Orbit QR", "A sphere of tiles that lands as a scannable code")} onClick={(event) => openComponent(event, "orbit")} aria-haspopup="dialog" aria-label="Open Orbit QR web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniOrbit}>{Array.from({ length: 36 }, (_, i) => <i key={i} />)}</div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 15</span><strong>Orbit QR</strong><small>A sphere of tiles that lands as a scannable code</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
             </div>
             <dialog ref={dialog} className={gallery.dialog} aria-labelledby="preview-dialog-title" aria-describedby="preview-dialog-description" onClose={afterClose} onCancel={(event) => { event.preventDefault(); closeComponent(); }} onKeyDown={(event) => {
               if (event.key !== "Tab") return;
@@ -543,7 +550,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
