@@ -1,6 +1,6 @@
 // MIT License. Copyright (c) 2026 Sandeepan Nandi. Keep the accompanying LICENSE.
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { AccessibilityInfo, Animated, BackHandler, Easing, findNodeHandle, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
+import { AccessibilityInfo, Animated, BackHandler, Easing, findNodeHandle, PanResponder, Platform, Pressable, ScrollView, StyleSheet, Text, View, type LayoutChangeEvent, type StyleProp, type TextStyle, type ViewStyle } from 'react-native';
 import { clamp, cornerRadius, crossedDismiss, dimOpacity, dismissOutcome, dragToProgress, dragTranslateX, heroHeightFor, shouldCaptureDismiss, staggerDelay, type Rect } from './expandingLogic';
 
 export type ExpandingFeedbackEvent = 'open' | 'threshold' | 'close';
@@ -28,6 +28,9 @@ export type ExpandingCardProps = {
   /** Decorative art drawn behind the title. Filled to the card, rendered again in the hero. Keep it non-interactive. */
   art?: ReactNode;
   titleColor?: string;
+  /** Optional typography for the eyebrow and title, e.g. a bundled font family. Colour and size stay controlled by the card. */
+  eyebrowStyle?: StyleProp<TextStyle>;
+  titleStyle?: StyleProp<TextStyle>;
   /** Height of the card in the list. Default 260. */
   cardHeight?: number;
   /** Height of the hero when open. Default 420, never taller than 70% of the host. */
@@ -261,8 +264,8 @@ function Overlay({ active, size, insets, progress, dragX, reduce, openRadius, sh
       contentContainerStyle={{ width: size.width, backgroundColor: sheetColor, minHeight: size.height }}>
       <Animated.View style={[styles.hero, { height: heroHeightAnim, backgroundColor: props.color, paddingTop: padTop }]}>
         {props.art ? <View style={StyleSheet.absoluteFill} pointerEvents="none" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">{props.art}</View> : null}
-        {props.eyebrow ? <Text style={[styles.eyebrow, { color: titleColor }]}>{props.eyebrow.toUpperCase()}</Text> : null}
-        <Animated.Text ref={titleRef} accessibilityRole="header" style={[styles.title, { color: titleColor, fontSize: titleSize, lineHeight: Animated.multiply(titleSize, 1.08) as unknown as number }]}>{props.title}</Animated.Text>
+        {props.eyebrow ? <Text style={[styles.eyebrow, props.eyebrowStyle, { color: titleColor }]}>{props.eyebrow.toUpperCase()}</Text> : null}
+        <Animated.Text ref={titleRef} accessibilityRole="header" style={[styles.title, props.titleStyle, { color: titleColor, fontSize: titleSize, lineHeight: Animated.multiply(titleSize, 1.08) as unknown as number }]}>{props.title}</Animated.Text>
       </Animated.View>
       <View style={[styles.body, { paddingBottom: insets.bottom + 40 }]}>
         {active.blocks.map((block, index) => {
@@ -307,8 +310,8 @@ export function ExpandingCard(props: ExpandingCardProps) {
       onPress={() => host?.open(idRef.current, ref.current, props, returnFocus)}
       style={[styles.card, { height: cardHeight, backgroundColor: props.color, borderRadius: props.cardRadius ?? 26 }]}>
       {props.art ? <View style={StyleSheet.absoluteFill} pointerEvents="none">{props.art}</View> : null}
-      {props.eyebrow ? <Text style={[styles.eyebrow, { color: titleColor }]}>{props.eyebrow.toUpperCase()}</Text> : null}
-      <Text style={[styles.title, { color: titleColor, fontSize: CARD_TITLE, lineHeight: CARD_TITLE * 1.08 }]}>{props.title}</Text>
+      {props.eyebrow ? <Text style={[styles.eyebrow, props.eyebrowStyle, { color: titleColor }]}>{props.eyebrow.toUpperCase()}</Text> : null}
+      <Text style={[styles.title, props.titleStyle, { color: titleColor, fontSize: CARD_TITLE, lineHeight: CARD_TITLE * 1.08 }]}>{props.title}</Text>
     </Pressable>
   </Animated.View>;
 }
