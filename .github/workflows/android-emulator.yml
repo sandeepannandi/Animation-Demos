@@ -2,7 +2,7 @@ name: Android emulator smoke
 on:
   workflow_dispatch:
   push:
-    branches: [ci/android-emulator-smoke]
+    branches: [ci/android-emulator-smoke, ci/android-core-interactions]
 permissions:
   contents: read
 jobs:
@@ -59,6 +59,7 @@ jobs:
           script: |
             bash scripts/android-smoke.sh apk/*.apk
             bash scripts/android-gestures.sh
+            bash scripts/android-core.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
