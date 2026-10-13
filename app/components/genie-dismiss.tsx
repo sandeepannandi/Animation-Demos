@@ -96,118 +96,135 @@ export function GenieDismissPreview() {
       setError(true);
       return;
     }
+    const shaders: WebGLShader[] = [];
+    let program: WebGLProgram | null = null;
     const shader = (kind: number, source: string) => {
-      const s = gl.createShader(kind)!;
+      const s = gl.createShader(kind);
+      if (!s) throw Error("Unable to create shader");
+      shaders.push(s);
       gl.shaderSource(s, source);
       gl.compileShader(s);
       if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
         throw Error(gl.getShaderInfoLog(s) || "Shader failed");
       return s;
     };
-    const vs = shader(
-      gl.VERTEX_SHADER,
-      "attribute vec2 pos; attribute vec2 uv; varying vec2 tex; void main(){gl_Position=vec4(pos.x/170.0-1.0,1.0-pos.y/215.0,0.,1.);tex=uv;}",
-    );
-    const fs = shader(
-      gl.FRAGMENT_SHADER,
-      "precision mediump float; varying vec2 tex; uniform sampler2D image; uniform float opacity; void main(){gl_FragColor=texture2D(image,tex)*opacity;}",
-    );
-    const program = gl.createProgram()!;
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS))
-      throw Error(gl.getProgramInfoLog(program) || "Program failed");
-    gl.useProgram(program);
-    const grid = makeGrid(),
-      pos = gl.createBuffer()!,
-      uv = gl.createBuffer()!,
-      index = gl.createBuffer()!,
-      image = gl.createTexture()!;
-    const bind = (buffer: WebGLBuffer, name: string) => {
-      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-      const loc = gl.getAttribLocation(program, name);
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    };
-    bind(uv, "uv");
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(grid.uv.flatMap((p) => [p.x, p.y])),
-      gl.STATIC_DRAW,
-    );
-    bind(pos, "pos");
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index);
-    gl.bufferData(
-      gl.ELEMENT_ARRAY_BUFFER,
-      new Uint16Array(grid.indices),
-      gl.STATIC_DRAW,
-    );
-    gl.bindTexture(gl.TEXTURE_2D, image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      texture(),
-    );
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    const media = matchMedia("(prefers-reduced-motion: reduce)");
-    latest.current.reduce = media.matches;
-    const change = () => {
-      latest.current.reduce = media.matches;
-      settle(goal.current);
-    };
-    media.addEventListener("change", change);
-    let frame = 0;
-    const draw = (now: number) => {
-      const a = animation.current;
-      if (a) {
-        const t = Math.min(1, (now - a.at) / a.duration),
-          ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-        progress.current = a.from + (a.to - a.from) * ease;
-        if (t === 1) animation.current = null;
-      }
-      const target = { x: latest.current.left ? 52 : 288, y: 382 };
-      const points = meshPoints(
-        grid.uv,
-        latest.current.reduce ? 0 : progress.current,
-        card,
-        target,
+    try {
+      const vs = shader(
+        gl.VERTEX_SHADER,
+        "attribute vec2 pos; attribute vec2 uv; varying vec2 tex; void main(){gl_Position=vec4(pos.x/170.0-1.0,1.0-pos.y/215.0,0.,1.);tex=uv;}",
       );
-      gl.viewport(0, 0, el.width, el.height);
-      gl.clearColor(0, 0, 0, 0);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      gl.bindBuffer(gl.ARRAY_BUFFER, pos);
+      const fs = shader(
+        gl.FRAGMENT_SHADER,
+        "precision mediump float; varying vec2 tex; uniform sampler2D image; uniform float opacity; void main(){gl_FragColor=texture2D(image,tex)*opacity;}",
+      );
+      program = gl.createProgram();
+      if (!program) throw Error("Unable to create program");
+      gl.attachShader(program, vs);
+      gl.attachShader(program, fs);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+        throw Error(gl.getProgramInfoLog(program) || "Program failed");
+      gl.useProgram(program);
+      const grid = makeGrid(),
+        pos = gl.createBuffer()!,
+        uv = gl.createBuffer()!,
+        index = gl.createBuffer()!,
+        image = gl.createTexture()!;
+      const bind = (buffer: WebGLBuffer, name: string) => {
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        const loc = gl.getAttribLocation(program!, name);
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      };
+      bind(uv, "uv");
       gl.bufferData(
         gl.ARRAY_BUFFER,
-        new Float32Array(points.flatMap((p) => [p.x, p.y])),
-        gl.DYNAMIC_DRAW,
+        new Float32Array(grid.uv.flatMap((p) => [p.x, p.y])),
+        gl.STATIC_DRAW,
       );
-      gl.uniform1f(
-        gl.getUniformLocation(program, "opacity"),
-        latest.current.reduce ? 1 - progress.current : 1,
+      bind(pos, "pos");
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index);
+      gl.bufferData(
+        gl.ELEMENT_ARRAY_BUFFER,
+        new Uint16Array(grid.indices),
+        gl.STATIC_DRAW,
       );
-      gl.drawElements(gl.TRIANGLES, grid.indices.length, gl.UNSIGNED_SHORT, 0);
-      el.dataset.progress = progress.current.toFixed(3);
+      gl.bindTexture(gl.TEXTURE_2D, image);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        texture(),
+      );
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      const media = matchMedia("(prefers-reduced-motion: reduce)");
+      latest.current.reduce = media.matches;
+      const change = () => {
+        latest.current.reduce = media.matches;
+        settle(goal.current);
+      };
+      media.addEventListener("change", change);
+      let frame = 0;
+      const draw = (now: number) => {
+        const a = animation.current;
+        if (a) {
+          const t = Math.min(1, (now - a.at) / a.duration),
+            ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+          progress.current = a.from + (a.to - a.from) * ease;
+          if (t === 1) animation.current = null;
+        }
+        const target = { x: latest.current.left ? 52 : 288, y: 382 };
+        const points = meshPoints(
+          grid.uv,
+          latest.current.reduce ? 0 : progress.current,
+          card,
+          target,
+        );
+        gl.viewport(0, 0, el.width, el.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.bindBuffer(gl.ARRAY_BUFFER, pos);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(points.flatMap((p) => [p.x, p.y])),
+          gl.DYNAMIC_DRAW,
+        );
+        gl.uniform1f(
+          gl.getUniformLocation(program!, "opacity"),
+          latest.current.reduce ? 1 - progress.current : 1,
+        );
+        gl.drawElements(
+          gl.TRIANGLES,
+          grid.indices.length,
+          gl.UNSIGNED_SHORT,
+          0,
+        );
+        el.dataset.progress = progress.current.toFixed(3);
+        frame = requestAnimationFrame(draw);
+      };
       frame = requestAnimationFrame(draw);
-    };
-    frame = requestAnimationFrame(draw);
-    return () => {
-      cancelAnimationFrame(frame);
-      media.removeEventListener("change", change);
-      gl.deleteTexture(image);
-      [pos, uv, index].forEach((b) => gl.deleteBuffer(b));
-      gl.deleteProgram(program);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-    };
+      return () => {
+        cancelAnimationFrame(frame);
+        media.removeEventListener("change", change);
+        gl.deleteTexture(image);
+        [pos, uv, index].forEach((b) => gl.deleteBuffer(b));
+        gl.deleteProgram(program);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+      };
+    } catch {
+      if (program) gl.deleteProgram(program);
+      shaders.forEach((shader) => gl.deleteShader(shader));
+      setError(true);
+      return;
+    }
   }, []);
   return (
     <div className={styles.wrap}>
