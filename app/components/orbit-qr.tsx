@@ -94,10 +94,8 @@ export function OrbitQRPreview() {
         const y = out[i * 5 + 1] - side / 2;
         tileColor(out[i * 5 + 3], out[i * 5 + 4], rgb);
         ctx.fillStyle = `rgb(${Math.round(rgb[0] * 255)},${Math.round(rgb[1] * 255)},${Math.round(rgb[2] * 255)})`;
-        const eI = out[i * 5 + 3];
-        const r = side * 0.5 * (1 - eI);
         ctx.beginPath();
-        ctx.roundRect(x, y, side, side, r);
+        ctx.rect(x, y, side, side);
         ctx.fill();
       }
       raf = requestAnimationFrame(frame);
