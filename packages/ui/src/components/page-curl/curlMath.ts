@@ -7,6 +7,7 @@ export function curlGeometry(
   tilt: number,
   originY: number,
   width: number,
+  height = width * 4 / 3,
 ) {
   "worklet";
   const radius = width * 0.115;
@@ -15,8 +16,8 @@ export function curlGeometry(
   return {
     axis: [
       width +
-        (Math.PI * radius) / 2 -
-        clamp(progress, 0, 1) * (width + Math.PI * radius + radius),
+        (Math.PI * radius) / 2 + Math.abs(t) * height -
+        clamp(progress, 0, 1) * (width + Math.PI * radius + radius + 2 * Math.abs(t) * height),
       originY,
     ],
     normal: [1 / k, t / k],

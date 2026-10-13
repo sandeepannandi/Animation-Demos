@@ -241,7 +241,7 @@ export const PageCurl = forwardRef<PageCurlHandle, PageCurlProps>(
     const reduce = reducedMotion ?? systemReduce;
     const uniforms = useDerivedValue(() => ({
       size: [width, height],
-      ...curlGeometry(progress.value, tilt.value, originY.value, width),
+      ...curlGeometry(progress.value, tilt.value, originY.value, width, height),
       progress: reduce ? 0 : progress.value,
       direction,
     }));

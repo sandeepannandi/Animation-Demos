@@ -164,7 +164,7 @@ export function PageCurlPreview() {
       const u = (name: string) => gl.getUniformLocation(program, name);
       draw.current = () => {
         const s = state.current,
-          g = curlGeometry(s.progress, s.tilt, s.y, W);
+          g = curlGeometry(s.progress, s.tilt, s.y, W, H);
         gl.viewport(0, 0, W, H);
         gl.uniform2f(u("size"), W, H);
         gl.uniform2fv(u("axis"), g.axis);
