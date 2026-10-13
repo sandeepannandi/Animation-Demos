@@ -8,7 +8,7 @@ open() { U="nativelet-showcase:///$1"; [ "$1" = index ] && U="nativelet-showcase
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; }
 tap() { adb shell input tap "$1" "$2"; sleep "${3:-1.2}"; }
 report() { A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
-  CR=no; adb logcat -d | grep -E 'FATAL EXCEPTION|has died|ANR in' | grep -q "$PKG" && CR=yes
+  CR=no; adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" | grep -q . && CR=yes
   echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"; }
 # Morph Capsule: compact, expanded, idle chips
 open capsule; shot capsule-a; tap 300 1032; shot capsule-compact; tap 528 1032; shot capsule-expanded; tap 120 1032; shot capsule-idle; report capsule-chips capsule-a capsule-expanded

@@ -34,7 +34,7 @@ for r in $ROUTES; do
   adb pull /sdcard/$r.mp4 "$OUT/$r.mp4" >/dev/null 2>&1
   adb logcat -d > "$OUT/$r.logcat.txt"
   CRASH=no
-  grep -E 'FATAL EXCEPTION|Process .* has died|ANR in' "$OUT/$r.logcat.txt" | grep -q "$PKG" && CRASH=yes
+  grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" "$OUT/$r.logcat.txt" | grep -q . && CRASH=yes
   JSERR=$(grep -c 'ReactNativeJS.*\(Error\|error\)' "$OUT/$r.logcat.txt")
   ALIVE=$(adb shell pidof "$PKG" | tr -d '\r')
   H1=$(md5sum < "$OUT/$r-1.png" | cut -c1-8); H2=$(md5sum < "$OUT/$r-2.png" | cut -c1-8)

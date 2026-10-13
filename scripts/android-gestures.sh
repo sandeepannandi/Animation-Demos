@@ -8,7 +8,7 @@ open() { adb shell am force-stop "$PKG"; adb logcat -c; adb shell am start -W -a
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; }
 report() { # name before after
   A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
-  CR=no; adb logcat -d | grep -E 'FATAL EXCEPTION|has died|ANR in' | grep -q "$PKG" && CR=yes
+  CR=no; adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" | grep -q . && CR=yes
   echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"
 }
 # Genie: slow drag down on the card, capture mid-drag, release, then drag back up
