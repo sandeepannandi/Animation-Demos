@@ -7,7 +7,7 @@ open() { adb shell am force-stop "$PKG"; adb logcat -c; adb shell am start -W -a
 shot() { adb exec-out screencap -p > "$OUT/$1.png"; }
 tap() { adb shell input tap "$1" "$2"; sleep "${3:-1.2}"; }
 report() { A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
-  CR=no; adb logcat -d | grep -E 'FATAL EXCEPTION|has died|ANR in' | grep -q "$PKG" && CR=yes
+  CR=no; adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" | grep -q . && CR=yes
   echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"; }
 open nativelet-showcase:///genie; shot genie-a
 tap 706 1778; shot genie-target-left
@@ -48,13 +48,13 @@ echo "cancel button at: ${B:-not found}" | tee -a "$OUT/summary.txt"
 [ -n "$B" ] && adb shell input tap $B; sleep 1; shot cancel-after-tap
 adb shell input motionevent UP 900 1000; sleep 1.5; shot cancel-released
 report sort-cancel-tap cancel-a cancel-released
-# Drag to Sort commit check on the current layout (handle x=900, rows at y 824 / 1036): three input styles, final order read after a long settle
+# Drag to Sort commit check on the current layout (handle x=900, rows at y 824 / 1036): three input styles, each reported before the next open clears logcat
 open nativelet-showcase:///sort; shot sortx-a
 adb shell input draganddrop 900 824 900 1100 1500; sleep 4; shot sortx-draganddrop
+report sortx-draganddrop sortx-a sortx-draganddrop
 open nativelet-showcase:///sort
 adb shell input motionevent DOWN 900 824; sleep 0.6; adb shell input motionevent MOVE 900 900; sleep 0.4; adb shell input motionevent MOVE 900 1100; sleep 1.0; adb shell input motionevent UP 900 1100; sleep 4; shot sortx-motion-noshot
+report sortx-motion-noshot sortx-a sortx-motion-noshot
 open nativelet-showcase:///sort
 adb shell input swipe 900 824 900 1100 1200; sleep 4; shot sortx-swipe
-report sortx-draganddrop sortx-a sortx-draganddrop
-report sortx-motion-noshot sortx-a sortx-motion-noshot
 report sortx-swipe sortx-a sortx-swipe
