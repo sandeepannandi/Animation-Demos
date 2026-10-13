@@ -8,6 +8,7 @@
     "expo": "~57.0.27",
     "expo-blur": "~57.0.3",
     "expo-constants": "~57.0.21",
+    "expo-font": "~57.0.4",
     "expo-glass-effect": "~57.0.4",
     "expo-haptics": "~57.0.3",
     "expo-linking": "~57.0.12",
