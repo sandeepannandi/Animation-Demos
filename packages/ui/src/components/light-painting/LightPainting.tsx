@@ -41,7 +41,7 @@ const FRAME = 56; // wooden frame inset, in scene pixels at size=1 scale
 const BULB_Z = 1.1;
 const INTENSITY = 1.1;
 const AMBIENT = 0.12;
-const SHADOW_FLOOR = 0.14;
+const SHADOW_FLOOR = 0.2;
 // Rope coordinates are 0..1 scene units; the web adapter's default gravity
 // (1400 px/s^2 over a 600px-tall scene) maps to 1400/600 in unit space.
 const GRAVITY = 1400 / 600;

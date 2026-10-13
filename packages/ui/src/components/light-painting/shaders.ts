@@ -4,8 +4,8 @@
  * One lighting model, two targets: SKSL_SRC feeds a Skia RuntimeEffect
  * (native + CanvasKit web), GLSL feeds the WebGL pass in the site adapter.
  * Both implement the exact maths of shadeBuffer() in lightMath.ts - lambert
- * from the depth-gradient normal, quadratic distance falloff, and a 3-tap
- * penumbra of 24-step occlusion marches through the depth map - but run per
+ * from the depth-gradient normal, quadratic distance falloff, and a 5-tap
+ * penumbra of soft 24-step occlusion marches through the depth map - but run per
  * pixel at full canvas resolution, so silhouettes and shadow edges stay as
  * sharp as the 256px textures allow. shadeBuffer() remains the CPU fallback
  * and the reference the Node tests pin.
@@ -15,7 +15,7 @@
  */
 
 /** Albedo and depth texture resolution (square). */
-export const LIGHT_TEX_SIZE = 256;
+export const LIGHT_TEX_SIZE = 384;
 
 const SKSL_SRC = `
 uniform shader albedoImg;
@@ -36,13 +36,14 @@ float depthAt(float2 uvp) {
 float march(float2 uv, float pd, float2 buv, float bz) {
     float2 d = buv - uv;
     if (length(d) * texSize < 1.5) { return 1.0; }
+    float occ = 1.0;
     for (int i = 1; i < 24; i++) {
         float t = float(i) / 24.0;
         float2 p = uv + d * t;
         float ray = pd + (bz - pd) * t;
-        if (depthAt(p) > ray + 0.012) { return 0.0; }
+        occ = min(occ, 1.0 - smoothstep(ray - 0.03, ray + 0.05, depthAt(p)));
     }
-    return 1.0;
+    return occ;
 }
 
 half4 main(float2 xy) {
@@ -58,11 +59,13 @@ half4 main(float2 xy) {
     float2 dl = bulbUV - uv;
     float falloff = 1.0 / (1.0 + dot(dl, dl) / 0.9);
     float dist = max(length(dl), 1e-5);
-    float2 perp = float2(-dl.y, dl.x) / dist * (0.9 / texSize);
+    float2 perp = float2(-dl.y, dl.x) / dist * (1.1 / texSize);
     float lit = march(uv, d, bulbUV, bulbZ)
               + march(uv + perp, d, bulbUV, bulbZ)
-              + march(uv - perp, d, bulbUV, bulbZ);
-    float shadow = shadowFloor + (1.0 - shadowFloor) * (lit / 3.0);
+              + march(uv - perp, d, bulbUV, bulbZ)
+              + march(uv + 2.0 * perp, d, bulbUV, bulbZ)
+              + march(uv - 2.0 * perp, d, bulbUV, bulbZ);
+    float shadow = shadowFloor + (1.0 - shadowFloor) * (lit / 5.0);
     float light = ambient + intensity * lambert * falloff * shadow;
     return half4(float3(c.r, c.g, c.b) * light, 1.0);
 }
@@ -96,13 +99,14 @@ float depthAt(vec2 uvp) {
 float march(vec2 uv, float pd, vec2 buv, float bz) {
     vec2 d = buv - uv;
     if (length(d) * texSize < 1.5) { return 1.0; }
+    float occ = 1.0;
     for (int i = 1; i < 24; i++) {
         float t = float(i) / 24.0;
         vec2 p = uv + d * t;
         float ray = pd + (bz - pd) * t;
-        if (depthAt(p) > ray + 0.012) { return 0.0; }
+        occ = min(occ, 1.0 - smoothstep(ray - 0.03, ray + 0.05, depthAt(p)));
     }
-    return 1.0;
+    return occ;
 }
 
 void main() {
@@ -118,11 +122,13 @@ void main() {
     vec2 dl = bulbUV - uv;
     float falloff = 1.0 / (1.0 + dot(dl, dl) / 0.9);
     float dist = max(length(dl), 1e-5);
-    vec2 perp = vec2(-dl.y, dl.x) / dist * (0.9 / texSize);
+    vec2 perp = vec2(-dl.y, dl.x) / dist * (1.1 / texSize);
     float lit = march(uv, d, bulbUV, bulbZ)
               + march(uv + perp, d, bulbUV, bulbZ)
-              + march(uv - perp, d, bulbUV, bulbZ);
-    float shadow = shadowFloor + (1.0 - shadowFloor) * (lit / 3.0);
+              + march(uv - perp, d, bulbUV, bulbZ)
+              + march(uv + 2.0 * perp, d, bulbUV, bulbZ)
+              + march(uv - 2.0 * perp, d, bulbUV, bulbZ);
+    float shadow = shadowFloor + (1.0 - shadowFloor) * (lit / 5.0);
     float light = ambient + intensity * lambert * falloff * shadow;
     gl_FragColor = vec4(c * light, 1.0);
 }

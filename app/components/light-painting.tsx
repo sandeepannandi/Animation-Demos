@@ -28,7 +28,7 @@ const ROPE_LENGTH = 300;
 const BULB_Z = 1.1;
 const INTENSITY = 1.1;
 const AMBIENT = 0.12;
-const SHADOW_FLOOR = 0.14;
+const SHADOW_FLOOR = 0.2;
 
 interface GLPainting {
   albedo: WebGLTexture;
