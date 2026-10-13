@@ -23,6 +23,9 @@
       ],
       "react-native-reanimated": [
         "./node_modules/react-native-reanimated"
+      ],
+      "qrcode-generator": [
+        "./node_modules/qrcode-generator"
       ]
     },
     "typeRoots": [
