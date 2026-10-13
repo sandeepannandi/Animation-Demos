@@ -113,6 +113,6 @@ export function PinchGalleryPreview() {
       </div>
       <div className={styles.controls}><button onClick={() => setReduceOverride(v => !v)} aria-pressed={reduceOverride}>Motion: {reduce ? 'reduced' : 'system'}</button></div>
     </div>
-    <p className={styles.help}>Two-finger pinch, or ctrl + scroll / trackpad pinch. Hold a photo and drag to select. Enter or Space toggles when focused.</p><p className={styles.log} role="status">{message}</p>
+    <p className={styles.log} role="status">{message}</p>
   </div>;
 }
