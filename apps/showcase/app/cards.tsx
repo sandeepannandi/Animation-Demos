@@ -24,7 +24,7 @@ export default function CardsScreen() {
       <Link href="/swipe" style={styles.note}>← Swipe Row</Link>
       <Text style={styles.date}>MONDAY, OCTOBER 12</Text>
       <Text accessibilityRole="header" style={styles.today}>Today</Text>
-      {stories.map(story => <ExpandingCard key={story.id} eyebrow={story.eyebrow} title={story.title} color={story.color} art={story.art} cardHeight={230} heroHeight={340}>
+      {stories.map(story => <ExpandingCard key={story.id} eyebrowStyle={{ fontFamily: 'Geist-SemiBold', fontWeight: undefined }} titleStyle={{ fontFamily: 'Geist-Bold', fontWeight: undefined }} eyebrow={story.eyebrow} title={story.title} color={story.color} art={story.art} cardHeight={230} heroHeight={340}>
         <Text style={styles.lead}>{story.lead}</Text>
         <Text style={styles.body}>{story.body}</Text>
         <View style={styles.chips}>{story.chips.map(chip => <Text key={chip} style={styles.chip}>{chip}</Text>)}</View>
