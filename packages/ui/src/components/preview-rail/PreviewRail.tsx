@@ -122,7 +122,7 @@ export function PreviewRail<T extends PreviewRailItem>({
       if (dragging.current) commit(dragIndex.current);
       dragging.current = false;
     },
-    onPanResponderTerminationRequest: () => true,
+    onPanResponderTerminationRequest: () => { dbg('terminationRequest (JS asked)'); return true; },
     onPanResponderTerminate: () => {
       dbg('terminate'); dragging.current = false; dragIndex.current = -1; setPreviewId(null); },
   });
