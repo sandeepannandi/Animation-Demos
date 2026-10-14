@@ -1,0 +1,41 @@
+name: Android caps2
+on:
+  push:
+    branches: ["verify/caps2"]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: apk
+          path: apk
+          run-id: 38608619416
+          github-token: ${{ github.token }}
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Run smoke on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          script: |
+            bash scripts/android-caps2.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: android-smoke-results
+          path: smoke-out
