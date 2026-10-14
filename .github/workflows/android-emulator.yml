@@ -58,12 +58,8 @@ jobs:
           disable-animations: false
           script: |
             bash scripts/android-smoke.sh apk/*.apk
-            bash scripts/android-gestures.sh
-            bash scripts/android-core.sh
-            bash scripts/android-slowmotion.sh
-            bash scripts/android-rail-stress.sh
-            bash scripts/android-rail-behavior.sh
-            bash scripts/android-core2.sh
+            bash scripts/android-gaps.sh
+            bash scripts/android-rail-native.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -16,7 +16,7 @@ export default function ShowcaseHome() {
   const [activeId, setActiveId] = useState('focus');
   const [orientation, setOrientation] = useState<'vertical'|'horizontal'>('vertical');
   const [reduce, setReduce] = useState<boolean | undefined>();
-  return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
+  return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content} onScrollBeginDrag={() => console.log('RAILDBG ' + Date.now() + ' page scrollBeginDrag')} onScrollEndDrag={() => console.log('RAILDBG ' + Date.now() + ' page scrollEndDrag')} onScroll={e => console.log('RAILDBG ' + Date.now() + ' page scroll y=' + Math.round(e.nativeEvent.contentOffset.y))} scrollEventThrottle={16} onTouchCancel={() => console.log('RAILDBG ' + Date.now() + ' page touchCancel')}>
     <View style={styles.header}><Text style={styles.brand}>nativelet</Text><Text style={styles.badge}>NATIVE STUDY / 01</Text></View>
     <Link href="/glass" style={styles.note}>New: Liquid Tabs →</Link>
     <Link href="/capsule" style={styles.note}>Next: Morph Capsule →</Link>
