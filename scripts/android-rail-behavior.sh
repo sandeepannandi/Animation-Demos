@@ -42,7 +42,7 @@ crashed scrollout
 launch; dump d0; R0=($(box "Preview rail" d0)); L=($(box Listen d0)); E=($(box Rest d0))
 if [ -z "${L[1]:-}" ] || [ -z "${E[1]:-}" ]; then say "railscroll UNRESOLVED (no nodes)"; else
   A=($(mid "${L[*]}")); Z=($(mid "${E[*]}")); adb shell input swipe "${A[0]}" "${A[1]}" "${Z[0]}" "${Z[1]}" 1200; sleep 1.5; dump d1; R1=($(box "Preview rail" d1))
-  say "railscroll: card=$(card d1) rail top before=${R0[1]} after=${R1[1]:-?} (parent page $([ "${R0[1]}" = "${R1[1]:-}" ] && echo 'did not scroll' || echo 'scrolled'))"; fi
+  say "railscroll: card=$(card d1) rail top before=${R0[1]} after=${R1[1]:-?} (rail on screen $([ "${R0[1]}" = "${R1[1]:-}" ] && echo 'did not move' || echo 'moved; a layout shift from the card change or a scroll - not distinguished'))"; fi
 crashed railscroll
 
 # horizontal
