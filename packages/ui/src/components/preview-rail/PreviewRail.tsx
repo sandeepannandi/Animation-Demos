@@ -100,6 +100,7 @@ export function PreviewRail<T extends PreviewRailItem>({
     }
   };
   // Recreated with the latest props, so callbacks and controlled value never go stale.
+  const dbg = (m: string) => console.log('RAILDBG ' + Date.now() + ' ' + m);
   const responder = PanResponder.create({
     onStartShouldSetPanResponder: () => false, // Keep ordinary presses/focus accessible.
     onMoveShouldSetPanResponder: (_, gesture) =>
@@ -107,6 +108,7 @@ export function PreviewRail<T extends PreviewRailItem>({
         ? Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy)
         : Math.abs(gesture.dy) > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx)),
     onPanResponderGrant: event => {
+      dbg('grant');
       dragging.current = true;
       lastFeedbackId.current = items[selected]?.id;
       railRef.current?.measureInWindow((x, y) => { origin.current = horizontal ? x : y; });
@@ -116,11 +118,13 @@ export function PreviewRail<T extends PreviewRailItem>({
       if (dragging.current) move((horizontal ? event.nativeEvent.pageX : event.nativeEvent.pageY) - origin.current);
     },
     onPanResponderRelease: () => {
+      dbg('release dragIndex=' + dragIndex.current);
       if (dragging.current) commit(dragIndex.current);
       dragging.current = false;
     },
     onPanResponderTerminationRequest: () => true,
-    onPanResponderTerminate: () => { dragging.current = false; dragIndex.current = -1; setPreviewId(null); },
+    onPanResponderTerminate: () => {
+      dbg('terminate'); dragging.current = false; dragIndex.current = -1; setPreviewId(null); },
   });
   const measure = (event: LayoutChangeEvent) => {
     extent.current = horizontal ? event.nativeEvent.layout.width : event.nativeEvent.layout.height;
@@ -133,6 +137,9 @@ export function PreviewRail<T extends PreviewRailItem>({
       <View style={[styles.body, horizontal && styles.horizontalBody]}>
         <View
           ref={railRef} onLayout={measure} {...responder.panHandlers}
+          onTouchStart={e => dbg('touchStart y=' + Math.round(e.nativeEvent.pageY))}
+          onTouchEnd={e => dbg('touchEnd y=' + Math.round(e.nativeEvent.pageY))}
+          onTouchCancel={() => dbg('touchCancel')}
           style={[styles.rail, horizontal ? styles.horizontalRail : styles.verticalRail]}
           accessibilityLabel={accessibilityLabel}
         >
@@ -144,7 +151,8 @@ export function PreviewRail<T extends PreviewRailItem>({
             return (
               <Pressable key={entry.id} accessibilityRole="button" accessibilityLabel={entry.label}
                 accessibilityState={{ selected: index === selected }}
-                onPress={() => { if (!dragging.current) commit(index); }}
+                onPressIn={() => dbg('pressIn ' + entry.id)}
+                onPress={() => { dbg('press ' + entry.id + ' dragging=' + dragging.current); if (!dragging.current) commit(index); }}
                 style={({ pressed }) => [styles.target, horizontal && styles.horizontalTarget, pressed && styles.pressed]}>
                 <Animated.View pointerEvents="none" style={[
                   styles.tick, horizontal && styles.horizontalTick,

@@ -20,10 +20,11 @@ PY
 card() { grep -o 'text="\(Focus\|Listen\|Move\|Rest\|Create\)"' "$OUT/ui-$1.xml" | head -1; }
 ok=0; fail=0; total=${RAIL_N:-12}
 for i in $(seq 1 "$total"); do
-  adb shell am force-stop "$PKG"; adb shell am start -W -a android.intent.action.VIEW -d "nativelet-showcase://" "$PKG" >/dev/null 2>&1; sleep 4
+  adb shell am force-stop "$PKG"; adb logcat -c; adb shell am start -W -a android.intent.action.VIEW -d "nativelet-showcase://" "$PKG" >/dev/null 2>&1; sleep 4
   dump "s$i-a"; L=($(node_center Listen "s$i-a")); R=($(node_center Rest "s$i-a")); P=($(node_center "Preview rail" "s$i-a"))
   [ -z "${L[1]:-}" ] || [ -z "${R[1]:-}" ] && { echo "attempt $i UNRESOLVED nodes" | tee -a "$OUT/summary.txt"; continue; }
   adb shell input swipe "${L[0]}" "${L[1]}" "${R[0]}" "${R[1]}" 1200; sleep 1.5
+  adb logcat -d -s ReactNativeJS:V > "$OUT/rn-$i.log" 2>&1; grep -c RAILDBG "$OUT/rn-$i.log" | sed 's/^/  raildbg lines: /' >> "$OUT/summary.txt"
   dump "s$i-b"; C=$(card "s$i-b"); P2=($(node_center "Preview rail" "s$i-b"))
   if [ "$C" = 'text="Rest"' ]; then ok=$((ok+1)); V=pass; else fail=$((fail+1)); V=FAIL; adb exec-out screencap -p > "$OUT/fail-$i.png"; fi
   echo "attempt $i from Listen(${L[0]},${L[1]}) to Rest(${R[0]},${R[1]}): card=$C rail_top before=${P[2]:-?} after=${P2[2]:-?} -> $V" | tee -a "$OUT/summary.txt"
