@@ -94,6 +94,8 @@ function makeTextures(r: RasterizedPainting): PaintingTextures | null {
 export interface LightPaintingProps {
   size?: number;
   style?: ViewStyle;
+  /** Called when the shown painting changes (including once on mount). Optional. */
+  onPaintingChange?: (index: number, name: string) => void;
 }
 
 interface Frame {
@@ -114,7 +116,7 @@ interface Frame {
  * compile, shading falls back to the JS thread at ~30fps into a 160px
  * buffer upscaled by Skia. Not device-tested; no frame-rate claim.
  */
-export function LightPainting({ size = 320, style }: LightPaintingProps) {
+export function LightPainting({ size = 320, style, onPaintingChange }: LightPaintingProps) {
   const effect = getEffect();
   // GPU path: 256px albedo + depth textures per painting, built once.
   const textures = useMemo<PaintingTextures[] | null>(() => {
@@ -149,6 +151,11 @@ export function LightPainting({ size = 320, style }: LightPaintingProps) {
     cord: "",
     painting: 0,
   });
+
+  useEffect(() => {
+    onPaintingChange?.(frame.painting, PAINTINGS[frame.painting]?.name ?? "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [frame.painting]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((v) => {
