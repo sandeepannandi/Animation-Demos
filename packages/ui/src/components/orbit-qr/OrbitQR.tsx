@@ -20,6 +20,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import {
+import { transitionMs } from "./timing";
   buildData,
   layoutTiles,
   makeConfig,
@@ -38,6 +39,8 @@ export type OrbitQRProps = {
   /** Called when a morph reaches its end state. */
   onSettled?: (showCode: boolean) => void;
   reducedMotion?: boolean;
+  /** Stretch the transition 4x so it is easy to watch. Optional demo aid. */
+  slowMotion?: boolean;
   /** Read by screen readers, for example the URL the code opens. */
   label?: string;
   style?: ViewStyle;
@@ -51,6 +54,7 @@ export function OrbitQR({
   showCode,
   onSettled,
   reducedMotion,
+  slowMotion,
   label = "QR code",
   style,
 }: OrbitQRProps) {
@@ -87,13 +91,13 @@ export function OrbitQR({
   useEffect(() => {
     progress.value = withTiming(
       showCode ? 1 : 0,
-      { duration: reduced ? 220 : 1700, easing: Easing.inOut(Easing.cubic) },
+      { duration: transitionMs(reduced, slowMotion), easing: Easing.inOut(Easing.cubic) },
       (finished) => {
         if (finished && settled.current)
           globalThis.requestAnimationFrame?.(() => settled.current?.(showCode));
       },
     );
-  }, [showCode, reduced, progress]);
+  }, [showCode, reduced, slowMotion, progress]);
 
   useFrameCallback((frame) => {
     if (dragging.value || reduced) return;
