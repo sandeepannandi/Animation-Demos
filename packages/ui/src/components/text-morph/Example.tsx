@@ -14,6 +14,7 @@ export default function Example() {
   const font = useFont(require("./fonts/Geist-Regular.ttf"), 12);
   return (
     <View style={{ alignItems: "center", gap: 16 }}>
+      <Text style={{ fontSize: 10, letterSpacing: 2, color: "#637e6b" }}>TEXT MORPH  <Text style={{ fontStyle: "italic", letterSpacing: 0, fontSize: 11 }}>a page</Text></Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 8 }}>
         {PICTURE_PRESETS.map((picture, index) => (
           <Pressable key={picture.id} accessibilityRole="button"

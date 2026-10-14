@@ -9,7 +9,7 @@ export const photos = Array.from({ length: 48 }, (_, i) => {
 export default function Example({ onFeedback }: { onFeedback?: (event: GalleryFeedback) => void }) {
   const [columns, setColumns] = useState(3);
   const [selected, setSelected] = useState<string[]>([]);
-  return <View style={{ padding: 16, backgroundColor: '#f3f6ee' }}>
+  return <View style={{ padding: 16, backgroundColor: '#e8eee0', borderRadius: 28, marginHorizontal: 12, overflow: 'hidden' }}>
     <View style={{ flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 12 }}>
       <View><Text style={{ fontSize: 28, fontWeight: '700', color: '#193f30' }}>Library</Text><Text style={{ fontSize: 12, color: '#6a7b6a', marginTop: 2 }}>{selected.length ? `${selected.length} selected` : `${photos.length} photos`}</Text></View>
       {selected.length ? <Pressable accessibilityRole="button" onPress={() => setSelected([])} style={{ paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99, backgroundColor: '#193f30' }}><Text style={{ color: '#fff', fontWeight: '600' }}>Clear</Text></Pressable>
