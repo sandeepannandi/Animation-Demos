@@ -100,12 +100,15 @@ export function PreviewRail<T extends PreviewRailItem>({
     }
   };
   // Recreated with the latest props, so callbacks and controlled value never go stale.
+  const shouldDrag = (gesture: { dx: number; dy: number }) =>
+    items.length > 1 && (horizontal
+      ? Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy)
+      : Math.abs(gesture.dy) > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx));
   const responder = PanResponder.create({
     onStartShouldSetPanResponder: () => false, // Keep ordinary presses/focus accessible.
-    onMoveShouldSetPanResponder: (_, gesture) =>
-      items.length > 1 && (horizontal
-        ? Math.abs(gesture.dx) > 6 && Math.abs(gesture.dx) > Math.abs(gesture.dy)
-        : Math.abs(gesture.dy) > 6 && Math.abs(gesture.dy) > Math.abs(gesture.dx)),
+    onMoveShouldSetPanResponder: (_, gesture) => shouldDrag(gesture),
+    // Capture phase: claim a clear drag along the rail before a child press or an ancestor scroll view takes it.
+    onMoveShouldSetPanResponderCapture: (_, gesture) => shouldDrag(gesture),
     onPanResponderGrant: event => {
       dragging.current = true;
       lastFeedbackId.current = items[selected]?.id;
@@ -119,7 +122,7 @@ export function PreviewRail<T extends PreviewRailItem>({
       if (dragging.current) commit(dragIndex.current);
       dragging.current = false;
     },
-    onPanResponderTerminationRequest: () => true,
+    onPanResponderTerminationRequest: () => false, // Keep the drag once claimed (an ancestor scroll view must not steal it).
     onPanResponderTerminate: () => { dragging.current = false; dragIndex.current = -1; setPreviewId(null); },
   });
   const measure = (event: LayoutChangeEvent) => {
