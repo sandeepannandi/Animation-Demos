@@ -48,7 +48,9 @@ crashed railscroll
 # horizontal
 launch; dump h0; H=($(box Horizontal h0))
 if [ -z "${H[1]:-}" ]; then say "horizontal UNRESOLVED (no Horizontal pill)"; else
-  C=($(mid "${H[*]}")); adb shell input tap "${C[0]}" "${C[1]}"; sleep 2; dump h1
+  C=($(mid "${H[*]}")); adb shell input tap "${C[0]}" "${C[1]}"; sleep 2
+  # the horizontal rail can sit below the fold: scroll the page (outside the rail) until its nodes exist
+  dump h1; [ -z "$(box 'Preview rail' h1)" ] && { adb shell input swipe 800 1900 800 700 600; sleep 1.5; dump h1; }
   RB=($(box "Preview rail" h1)); W=$(( ${RB[2]:-0} - ${RB[0]:-0} )); Ht=$(( ${RB[3]:-0} - ${RB[1]:-0} ))
   L=($(box Listen h1)); E=($(box Rest h1))
   say "horizontal: rail ${W}x${Ht} (wider than tall: $([ $W -gt $Ht ] && echo yes || echo no)); card before drag: $(card h1)"
