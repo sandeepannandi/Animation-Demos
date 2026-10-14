@@ -61,6 +61,7 @@ jobs:
             bash scripts/android-gestures.sh
             bash scripts/android-core.sh
             bash scripts/android-slowmotion.sh
+            bash scripts/android-rail-stress.sh
             bash scripts/android-core2.sh
       - uses: actions/upload-artifact@v4
         if: always()

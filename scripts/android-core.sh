@@ -64,10 +64,16 @@ L=($(center_desc Listen rail)); M=($(center_desc Move rail)); R=($(center_desc R
 echo "rail nodes listen=${L[*]:-none} move=${M[*]:-none} rest=${R[*]:-none}; card before: $(title rail-t0)" | tee -a "$OUT/summary.txt"
 if ((${#L[@]} < 2 || ${#R[@]} < 2)); then echo "rail-drag UNRESOLVED (no accessibility bounds for Listen/Rest); interaction not run" | tee -a "$OUT/summary.txt"; else
 adb shell input tap "${L[0]}" "${L[1]}"; sleep 1.2; shot rail-tap; echo "rail tap Listen -> card: $(title rail-t1)" | tee -a "$OUT/summary.txt"
+FIRST=""; N=0
 for attempt in 1 2 3; do
-  adb shell input swipe "${L[0]}" "${L[1]}" "${R[0]}" "${R[1]}" 1200; sleep 1.5; shot rail-b; T2=$(title rail-t2); echo "rail drag attempt $attempt Listen->Rest -> card: $T2" | tee -a "$OUT/summary.txt"
+  N=$attempt
+  adb shell input swipe "${L[0]}" "${L[1]}" "${R[0]}" "${R[1]}" 1200; sleep 1.5; shot "rail-b-attempt$attempt"; T2=$(title rail-t2); echo "rail drag attempt $attempt Listen->Rest -> card: $T2" | tee -a "$OUT/summary.txt"
+  [ -z "$FIRST" ] && FIRST="$T2"
   [ "$T2" = 'text="Rest"' ] && break
 done
+cp "$OUT/rail-b-attempt$N.png" "$OUT/rail-b.png"
+if [ "$FIRST" = 'text="Rest"' ]; then V="PASS on first attempt"; elif [ "$T2" = 'text="Rest"' ]; then V="PASS AFTER RETRY (first attempt ended on $FIRST, passed on attempt $N)"; else V="FAIL (ended on $T2 after $N attempts)"; fi
+echo "rail drag verdict: $V" | tee -a "$OUT/summary.txt"
 report rail-drag rail-a rail-b
 fi
 # Gooey Menu: open, tap an item, then close
