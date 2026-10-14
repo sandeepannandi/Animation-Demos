@@ -8,6 +8,7 @@ shot() { adb exec-out screencap -p > "$OUT/$1.png"; }
 tap() { adb shell input tap "$1" "$2"; sleep "${3:-1.2}"; }
 report() { A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
   CR=no; adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" | grep -q . && CR=yes
+  [ "$CR" = yes ] && adb logcat -d > "$OUT/$1.crash.logcat.txt"
   echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"; }
 open nativelet-showcase:///genie; shot genie-a
 tap 706 1778; shot genie-target-left
