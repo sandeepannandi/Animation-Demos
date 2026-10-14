@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-OUT=smoke-out/caps8; mkdir -p "$OUT"
+OUT=smoke-out/caps9; mkdir -p "$OUT"
 say() { echo "$*" | tee -a "$OUT/summary.txt"; }
 adb install -r -t verifyapp/app/build/outputs/apk/debug/app-debug.apk 2>&1 | tail -1
 for M in base cand; do

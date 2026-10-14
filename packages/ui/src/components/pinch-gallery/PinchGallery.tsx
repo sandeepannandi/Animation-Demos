@@ -61,7 +61,10 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
     if (reduce) Animated.timing(t, { toValue: to, duration: 100, easing: Easing.out(Easing.quad), useNativeDriver: false }).start(finish);
     else Animated.spring(t, { toValue: to, stiffness: 260, damping: 26, mass: 0.9, useNativeDriver: false }).start(finish);
   };
-  const settle = (to: number) => { applyAnchor(tValue.current); setLayout({ from: to, to }); anchor.current = null; setLocked(false); (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: true }); };
+  // Lock the ScrollView as soon as a second finger lands, instead of waiting for the setLocked render. On the Android emulator a vertical or diagonal pinch was cancelled mid-gesture without this. The native value is set directly and restored in settle so it cannot drift from React state.
+  const lockScrollNow = () => (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: false });
+  const unlockScrollNow = () => (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: true });
+  const settle = (to: number) => { applyAnchor(tValue.current); setLayout({ from: to, to }); anchor.current = null; setLocked(false); unlockScrollNow(); };
 
   // Columns changed from outside (segmented control, state restore): blend there around the viewport center.
   useEffect(() => {
@@ -125,7 +128,7 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
   }
   const toggle = (index: number) => { const id = live.current.ids[index], cur = live.current.selection; setSelection(cur.includes(id) ? cur.filter(x => x !== id) : live.current.ids.filter(x => x === id || cur.includes(x))); };
 
-  const onTouchStart = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; if (n === 1) { measure(); finger.current = { x: e.nativeEvent.touches[0].pageX - origin.current.x, y: e.nativeEvent.touches[0].pageY - origin.current.y }; } if (n === 2 && !pinch.current) { (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: false }); beginPinch(e); } };
+  const onTouchStart = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; if (n === 1) { measure(); finger.current = { x: e.nativeEvent.touches[0].pageX - origin.current.x, y: e.nativeEvent.touches[0].pageY - origin.current.y }; } if (n === 2 && !pinch.current) { lockScrollNow(); beginPinch(e); } };
   const onTouchMove = (e: GestureResponderEvent) => {
     const n = e.nativeEvent.touches.length;
     if (pinch.current) { if (n >= 2) movePinch(e); else endPinch(); return; }
