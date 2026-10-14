@@ -33,6 +33,7 @@ PY
 }
 report() { A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
   CR=no; adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" | grep -q . && CR=yes
+  [ "$CR" = yes ] && adb logcat -d > "$OUT/$1.crash.logcat.txt"
   echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"; }
 # Morph Capsule: compact, expanded, idle chips
 open capsule; shot capsule-a; tap 300 1032; shot capsule-compact; tap 528 1032; shot capsule-expanded; tap 120 1032; shot capsule-idle; report capsule-chips capsule-a capsule-expanded
@@ -63,7 +64,10 @@ L=($(center_desc Listen rail)); M=($(center_desc Move rail)); R=($(center_desc R
 echo "rail nodes listen=${L[*]:-none} move=${M[*]:-none} rest=${R[*]:-none}; card before: $(title rail-t0)" | tee -a "$OUT/summary.txt"
 if ((${#L[@]} < 2 || ${#R[@]} < 2)); then echo "rail-drag UNRESOLVED (no accessibility bounds for Listen/Rest); interaction not run" | tee -a "$OUT/summary.txt"; else
 adb shell input tap "${L[0]}" "${L[1]}"; sleep 1.2; shot rail-tap; echo "rail tap Listen -> card: $(title rail-t1)" | tee -a "$OUT/summary.txt"
-adb shell input swipe "${L[0]}" "${L[1]}" "${R[0]}" "${R[1]}" 1200; sleep 1.2; shot rail-b; echo "rail drag Listen->Rest -> card: $(title rail-t2)" | tee -a "$OUT/summary.txt"
+for attempt in 1 2 3; do
+  adb shell input swipe "${L[0]}" "${L[1]}" "${R[0]}" "${R[1]}" 1200; sleep 1.5; shot rail-b; T2=$(title rail-t2); echo "rail drag attempt $attempt Listen->Rest -> card: $T2" | tee -a "$OUT/summary.txt"
+  [ "$T2" = 'text="Rest"' ] && break
+done
 report rail-drag rail-a rail-b
 fi
 # Gooey Menu: open, tap an item, then close
