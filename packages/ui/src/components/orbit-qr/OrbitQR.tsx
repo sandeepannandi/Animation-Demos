@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { transitionMs } from "./timing";
 import {
   AccessibilityInfo,
   PanResponder,
@@ -20,7 +21,6 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import {
-import { transitionMs } from "./timing";
   buildData,
   layoutTiles,
   makeConfig,
