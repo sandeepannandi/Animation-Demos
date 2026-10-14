@@ -1,0 +1,13 @@
+plugins { id 'com.android.application' }
+android {
+  namespace 'com.nativelet.verify'
+  compileSdk 34
+  defaultConfig { applicationId 'com.nativelet.verify'; minSdk 26; targetSdk 34; versionCode 1; versionName '1' }
+  compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+}
+dependencies {
+  implementation 'androidx.test:runner:1.5.2'
+  implementation 'androidx.test.ext:junit:1.1.5'
+  implementation 'androidx.test.uiautomator:uiautomator:2.3.0'
+  implementation 'junit:junit:4.13.2'
+}

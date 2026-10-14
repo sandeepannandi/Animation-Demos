@@ -83,7 +83,7 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
     const start = layoutRef.current.to, stepIndex = steps.indexOf(start) >= 0 ? steps.indexOf(start) : steps.reduce((best, s, i) => Math.abs(s - start) < Math.abs(steps[best] - start) ? i : best, 0);
     t.setValue(0); setLayout({ from: start, to: start });
     anchor.current = { a: anchorAt(scrollY.current + mid.y, l.count, start, l.width, l.gap, mid.x), focalY: mid.y };
-    pinch.current = { d0: Math.max(1, distance(a, b)), startCols: start, stepIndex, ratio: 1 }; setLocked(true); feedback.current?.('pinch-start');
+    pinch.current = { d0: Math.max(1, distance(a, b)), startCols: start, stepIndex, ratio: 1 }; console.log('NLVRN beginPinch d0=' + Math.round(distance(a, b)) + ' start=' + start); setLocked(true); feedback.current?.('pinch-start');
   };
   const movePinch = (e: GestureResponderEvent) => {
     const p = pinch.current, a = anchor.current; if (!p || !a) return;
@@ -95,7 +95,7 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
   };
   const endPinch = () => {
     const p = pinch.current; if (!p) return; pinch.current = null;
-    const to = layoutRef.current.to, commit = to !== p.startCols && shouldCommit(tValue.current);
+    const to = layoutRef.current.to, commit = to !== p.startCols && shouldCommit(tValue.current); console.log('NLVRN endPinch ratio=' + p.ratio.toFixed(3) + ' start=' + p.startCols + ' to=' + to + ' progress=' + tValue.current.toFixed(3) + ' commit=' + commit);
     const target = commit ? to : p.startCols;
     if (!commit && to !== p.startCols) feedback.current?.('cancel');
     run(commit ? 1 : 0, () => { settle(target); if (commit) { setInnerCols(target); emitColumns.current?.(target); feedback.current?.('snap'); } });
@@ -125,21 +125,21 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
   }
   const toggle = (index: number) => { const id = live.current.ids[index], cur = live.current.selection; setSelection(cur.includes(id) ? cur.filter(x => x !== id) : live.current.ids.filter(x => x === id || cur.includes(x))); };
 
-  const onTouchStart = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; if (n === 1) { measure(); finger.current = { x: e.nativeEvent.touches[0].pageX - origin.current.x, y: e.nativeEvent.touches[0].pageY - origin.current.y }; } if (n === 2 && !pinch.current) beginPinch(e); };
+  const onTouchStart = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; console.log('NLVRN touchStart n=' + n + ' pinch=' + !!pinch.current); if (n === 1) { measure(); finger.current = { x: e.nativeEvent.touches[0].pageX - origin.current.x, y: e.nativeEvent.touches[0].pageY - origin.current.y }; } if (n === 2 && !pinch.current) { if (process.env.EXPO_PUBLIC_NLV_MODE === 'sync') (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: false }); beginPinch(e); } };
   const onTouchMove = (e: GestureResponderEvent) => {
-    const n = e.nativeEvent.touches.length;
+    const n = e.nativeEvent.touches.length; if (n >= 2 && (((globalThis as any).__nlvc = ((globalThis as any).__nlvc || 0) + 1) % 6) === 0) console.log('NLVRN move n=' + n + ' pinch=' + !!pinch.current + ' d=' + Math.round(Math.hypot(e.nativeEvent.touches[0].pageX - e.nativeEvent.touches[1].pageX, e.nativeEvent.touches[0].pageY - e.nativeEvent.touches[1].pageY)));
     if (pinch.current) { if (n >= 2) movePinch(e); else endPinch(); return; }
     if (n >= 1) { finger.current = pointOf(e, 0); if (select.current) updateSelect(); }
   };
-  const onTouchEnd = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; if (pinch.current && n < 2) endPinch(); if (n === 0) { endSelect(); } };
-  const onTouchCancel = () => { if (pinch.current) endPinch(); endSelect(true); };
+  const onTouchEnd = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; console.log('NLVRN touchEnd n=' + n + ' pinch=' + !!pinch.current); if (pinch.current && n < 2) endPinch(); if (n === 0) { endSelect(); } };
+  const onTouchCancel = () => { console.log('NLVRN touchCancel pinch=' + !!pinch.current); if (pinch.current) endPinch(); endSelect(true); };
 
   const onLayout = (e: LayoutChangeEvent) => { setWidth(Math.round(e.nativeEvent.layout.width)); measure(); };
   const settled = layout.from === layout.to;
   const fullHeight = width > 0 ? (settled ? contentHeight(items.length, layout.to, width, gap) : Math.max(contentHeight(items.length, layout.from, width, gap), contentHeight(items.length, layout.to, width, gap))) : 0;
   const selectedSet = useMemo(() => new Set(selection), [selection]);
   return <View ref={rootRef} collapsable={false} style={[{ height }, style]} onLayout={onLayout} onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd} onTouchCancel={onTouchCancel}>
-    <ScrollView ref={scrollRef} scrollEnabled={!locked} scrollEventThrottle={16} onScroll={e => { if (!anchor.current && !select.current) scrollY.current = e.nativeEvent.contentOffset.y; }} showsVerticalScrollIndicator={false} contentContainerStyle={{ height: fullHeight }} style={styles.scroll}>
+    <ScrollView ref={scrollRef} scrollEnabled={process.env.EXPO_PUBLIC_NLV_MODE === 'noscroll' ? false : !locked} scrollEventThrottle={16} onScroll={e => { if (!anchor.current && !select.current) scrollY.current = e.nativeEvent.contentOffset.y; }} showsVerticalScrollIndicator={false} contentContainerStyle={{ height: fullHeight }} style={styles.scroll}>
       {width > 0 && items.map((item, index) => {
         const id = ids[index], a = tileRect(index, layout.from, width, gap), b = tileRect(index, layout.to, width, gap), selected = selectedSet.has(id);
         return <Tile key={id} a={a} b={b} t={t} selected={selected} label={labelExtractor(item)} accent={accentColor} reduce={reduce} hasSelection={selection.length > 0}
