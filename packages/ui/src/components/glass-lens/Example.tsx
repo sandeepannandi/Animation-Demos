@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Shader, Skia } from '@shopify/react-native-skia';
 import { GlassLens, type LensFeedback, type LensSize } from './GlassLens';
 
@@ -25,11 +25,13 @@ const art = Skia.RuntimeEffect.Make(ART);
 
 export default function Example({ onFeedback }: { onFeedback?: (event: LensFeedback) => void }) {
   const [at, setAt] = useState({ x: 186, y: 84 });
+  const [reduce, setReduce] = useState<boolean | undefined>();
   const backdrop = useMemo(() => ({ width, height }: LensSize) => art ? <Shader source={art} uniforms={{ size: [width, height] }} /> : null, []);
   return (
     <View style={{ paddingVertical: 24, width: '100%', alignItems: 'center' }}>
       <Text accessibilityLiveRegion="polite" style={{ color: '#31513b', fontSize: 13, marginBottom: 12 }}>Lens at {Math.round(at.x)}, {Math.round(at.y)}</Text>
       <GlassLens
+        reducedMotion={reduce}
         width={300}
         height={200}
         backdrop={backdrop}
@@ -38,6 +40,8 @@ export default function Example({ onFeedback }: { onFeedback?: (event: LensFeedb
         onFeedback={onFeedback}
         overlay={<View style={{ flex: 1, padding: 16, justifyContent: 'flex-end' }}><Text style={{ color: '#f4f1ff', fontSize: 13 }}>Drag the lens over the poster</Text></View>}
       />
+      <Text style={{ color: '#4b6053', fontSize: 12, marginTop: 12 }}>Drag the lens over the poster.</Text>
+      <Pressable accessibilityRole="switch" accessibilityState={{ checked: reduce === true }} accessibilityLabel="Reduced motion" onPress={() => setReduce(reduce === true ? undefined : true)} style={{ marginTop: 8, minHeight: 44, paddingHorizontal: 16, borderRadius: 14, backgroundColor: '#e6edde', justifyContent: 'center' }}><Text style={{ color: '#31513b', fontSize: 13 }}>Motion: {reduce === true ? 'reduced' : 'system'}</Text></Pressable>
     </View>
   );
 }

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { Shader, Skia } from '@shopify/react-native-skia';
 import { RippleReveal, type RippleFeedback, type RippleSize } from './RippleReveal';
 
@@ -26,12 +26,14 @@ const make = (colors: typeof dusk) => ({ width, height }: RippleSize) => art ? <
 
 export default function Example({ onFeedback }: { onFeedback?: (event: RippleFeedback) => void }) {
   const [showing, setShowing] = useState<'a' | 'b'>('a');
+  const [reduce, setReduce] = useState<boolean | undefined>();
   const themeA = useMemo(() => make(dusk), []);
   const themeB = useMemo(() => make(dawn), []);
   return (
     <View style={{ paddingVertical: 24, width: '100%', alignItems: 'center' }}>
       <Text accessibilityLiveRegion="polite" style={{ color: '#31513b', fontSize: 13, marginBottom: 12 }}>Theme: {showing === 'a' ? 'Dusk' : 'Dawn'}</Text>
       <RippleReveal
+        reducedMotion={reduce}
         width={300}
         height={200}
         themeA={themeA}
@@ -41,6 +43,8 @@ export default function Example({ onFeedback }: { onFeedback?: (event: RippleFee
         onFeedback={onFeedback}
         overlay={current => <View style={{ flex: 1, padding: 20, justifyContent: 'flex-end' }}><Text style={{ color: current === 'a' ? '#f1eefc' : '#3d2a14', fontSize: 22, fontWeight: '700' }}>{current === 'a' ? 'Dusk' : 'Dawn'}</Text><Text style={{ color: current === 'a' ? '#c9c2ee' : '#7a5a35', fontSize: 13 }}>Tap anywhere to switch</Text></View>}
       />
+      <Text style={{ color: '#4b6053', fontSize: 12, marginTop: 12 }}>Tap anywhere on the card.</Text>
+      <Pressable accessibilityRole="switch" accessibilityState={{ checked: reduce === true }} accessibilityLabel="Reduced motion" onPress={() => setReduce(reduce === true ? undefined : true)} style={{ marginTop: 8, minHeight: 44, paddingHorizontal: 16, borderRadius: 14, backgroundColor: '#e6edde', justifyContent: 'center' }}><Text style={{ color: '#31513b', fontSize: 13 }}>Motion: {reduce === true ? 'reduced' : 'system'}</Text></Pressable>
     </View>
   );
 }
