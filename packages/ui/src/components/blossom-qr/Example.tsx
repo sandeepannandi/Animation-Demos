@@ -16,11 +16,14 @@ function encode(text: string) {
 
 export default function Example() {
   const [showCode, setShowCode] = useState(false);
+  const [slow, setSlow] = useState(false);
   const [text, setText] = useState("https://nativelet.netlify.app/");
   const modules = useMemo(() => encode(text.slice(0, 120)), [text]);
   return (
     <View style={{ alignItems: "center", gap: 16 }}>
+      <View style={{ width: "100%", flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 20 }}><Text style={{ fontSize: 10, letterSpacing: 1.5, color: "#315444" }}>BLOSSOM QR</Text><Pressable accessibilityRole="switch" accessibilityState={{ checked: slow }} accessibilityLabel="Slow motion" onPress={() => setSlow((v) => !v)} style={{ minHeight: 44, paddingHorizontal: 12, justifyContent: "center", borderRadius: 20, borderWidth: 1, borderColor: "#dce5d6", backgroundColor: "#f3f6ee" }}><Text style={{ fontSize: 10, color: "#315444" }}>Slow motion: {slow ? "on" : "off"}</Text></Pressable></View>
       <BlossomQR
+        slowMotion={slow}
         modules={modules}
         size={320}
         showCode={showCode}
