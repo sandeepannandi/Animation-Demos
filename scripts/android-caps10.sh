@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -u
-OUT=smoke-out/caps9; mkdir -p "$OUT"
+OUT=smoke-out/caps10; mkdir -p "$OUT"
 say() { echo "$*" | tee -a "$OUT/summary.txt"; }
 adb install -r -t verifyapp/app/build/outputs/apk/debug/app-debug.apk 2>&1 | tail -1
 for M in base cand; do
@@ -9,6 +9,6 @@ for M in base cand; do
   sleep 20; adb shell input keyevent KEYCODE_HOME; sleep 4
   adb logcat -c
   say "===== MODE $M ====="
-  for TST in scrollrepeat scrollcheck; do adb shell am instrument -w -e class com.nativelet.verify.VerifyTest#$TST com.nativelet.verify/androidx.test.runner.AndroidJUnitRunner 2>&1 | tee "$OUT/instr-$M-$TST.txt" | tail -3; done
-  adb logcat -d | grep -E ' NLV |NLVRN' | cut -c1-240 | tee "$OUT/$M.txt" | grep -E 'SHAPE|SC |SR |CONTROL|endPinch|touchCancel' >> "$OUT/summary.txt"
+  for TST in scrollcheck reentry momentum holdselect; do adb shell am instrument -w -e class com.nativelet.verify.VerifyTest#$TST com.nativelet.verify/androidx.test.runner.AndroidJUnitRunner 2>&1 | tee "$OUT/instr-$M-$TST.txt" | tail -3; done
+  adb logcat -d | grep -E ' NLV |NLVRN' | cut -c1-240 | tee "$OUT/$M.txt" | grep -E 'SHAPE|SC |SR |RE |MO |HS |CONTROL|endPinch|touchCancel' >> "$OUT/summary.txt"
 done

@@ -320,4 +320,68 @@ public class VerifyTest {
       d.swipe(540, 800, 540, 1500, 20); sleep(800);
     }
   }
+  int selCount() { int n = 0; for (UiObject2 o : d.findObjects(By.descStartsWith("Photo "))) if (o.isSelected()) n++; return n; }
+  void holdDrag(int x0, int y0, int x1, int y1, int holdMs, int steps) {
+    UiAutomation ua = InstrumentationRegistry.getInstrumentation().getUiAutomation();
+    long down = android.os.SystemClock.uptimeMillis();
+    android.view.MotionEvent.PointerProperties[] pp = new android.view.MotionEvent.PointerProperties[1];
+    pp[0] = new android.view.MotionEvent.PointerProperties(); pp[0].id = 0; pp[0].toolType = android.view.MotionEvent.TOOL_TYPE_FINGER;
+    java.util.function.BiFunction<Float, Float, android.view.MotionEvent.PointerCoords[]> c = (x, y) -> { android.view.MotionEvent.PointerCoords[] pc = new android.view.MotionEvent.PointerCoords[1]; pc[0] = new android.view.MotionEvent.PointerCoords(); pc[0].x = x; pc[0].y = y; pc[0].pressure = 1; pc[0].size = 1; return pc; };
+    java.util.function.BiConsumer<Integer, android.view.MotionEvent.PointerCoords[]> inj = (act, pc) -> { android.view.MotionEvent ev = android.view.MotionEvent.obtain(down, android.os.SystemClock.uptimeMillis(), act, 1, pp, pc, 0, 0, 1, 1, 0, 0, android.view.InputDevice.SOURCE_TOUCHSCREEN, 0); ua.injectInputEvent(ev, true); ev.recycle(); };
+    inj.accept(android.view.MotionEvent.ACTION_DOWN, c.apply((float) x0, (float) y0));
+    sleep(holdMs);
+    for (int k = 1; k <= steps; k++) { sleep(40); inj.accept(android.view.MotionEvent.ACTION_MOVE, c.apply((float) (x0 + (x1 - x0) * k / steps), (float) (y0 + (y1 - y0) * k / steps))); }
+    inj.accept(android.view.MotionEvent.ACTION_UP, c.apply((float) x1, (float) y1));
+  }
+  String scrollProbe() {
+    d.swipe(540, 800, 540, 1500, 20); sleep(1200);
+    java.util.Map<String, Integer> t0 = tiles();
+    d.swipe(540, 1500, 540, 800, 20); sleep(1500);
+    String r = disp(t0, tiles());
+    d.swipe(540, 800, 540, 1500, 20); sleep(800);
+    return r;
+  }
+  // Interruption and re-entry: a second pinch lands while the first pinch's settle animation is still running.
+  @Test public void reentry() throws Exception {
+    d.wakeUp(); open("pinch");
+    if (!(chip("5 columns") && chip("3 columns"))) { log("RE control failed"); return; }
+    int[] gaps = {0, 60, 120, 200, 300, 450};
+    for (int i = 0; i < gaps.length; i++) {
+      chip("3 columns");
+      pinchShape(540, 1160, 90, 600, 250, 30, 700); sleep(gaps[i]);
+      pinchShape(540, 1160, 45, 250, 600, 30, 700); sleep(2500);
+      String cols = selectedCols();
+      log("RE i=" + i + " gap=" + gaps[i] + "ms colsAfter=[" + cols + "] scroll: " + scrollProbe() + " chipTap2=" + chip("2 columns"));
+    }
+  }
+  // Momentum: a fast fling, then a pinch immediately.
+  @Test public void momentum() throws Exception {
+    d.wakeUp(); open("pinch");
+    if (!(chip("5 columns") && chip("3 columns"))) { log("MO control failed"); return; }
+    for (int i = 0; i < 4; i++) {
+      chip("3 columns");
+      java.util.Map<String, Integer> t0 = tiles();
+      d.swipe(540, 1600, 540, 500, 4); sleep(i * 60);
+      pinchShape(540, 1160, i % 2 == 0 ? 90 : 45, 600, 250, 30, 700); sleep(2500);
+      log("MO i=" + i + " delay=" + (i * 60) + "ms colsAfter=[" + selectedCols() + "] flingDisp: " + disp(t0, tiles()) + " scrollAfter: " + scrollProbe());
+    }
+  }
+  // Hold-select: long press a tile, drag to another, release; then scroll and pinch must still work.
+  @Test public void holdselect() throws Exception {
+    d.wakeUp(); open("pinch");
+    if (!(chip("5 columns") && chip("3 columns"))) { log("HS control failed"); return; }
+    for (int i = 0; i < 3; i++) {
+      d.swipe(540, 800, 540, 1500, 20); sleep(1000);
+      UiObject2 a = d.findObject(By.desc("Photo 1")), b = d.findObject(By.desc("Photo " + (5 + i)));
+      if (a == null || b == null) { log("HS i=" + i + " tile not found"); continue; }
+      int before = selCount();
+      holdDrag(a.getVisibleBounds().centerX(), a.getVisibleBounds().centerY(), b.getVisibleBounds().centerX(), b.getVisibleBounds().centerY(), 700, 12);
+      sleep(1500);
+      int after = selCount();
+      log("HS i=" + i + " selectedBefore=" + before + " selectedAfter=" + after + " scrollAfterSelect: " + scrollProbe());
+      chip("3 columns");
+      pinchShape(540, 1160, 90, 600, 250, 30, 700); sleep(2500);
+      log("HS i=" + i + " colsAfterVerticalPinch=[" + selectedCols() + "] scrollAfterPinch: " + scrollProbe());
+    }
+  }
 }
