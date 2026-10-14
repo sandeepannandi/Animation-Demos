@@ -58,10 +58,18 @@ jobs:
           disable-animations: false
           script: |
             bash scripts/android-smoke.sh apk/*.apk
-            bash scripts/android-gaps.sh
-            bash scripts/android-rail-native.sh
+            bash scripts/android-caps.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: android-smoke-results
           path: smoke-out
+  arm-probe:
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 10
+    steps:
+      - run: |
+          uname -m
+          ls -l /dev/kvm 2>&1 || echo "no /dev/kvm on this arm runner"
+          grep -c -E 'vmx|svm' /proc/cpuinfo || true
+          echo "arm runner reachable"
