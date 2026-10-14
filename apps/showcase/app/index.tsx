@@ -22,6 +22,7 @@ export default function ShowcaseHome() {
     <Link href="/capsule" style={styles.note}>Next: Morph Capsule →</Link>
     <Text accessibilityRole="header" style={styles.title}>{'A small rail.\nA world of previews.'}</Text>
     <Text style={styles.subtitle}>Press a tick. Drag to explore. Release to choose.</Text>
+    <View style={styles.pills}>{(['vertical', 'horizontal'] as const).map(o => <Pressable key={o} accessibilityRole="button" accessibilityState={{ selected: orientation === o }} onPress={() => setOrientation(o)} style={[styles.pill, orientation === o && styles.pillOn]}><Text style={[styles.pillText, orientation === o && styles.pillTextOn]}>{o === 'vertical' ? 'Vertical' : 'Horizontal'}</Text></Pressable>)}</View>
     <View style={styles.demo}>
       <View style={styles.demoHeader}><Text style={styles.eyebrow}>PREVIEW RAIL</Text><Text style={styles.platform}>{Platform.OS === 'web' ? 'React Native Web preview' : 'Native demo'}</Text></View>
       <PreviewRail items={items} activeId={activeId} onActiveChange={setActiveId} orientation={orientation} reducedMotion={reduce}
@@ -35,7 +36,6 @@ export default function ShowcaseHome() {
       <Text style={styles.selected}>Selected: {items.find(item => item.id === activeId)?.label}</Text>
     </View>
     <View style={styles.options}>
-      <Pressable accessibilityRole="button" onPress={() => setOrientation(orientation === 'vertical' ? 'horizontal' : 'vertical')} style={styles.option}><Text style={styles.optionText}>{orientation === 'vertical' ? 'Try horizontal' : 'Try vertical'}</Text></Pressable>
       <Pressable accessibilityRole="button" onPress={() => setReduce(reduce === true ? undefined : true)} style={styles.option}><Text style={styles.optionText}>{reduce === true ? 'Motion: reduced' : 'Motion: system'}</Text></Pressable>
       <Pressable accessibilityRole="button" onPress={() => { setActiveId('focus'); setOrientation('vertical'); setReduce(undefined); }} style={styles.option}><Text style={styles.optionText}>Reset</Text></Pressable>
     </View>
@@ -54,5 +54,7 @@ const styles = StyleSheet.create({
   glyph: { fontSize: 64, lineHeight: 76, color: '#254934', marginVertical: 6 }, cardTitle: { fontSize: 30, fontWeight: '700', letterSpacing: -1, color: '#193f30' }, cardDescription: { color: '#3d5644', fontSize: 14, lineHeight: 22 },
   cardFooter: { flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 1, borderColor: '#abc79f', paddingTop: 14, marginTop: 4 }, cardFooterText: { color: '#2a4934', fontSize: 11, fontWeight: '600' },
   selected: { color: '#486045', fontSize: 12 }, options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, option: { paddingHorizontal: 12, minHeight: 44, borderRadius: 14, backgroundColor: '#e6edde', justifyContent: 'center' },
+  pills: { flexDirection: 'row', gap: 8, marginBottom: -8 }, pill: { paddingHorizontal: 16, minHeight: 44, borderRadius: 22, backgroundColor: '#fff', borderWidth: 1, borderColor: '#d5e1d2', justifyContent: 'center' }, pillOn: { backgroundColor: '#193f30', borderColor: '#193f30' },
+  pillText: { fontSize: 12, color: '#193f30' }, pillTextOn: { color: '#fff' },
   optionText: { fontSize: 12, color: '#31513b', fontWeight: '600' }, note: { color: '#4b6053', fontSize: 13, lineHeight: 22 },
 });
