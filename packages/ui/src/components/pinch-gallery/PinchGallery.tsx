@@ -61,7 +61,7 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
     if (reduce) Animated.timing(t, { toValue: to, duration: 100, easing: Easing.out(Easing.quad), useNativeDriver: false }).start(finish);
     else Animated.spring(t, { toValue: to, stiffness: 260, damping: 26, mass: 0.9, useNativeDriver: false }).start(finish);
   };
-  const settle = (to: number) => { applyAnchor(tValue.current); setLayout({ from: to, to }); anchor.current = null; setLocked(false); };
+  const settle = (to: number) => { applyAnchor(tValue.current); setLayout({ from: to, to }); anchor.current = null; setLocked(false); (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: true }); };
 
   // Columns changed from outside (segmented control, state restore): blend there around the viewport center.
   useEffect(() => {

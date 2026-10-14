@@ -300,4 +300,24 @@ public class VerifyTest {
     d.swipe(540, 1500, 540, 800, 20); sleep(1500);
     log("SC single-finger scroll after vertical pinch: screen changed=" + !f2.sameAs(grab("sc-g")) + " " + disp(t2, tiles()));
   }
+
+  @Test public void scrollrepeat() throws Exception {
+    d.wakeUp();
+    open("pinch");
+    boolean c = chip("5 columns") && chip("3 columns");
+    log("SR route/tap control ok=" + c + " fg=" + d.getCurrentPackageName());
+    if (!c) return;
+    double[] degs = {90, 45, 0, 90, 45, 0, 90, 45, 0, 90};
+    for (int i = 0; i < degs.length; i++) {
+      chip("3 columns");
+      pinchShape(540, 1160, degs[i], 600, 250, 30, 700); sleep(2500);
+      String cols = selectedCols();
+      d.swipe(540, 800, 540, 1500, 20); sleep(1200);
+      java.util.Map<String, Integer> t0 = tiles();
+      d.swipe(540, 1500, 540, 800, 20); sleep(1500);
+      java.util.Map<String, Integer> t1 = tiles();
+      log("SR i=" + i + " deg=" + (int) degs[i] + " colsAfterPinch=[" + cols + "] scroll: " + disp(t0, t1));
+      d.swipe(540, 800, 540, 1500, 20); sleep(800);
+    }
+  }
 }
