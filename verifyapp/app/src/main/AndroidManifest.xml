@@ -1,0 +1,5 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <queries><package android:name="com.anonymous.nativeletshowcase"/></queries>
+  <application android:label="verify"/>
+  <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner" android:targetPackage="com.nativelet.verify"/>
+</manifest>
