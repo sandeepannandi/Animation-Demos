@@ -125,7 +125,7 @@ export function PinchGallery<T>({ items, keyExtractor, labelExtractor, renderIte
   }
   const toggle = (index: number) => { const id = live.current.ids[index], cur = live.current.selection; setSelection(cur.includes(id) ? cur.filter(x => x !== id) : live.current.ids.filter(x => x === id || cur.includes(x))); };
 
-  const onTouchStart = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; if (n === 1) { measure(); finger.current = { x: e.nativeEvent.touches[0].pageX - origin.current.x, y: e.nativeEvent.touches[0].pageY - origin.current.y }; } if (n === 2 && !pinch.current) beginPinch(e); };
+  const onTouchStart = (e: GestureResponderEvent) => { const n = e.nativeEvent.touches.length; if (n === 1) { measure(); finger.current = { x: e.nativeEvent.touches[0].pageX - origin.current.x, y: e.nativeEvent.touches[0].pageY - origin.current.y }; } if (n === 2 && !pinch.current) { (scrollRef.current as any)?.setNativeProps?.({ scrollEnabled: false }); beginPinch(e); } };
   const onTouchMove = (e: GestureResponderEvent) => {
     const n = e.nativeEvent.touches.length;
     if (pinch.current) { if (n >= 2) movePinch(e); else endPinch(); return; }
