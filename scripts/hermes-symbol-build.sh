@@ -13,9 +13,20 @@ mkdir -p /tmp/hermes-source; tar -xzf /tmp/hermes-src.tgz -C /tmp/hermes-source 
 JSI="$RN/ReactCommon/jsi"
 cmake -S /tmp/hermes-source -B /tmp/hermes-host -G Ninja -DCMAKE_BUILD_TYPE=Release -DJSI_DIR="$JSI" -DHERMESVM_HEAP_HV_MODE=HEAP_HV_PREFER32 -DHERMES_ENABLE_TEST_SUITE=OFF
 cmake --build /tmp/hermes-host --target hermesc -j 4
-NDK=$(find "$ANDROID_HOME/ndk" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+sdkmanager "ndk;27.1.12297006" >/dev/null
+NDK="$ANDROID_HOME/ndk/27.1.12297006"
 printf 'ndk=%s\n' "$NDK" | tee -a engine-out/build.txt
-cmake -S /tmp/hermes-source -B /tmp/hermes-android -G Ninja \
+# RN pins fbjni 0.7.0. Supply the same Prefab import normally provided by AGP.
+curl -fL --retry 2 https://repo.maven.apache.org/maven2/com/facebook/fbjni/fbjni/0.7.0/fbjni-0.7.0.aar -o /tmp/fbjni.aar
+mkdir -p /tmp/fbjni; unzip -q /tmp/fbjni.aar -d /tmp/fbjni
+cat > /tmp/fbjni/fbjniConfig.cmake <<'CMAKE'
+add_library(fbjni::fbjni SHARED IMPORTED)
+set_target_properties(fbjni::fbjni PROPERTIES
+ IMPORTED_LOCATION /tmp/fbjni/prefab/modules/fbjni/libs/android.x86_64/libfbjni.so
+ INTERFACE_INCLUDE_DIRECTORIES /tmp/fbjni/prefab/modules/fbjni/include)
+CMAKE
+sha256sum /tmp/fbjni.aar | tee -a engine-out/build.txt
+cmake -S /tmp/hermes-source -B /tmp/hermes-android -G Ninja -Dfbjni_DIR=/tmp/fbjni \
  -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
  -DANDROID_ABI=x86_64 -DANDROID_PLATFORM=android-24 -DANDROID_STL=c++_shared \
  -DANDROID_PIE=True -DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON \
