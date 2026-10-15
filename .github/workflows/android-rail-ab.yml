@@ -58,7 +58,7 @@ jobs:
           disable-animations: false
           script: |
             adb install -r apk/*.apk
-            bash scripts/android-rail-ab.sh
+            RAIL_N=0 RAIL_M=8 bash scripts/android-rail-ab.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
