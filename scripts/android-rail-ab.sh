@@ -16,7 +16,7 @@ for m in re.finditer(r'<node[^>]*>',x):
     if not b: continue
     if (t and t.group(1)==needle) or (d and d.group(1)==needle):
         x1,y1,x2,y2=map(int,b.groups())
-        print(((x1+x2)//2,(y1+y2)//2) if mode=='center' else y1); break
+        print('%d %d'%((x1+x2)//2,(y1+y2)//2) if mode=='center' else y1); break
 PYEOF
 dump() { for k in 1 2 3; do adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1; adb pull /sdcard/ui.xml "$OUT/ui-$1.xml" >/dev/null 2>&1 && [ -s "$OUT/ui-$1.xml" ] && return; sleep 1; done; }
 C() { python3 "$PY" center "$1" "$OUT/ui-$2.xml"; }
