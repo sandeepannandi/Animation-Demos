@@ -59,6 +59,16 @@ for i in $(seq 1 "$M"); do
     say "C i=$i arm=$A pagescroll_from_card_eyebrow_y=$Y0->$Y1"
   done
 done
+# vertical orientation: page scroll (vertical swipe) started ON the rail strip - the same axis the rail uses; reported as the tradeoff measurement
+for i in $(seq 1 "$M"); do
+  if [ $((i%2)) = 1 ]; then ORDER="0 1"; else ORDER="1 0"; fi
+  for A in $ORDER; do
+    launch $A; dump s0
+    Y0=$(T "PREVIEW RAIL" s0); R=($(C Rest s0))
+    if [ -n "${R[1]:-}" ]; then adb shell input swipe "${R[0]}" "${R[1]}" "${R[0]}" $((R[1]-400)) 500; sleep 1.5; dump s1; Y1=$(T "PREVIEW RAIL" s1); C1=$(card s1); else Y1=NA; C1=NA; fi
+    say "S i=$i arm=$A vertical_swipe_from_strip_eyebrow_y=$Y0->$Y1 card=$C1"
+  done
+done
 # horizontal orientation: scroll the page so the rail is on screen first
 for i in $(seq 1 "$M"); do
   if [ $((i%2)) = 1 ]; then ORDER="0 1"; else ORDER="1 0"; fi
@@ -66,10 +76,10 @@ for i in $(seq 1 "$M"); do
     launch $A; dump h0
     H=($(C Horizontal h0)); [ -z "${H[1]:-}" ] && { say "H i=$i arm=$A UNRESOLVED pill"; continue; }
     adb shell input tap "${H[0]}" "${H[1]}"; sleep 1.5; dump h1
-    SB=($(C "Press a tick. Drag to explore. Release to choose." h1)); [ -n "${SB[1]:-}" ] && { adb shell input swipe "${SB[0]}" "${SB[1]}" "${SB[0]}" $((SB[1]-600)) 500; sleep 1.2; }
-    dump h2; P=$(card h2)
+    SB=($(C "Press a tick. Drag to explore. Release to choose." h1)); [ -n "${SB[1]:-}" ] && { adb shell input swipe "${SB[0]}" "${SB[1]}" "${SB[0]}" $((SB[1]-600)) 500; sleep 3; }
+    dump h2; sleep 1; dump h2; P=$(card h2)
     HD=$(drag Focus Create h2 && { dump h3; card h3; } || echo UNRESOLVED)
-    dump h4; Y0=$(T "PREVIEW RAIL" h4); R=($(C Listen h4))
+    sleep 1; dump h4; Y0=$(T "PREVIEW RAIL" h4); R=($(C Listen h4))
     if [ -n "${R[1]:-}" ]; then adb shell input swipe "${R[0]}" "${R[1]}" "${R[0]}" $((R[1]-300)) 500; sleep 1.2; dump h5; Y1=$(T "PREVIEW RAIL" h5); else Y1=NA; fi
     say "H i=$i arm=$A start_card=$P horizontal_drag_card=$HD (expect Create) pagescroll_from_rail_eyebrow_y=$Y0->$Y1"
   done

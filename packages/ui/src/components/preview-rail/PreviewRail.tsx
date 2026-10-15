@@ -20,6 +20,9 @@ export interface PreviewRailProps<T extends PreviewRailItem> {
   orientation?: 'vertical' | 'horizontal';
   /** Called only when a user moves onto a different item. Keep errors inside your adapter. */
   onSelectionFeedback?: () => void;
+  /** Called when a touch lands on / leaves the rail strip, so a parent scroller can be held still. */
+  onTouchBegin?: () => void;
+  onTouchFinish?: () => void;
   /** Omit to follow the system accessibility setting. */
   reducedMotion?: boolean;
   accessibilityLabel?: string;
@@ -28,7 +31,7 @@ export interface PreviewRailProps<T extends PreviewRailItem> {
 
 export function PreviewRail<T extends PreviewRailItem>({
   items, activeId, defaultActiveId, onActiveChange, renderPreview,
-  orientation = 'vertical', onSelectionFeedback, reducedMotion,
+  orientation = 'vertical', onSelectionFeedback, onTouchBegin, onTouchFinish, reducedMotion,
   accessibilityLabel = 'Preview rail', style,
 }: PreviewRailProps<T>) {
   const [internalId, setInternalId] = useState(defaultActiveId ?? items[0]?.id);
@@ -137,9 +140,9 @@ export function PreviewRail<T extends PreviewRailItem>({
       <View style={[styles.body, horizontal && styles.horizontalBody]}>
         <View
           ref={railRef} onLayout={measure} {...responder.panHandlers}
-          onTouchStart={e => dbg('touchStart y=' + Math.round(e.nativeEvent.pageY))}
-          onTouchEnd={e => dbg('touchEnd y=' + Math.round(e.nativeEvent.pageY))}
-          onTouchCancel={() => dbg('touchCancel')}
+          onTouchStart={e => { onTouchBegin?.(); dbg('touchStart y=' + Math.round(e.nativeEvent.pageY)); }}
+          onTouchEnd={e => { onTouchFinish?.(); dbg('touchEnd y=' + Math.round(e.nativeEvent.pageY)); }}
+          onTouchCancel={() => { onTouchFinish?.(); dbg('touchCancel'); }}
           style={[styles.rail, horizontal ? styles.horizontalRail : styles.verticalRail]}
           accessibilityLabel={accessibilityLabel}
         >

@@ -29,8 +29,7 @@ export default function ShowcaseHome() {
     <View style={styles.pills}>{(['vertical', 'horizontal'] as const).map(o => <Pressable key={o} accessibilityRole="button" accessibilityState={{ selected: orientation === o }} onPress={() => setOrientation(o)} style={[styles.pill, orientation === o && styles.pillOn]}><Text style={[styles.pillText, orientation === o && styles.pillTextOn]}>{o === 'vertical' ? 'Vertical' : 'Horizontal'}</Text></Pressable>)}</View>
     <View style={styles.demo}>
       <View style={styles.demoHeader}><Text style={styles.eyebrow}>PREVIEW RAIL</Text><Text style={styles.platform}>{Platform.OS === 'web' ? 'React Native Web preview' : 'Native demo'}</Text></View>
-      <View onTouchStart={() => { if (arm) { setPage(false); console.log('RAILDBG ' + Date.now() + ' page locked'); } }} onTouchEnd={() => { if (arm) setPage(true); }} onTouchCancel={() => { if (arm) setPage(true); }}>
-      <PreviewRail items={items} activeId={activeId} onActiveChange={setActiveId} orientation={orientation} reducedMotion={reduce}
+      <PreviewRail onTouchBegin={() => { if (arm && orientation === 'vertical') { setPage(false); console.log('RAILDBG ' + Date.now() + ' page locked'); } }} onTouchFinish={() => { if (arm && orientation === 'vertical') setPage(true); }} items={items} activeId={activeId} onActiveChange={setActiveId} orientation={orientation} reducedMotion={reduce}
         onSelectionFeedback={() => { if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {}); }}
         renderPreview={item => <View style={[styles.card, { backgroundColor: item.color }]}>
           <Text style={styles.cardNumber}>{item.number} / DAILY RITUALS</Text>
@@ -38,7 +37,6 @@ export default function ShowcaseHome() {
           <Text accessibilityRole="header" style={styles.cardTitle}>{item.label}</Text><Text style={styles.cardDescription}>{item.description}</Text>
           <View style={styles.cardFooter}><Text style={styles.cardFooterText}>Take a moment</Text><Text style={styles.cardFooterText}>↗</Text></View>
         </View>} />
-      </View>
       <Text style={styles.selected}>Selected: {items.find(item => item.id === activeId)?.label}</Text>
     </View>
     <View style={styles.options}>
