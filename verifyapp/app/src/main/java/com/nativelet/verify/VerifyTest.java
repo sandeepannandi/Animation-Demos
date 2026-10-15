@@ -107,8 +107,16 @@ public class VerifyTest {
  @Test public void captureGooey()throws Exception{
   open("gooey");save("gooey-before");tap("Slow motion");pause(800);tap("Create");pause(3500);tap("Create");pause(3500);save("gooey-after");
  }
+ @Test public void prepareLight()throws Exception{
+  open("light");awaitNode("Drag the bulb to move the light. Swipe for the next painting.");
+  for(int n=0;n<5;n++){clearSystemDialog();pause(2000);}
+ }
+ void clearSystemDialog(){
+  AccessibilityNodeInfo close=node("Close app");
+  if(close!=null){close.performAction(AccessibilityNodeInfo.ACTION_CLICK);log("SYSTEM_CLOSE_DIALOG");pause(1000);}
+ }
  @Test public void captureLight()throws Exception{
-  open("light");save("light-before");
+  awaitNode("Drag the bulb to move the light. Swipe for the next painting.");save("light-before");
   AccessibilityNodeInfo hint=awaitNode("Drag the bulb to move the light. Swipe for the next painting.");
   if(hint==null)throw new Exception("Light hint target absent");
   Rect b=new Rect();hint.getBoundsInScreen(b);
@@ -117,10 +125,12 @@ public class VerifyTest {
   float y=b.top-16*density-80*density;
   log("Light hint bounds="+b.toShortString()+" configuredDensity="+density+" swipe y="+y);
   for(int n=0;n<8;n++){
+   clearSystemDialog();
    log("LIGHT_SWIPE "+n);
    boolean left=n<4;
    motion(width*(left?0.74f:0.26f),y,width*(left?0.26f:0.74f),y,250);pause(1700);
   }
+  clearSystemDialog();
   // Bulb drag is still relative to the art box, not the caption.
   float side=320*density,top=b.top-16*density-side;
   motion(width*0.5f,top+side*0.33f,width*0.7f,top+side*0.52f,700);pause(1500);

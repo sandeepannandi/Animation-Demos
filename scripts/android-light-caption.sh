@@ -16,9 +16,11 @@ run_test(){
  adb shell am instrument -w -e class "com.nativelet.verify.VerifyTest#$1" com.nativelet.verify/androidx.test.runner.AndroidJUnitRunner | tee "$OUT/$1.txt"
  if grep -qE 'FAILURES!!!|INSTRUMENTATION_FAILED|Process crashed' "$OUT/$1.txt"; then echo "CHECK_INVALID $1"; return 1; fi
 }
+run_test prepareLight
+adb shell am force-stop com.google.android.apps.nexuslauncher || true
 for test in captureLight; do
   adb logcat -c
-  adb shell screenrecord --size 540x1200 --bit-rate 4000000 --time-limit 45 "/sdcard/$test.mp4" >"$OUT/record-$test.txt" 2>&1 &
+  adb shell screenrecord --size 540x1200 --bit-rate 4000000 --time-limit 120 "/sdcard/$test.mp4" >"$OUT/record-$test.txt" 2>&1 &
   recorder=$!
   run_test "$test"
   wait "$recorder" || true
