@@ -2,7 +2,7 @@ name: Android emulator smoke
 on:
   workflow_dispatch:
   push:
-    branches: [ci/android-emulator-smoke, "parity/**"]
+    branches: ["verify/final-main"]
 permissions:
   contents: read
 jobs:
@@ -37,6 +37,12 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 17 }
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: 8.9 }
+      - name: Build verify app
+        run: cd verifyapp && gradle --no-daemon :app:assembleDebug
       - uses: actions/download-artifact@v4
         with:
           name: apk
@@ -57,13 +63,8 @@ jobs:
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: false
           script: |
-            bash scripts/android-smoke.sh apk/*.apk
-            bash scripts/android-gestures.sh
-            bash scripts/android-core.sh
-            bash scripts/android-slowmotion.sh
-            bash scripts/android-rail-stress.sh
-            bash scripts/android-rail-behavior.sh
-            bash scripts/android-core2.sh
+            adb install -r apk/*.apk
+            bash scripts/android-final.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
