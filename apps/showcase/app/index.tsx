@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Link } from 'expo-router';
@@ -16,7 +16,10 @@ export default function ShowcaseHome() {
   const [activeId, setActiveId] = useState('focus');
   const [orientation, setOrientation] = useState<'vertical'|'horizontal'>('vertical');
   const [reduce, setReduce] = useState<boolean | undefined>();
-  return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
+  const pageRef = useRef<ScrollView>(null);
+  // Vertical rail only: hold the page still while a finger is on the strip, so a vertical drag cannot be taken by the page scroller. Set natively and restored on touch end/cancel.
+  const holdPage = (hold: boolean) => { if (orientation === 'vertical') (pageRef.current as any)?.setNativeProps?.({ scrollEnabled: !hold }); };
+  return <SafeAreaView style={styles.page}><ScrollView ref={pageRef} contentContainerStyle={styles.content}>
     <View style={styles.header}><Text style={styles.brand}>nativelet</Text><Text style={styles.badge}>NATIVE STUDY / 01</Text></View>
     <Link href="/glass" style={styles.note}>New: Liquid Tabs →</Link>
     <Link href="/capsule" style={styles.note}>Next: Morph Capsule →</Link>
@@ -26,6 +29,7 @@ export default function ShowcaseHome() {
     <View style={styles.demo}>
       <View style={styles.demoHeader}><Text style={styles.eyebrow}>PREVIEW RAIL</Text><Text style={styles.platform}>{Platform.OS === 'web' ? 'React Native Web preview' : 'Native demo'}</Text></View>
       <PreviewRail items={items} activeId={activeId} onActiveChange={setActiveId} orientation={orientation} reducedMotion={reduce}
+        onTouchBegin={() => holdPage(true)} onTouchFinish={() => holdPage(false)}
         onSelectionFeedback={() => { if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {}); }}
         renderPreview={item => <View style={[styles.card, { backgroundColor: item.color }]}>
           <Text style={styles.cardNumber}>{item.number} / DAILY RITUALS</Text>
