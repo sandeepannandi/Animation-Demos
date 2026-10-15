@@ -8,7 +8,7 @@ adb install -r -t verifyapp/app/build/outputs/apk/debug/app-debug.apk
 adb shell wm size 540x1200
 adb shell wm density 210
 adb shell wm size > "$OUT/device.txt"; adb shell wm density >> "$OUT/device.txt"
-adb shell settings put secure enabled_accessibility_services ''
+adb shell settings delete secure enabled_accessibility_services
 adb shell settings put secure accessibility_enabled 0
 run_test(){ adb shell am instrument -w -e class "com.nativelet.verify.VerifyTest#$1" com.nativelet.verify/androidx.test.runner.AndroidJUnitRunner | tee "$OUT/$1.txt"; }
 for test in captureLight captureGenie captureGooey; do
