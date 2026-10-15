@@ -5,6 +5,7 @@
   "files": [
     "BlossomQR.tsx",
     "blossomMath.ts",
+    "timing.ts",
     "Example.tsx",
     "README.md",
     "LICENSE"
