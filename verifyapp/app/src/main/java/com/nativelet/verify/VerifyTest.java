@@ -46,9 +46,12 @@ public class VerifyTest {
   for(int k=0;k<=12;k++){
    int a=k==0?MotionEvent.ACTION_DOWN:k==12?MotionEvent.ACTION_UP:MotionEvent.ACTION_MOVE;
    MotionEvent e=MotionEvent.obtain(down,SystemClock.uptimeMillis(),a,w*(0.25f+0.5f*k/12),h*0.50f,0);
-   e.setSource(InputDevice.SOURCE_TOUCHSCREEN);u().injectInputEvent(e,true);e.recycle();pause(12);
+   e.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+   try { u().getClass().getMethod("injectInputEventToInputFilter",InputEvent.class).invoke(u(),e); }
+   catch(Exception error) { throw new RuntimeException("ACCESSIBILITY_FILTER_INJECTION_FAILED",error); }
+   e.recycle();pause(12);
   }
-  pause(1000);
+  pause(1700);
  }
  void save(String s){try{android.graphics.Bitmap b=u().takeScreenshot();try(java.io.FileOutputStream f=new java.io.FileOutputStream(new java.io.File(inst.getContext().getExternalFilesDir(null),s+".png"))){b.compress(android.graphics.Bitmap.CompressFormat.PNG,100,f);}b.recycle();}catch(Exception e){log("shot error "+e);}}
  @Test public void touchFocus() throws Exception {
@@ -58,7 +61,7 @@ public class VerifyTest {
   for(int n=0;n<6;n++){AccessibilityNodeInfo wait=node("Wait");if(wait==null)break;wait.performAction(AccessibilityNodeInfo.ACTION_CLICK);pause(2000);}
   Set<String> seen=new HashSet<>();
   log("CONTROL initial "+focus());
-  for(int n=0;n<16;n++){swipeRight();String f=focus();log("CONTROL right"+n+" "+f);if(f.contains("pkg=com.android.settings")&&!f.contains("NO_FOCUS"))seen.add(f);}
+  for(int n=0;n<8;n++){swipeRight();String f=focus();log("CONTROL right"+n+" "+f);if(f.contains("pkg=com.android.settings")&&!f.contains("NO_FOCUS"))seen.add(f);}
   save("focus-control");
   if(seen.size()<2){log("CONTROL_FAILED distinctFocus="+seen.size()+"; app traversal not attempted");return;}
   log("CONTROL_PASSED distinctFocus="+seen.size());

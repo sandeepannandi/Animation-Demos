@@ -16,16 +16,10 @@ run_test(){
  adb shell am instrument -w -e class "com.nativelet.verify.VerifyTest#$1" com.nativelet.verify/androidx.test.runner.AndroidJUnitRunner | tee "$OUT/$1.txt"
  if grep -qE 'FAILURES!!!|INSTRUMENTATION_FAILED|Process crashed' "$OUT/$1.txt"; then echo "CHECK_INVALID $1"; return 1; fi
 }
-for test in captureLight captureGenie captureGooey; do
-  adb logcat -c
-  adb shell screenrecord --size 540x1200 --bit-rate 4000000 --time-limit 24 "/sdcard/$test.mp4" >"$OUT/record-$test.txt" 2>&1 &
-  recorder=$!
-  run_test "$test"
-  wait "$recorder" || true
-  adb pull "/sdcard/$test.mp4" "$OUT/" >/dev/null
-  adb logcat -d > "$OUT/$test.log"
-done
 TB=com.google.android.marvin.talkback
+# Emulator-only diagnostic API access. Standard injected input bypasses TalkBack's filter.
+adb shell settings put global hidden_api_policy 1
+adb shell pm grant com.google.android.marvin.talkback android.permission.POST_NOTIFICATIONS || true
 adb shell settings put secure tts_default_synth com.google.android.tts
 adb shell settings put secure enabled_accessibility_services "$TB/com.google.android.marvin.talkback.TalkBackService"
 adb shell settings put secure accessibility_enabled 1

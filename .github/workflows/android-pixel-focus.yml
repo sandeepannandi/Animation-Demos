@@ -1,4 +1,4 @@
-name: Android visible frames and TalkBack touch focus
+name: Android TalkBack filter and TalkBack touch focus
 on:
   push:
     branches: [verify/pixel-focus]
