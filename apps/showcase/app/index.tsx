@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import { PreviewRail } from '../../../packages/ui/src/components/preview-rail/PreviewRail';
 import { SourcePanel } from '../src/web/SourcePanel';
@@ -16,7 +16,11 @@ export default function ShowcaseHome() {
   const [activeId, setActiveId] = useState('focus');
   const [orientation, setOrientation] = useState<'vertical'|'horizontal'>('vertical');
   const [reduce, setReduce] = useState<boolean | undefined>();
-  return <SafeAreaView style={styles.page}><ScrollView contentContainerStyle={styles.content}>
+  const { lock } = useLocalSearchParams<{ lock?: string }>();
+  const arm = lock === '1';
+  const pageRef = useRef<ScrollView>(null);
+  const setPage = (on: boolean) => (pageRef.current as any)?.setNativeProps?.({ scrollEnabled: on });
+  return <SafeAreaView style={styles.page}><ScrollView ref={pageRef} contentContainerStyle={styles.content} onScrollBeginDrag={() => console.log('RAILDBG ' + Date.now() + ' page scrollBeginDrag')} onScrollEndDrag={() => console.log('RAILDBG ' + Date.now() + ' page scrollEndDrag')} onScroll={e => console.log('RAILDBG ' + Date.now() + ' page scroll y=' + Math.round(e.nativeEvent.contentOffset.y))} scrollEventThrottle={16} onTouchCancel={() => console.log('RAILDBG ' + Date.now() + ' page touchCancel')}>
     <View style={styles.header}><Text style={styles.brand}>nativelet</Text><Text style={styles.badge}>NATIVE STUDY / 01</Text></View>
     <Link href="/glass" style={styles.note}>New: Liquid Tabs →</Link>
     <Link href="/capsule" style={styles.note}>Next: Morph Capsule →</Link>
@@ -25,6 +29,7 @@ export default function ShowcaseHome() {
     <View style={styles.pills}>{(['vertical', 'horizontal'] as const).map(o => <Pressable key={o} accessibilityRole="button" accessibilityState={{ selected: orientation === o }} onPress={() => setOrientation(o)} style={[styles.pill, orientation === o && styles.pillOn]}><Text style={[styles.pillText, orientation === o && styles.pillTextOn]}>{o === 'vertical' ? 'Vertical' : 'Horizontal'}</Text></Pressable>)}</View>
     <View style={styles.demo}>
       <View style={styles.demoHeader}><Text style={styles.eyebrow}>PREVIEW RAIL</Text><Text style={styles.platform}>{Platform.OS === 'web' ? 'React Native Web preview' : 'Native demo'}</Text></View>
+      <View onTouchStart={() => { if (arm) { setPage(false); console.log('RAILDBG ' + Date.now() + ' page locked'); } }} onTouchEnd={() => { if (arm) setPage(true); }} onTouchCancel={() => { if (arm) setPage(true); }}>
       <PreviewRail items={items} activeId={activeId} onActiveChange={setActiveId} orientation={orientation} reducedMotion={reduce}
         onSelectionFeedback={() => { if (Platform.OS !== 'web') void Haptics.selectionAsync().catch(() => {}); }}
         renderPreview={item => <View style={[styles.card, { backgroundColor: item.color }]}>
@@ -33,6 +38,7 @@ export default function ShowcaseHome() {
           <Text accessibilityRole="header" style={styles.cardTitle}>{item.label}</Text><Text style={styles.cardDescription}>{item.description}</Text>
           <View style={styles.cardFooter}><Text style={styles.cardFooterText}>Take a moment</Text><Text style={styles.cardFooterText}>↗</Text></View>
         </View>} />
+      </View>
       <Text style={styles.selected}>Selected: {items.find(item => item.id === activeId)?.label}</Text>
     </View>
     <View style={styles.options}>
