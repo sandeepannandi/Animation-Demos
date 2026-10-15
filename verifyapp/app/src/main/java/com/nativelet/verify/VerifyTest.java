@@ -17,8 +17,20 @@ public class VerifyTest {
  void pause(long n){SystemClock.sleep(n);}
  void open(String r){
   Intent i=new Intent(Intent.ACTION_VIEW,Uri.parse("nativelet-showcase:///"+r));
+  u().executeShellCommand("am force-stop com.anonymous.nativeletshowcase");pause(800);
   i.setPackage("com.anonymous.nativeletshowcase");i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-  inst.getContext().startActivity(i);pause(6000);
+  inst.getContext().startActivity(i);pause(3000);
+  ready();
+ }
+ void ready(){
+  for(int n=0;n<20;n++){
+   AccessibilityNodeInfo r=u().getRootInActiveWindow();
+   AccessibilityNodeInfo wait=node("Wait");
+   if(wait!=null){wait.performAction(AccessibilityNodeInfo.ACTION_CLICK);log("SYSTEM_DIALOG_WAIT");pause(2500);continue;}
+   if(r!=null&&"com.anonymous.nativeletshowcase".contentEquals(r.getPackageName())){pause(1500);return;}
+   pause(1000);
+  }
+  throw new RuntimeException("app foreground readiness failed");
  }
  String focus(){
   AccessibilityNodeInfo r=u().getRootInActiveWindow();
@@ -43,9 +55,10 @@ public class VerifyTest {
   u().setOnAccessibilityEventListener(e->{if(e.getEventType()==AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED)log("FOCUS_EVENT pkg="+e.getPackageName()+" text="+e.getText()+" desc="+e.getContentDescription());});
   Intent set=new Intent(android.provider.Settings.ACTION_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
   inst.getContext().startActivity(set);pause(5000);
+  for(int n=0;n<6;n++){AccessibilityNodeInfo wait=node("Wait");if(wait==null)break;wait.performAction(AccessibilityNodeInfo.ACTION_CLICK);pause(2000);}
   Set<String> seen=new HashSet<>();
   log("CONTROL initial "+focus());
-  for(int n=0;n<5;n++){swipeRight();String f=focus();log("CONTROL right"+n+" "+f);if(f.contains("pkg=com.android.settings")&&!f.contains("NO_FOCUS"))seen.add(f);}
+  for(int n=0;n<16;n++){swipeRight();String f=focus();log("CONTROL right"+n+" "+f);if(f.contains("pkg=com.android.settings")&&!f.contains("NO_FOCUS"))seen.add(f);}
   save("focus-control");
   if(seen.size()<2){log("CONTROL_FAILED distinctFocus="+seen.size()+"; app traversal not attempted");return;}
   log("CONTROL_PASSED distinctFocus="+seen.size());
