@@ -64,7 +64,7 @@ jobs:
           disable-animations: false
           script: |
             adb install -r apk/*.apk
-            bash scripts/android-final.sh
+            bash scripts/android-final2.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
