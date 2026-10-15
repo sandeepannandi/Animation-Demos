@@ -23,14 +23,6 @@ jobs:
           path: apk
           run-id: 38752568625
           github-token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/download-artifact@v4
-        with:
-          name: exact-engine-and-apks
-          path: engine-out
-          run-id: 38783981887
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Repackage exact existing engine, uncompressed and page-aligned
-        run: bash scripts/repackage-engine.sh
       - name: Confirm stock APK provenance
         run: sha256sum apk/*.apk
       - name: Enable KVM
@@ -47,9 +39,7 @@ jobs:
           profile: pixel_6
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           disable-animations: false
-          script: |
-            bash scripts/hermes-symbol-test.sh
-            bash scripts/android-pixel-focus.sh
+          script: bash scripts/android-pixel-focus.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:

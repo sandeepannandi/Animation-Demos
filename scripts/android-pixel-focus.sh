@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 OUT=smoke-out/pixel-focus; mkdir -p "$OUT"
-adb uninstall com.anonymous.nativeletshowcase >/dev/null
+trap 'adb pull /sdcard/Android/data/com.nativelet.verify/files "$OUT/shots" >/dev/null 2>&1 || true; adb logcat -d > "$OUT/final-logcat.txt"' EXIT
+adb uninstall com.anonymous.nativeletshowcase >/dev/null 2>&1 || true
 adb install --no-incremental -r apk/*.apk
 adb install -r -t verifyapp/app/build/outputs/apk/debug/app-debug.apk
 # Four times fewer physical pixels, same logical layout. This is a changed capture method,

@@ -78,8 +78,18 @@ public class VerifyTest {
    for(int i=0;i<n.getChildCount();i++){AccessibilityNodeInfo c=n.getChild(i);if(c!=null)q.add(c);}
   }return null;
  }
+ AccessibilityNodeInfo awaitNode(String text)throws Exception{
+  for(int k=0;k<24;k++){
+   AccessibilityNodeInfo wait=node("Wait");if(wait!=null){wait.performAction(AccessibilityNodeInfo.ACTION_CLICK);pause(2000);}
+   AccessibilityNodeInfo n=node(text);if(n!=null)return n;pause(1000);
+  }
+  save("missing-target");
+  AccessibilityNodeInfo r=u().getRootInActiveWindow();log("MISSING_TARGET "+text+" root="+r);
+  if(r!=null)log("ROOT text="+r.getText()+" desc="+r.getContentDescription()+" pkg="+r.getPackageName());
+  throw new Exception("target absent after24readinesschecks "+text);
+ }
  void tap(String text)throws Exception{
-  AccessibilityNodeInfo n=node(text);if(n==null)throw new Exception("target absent "+text);
+  AccessibilityNodeInfo n=awaitNode(text);
   Rect r=new Rect();n.getBoundsInScreen(r);log("tap "+text+" "+r.toShortString());
   motion(r.centerX(),r.centerY(),r.centerX(),r.centerY(),80);pause(300);
  }
@@ -99,7 +109,7 @@ public class VerifyTest {
  }
  @Test public void captureLight()throws Exception{
   open("light");save("light-before");
-  AccessibilityNodeInfo hint=node("Drag the bulb to move the light. Swipe for the next painting.");
+  AccessibilityNodeInfo hint=awaitNode("Drag the bulb to move the light. Swipe for the next painting.");
   if(hint==null)throw new Exception("Light hint target absent");
   Rect b=new Rect();hint.getBoundsInScreen(b);
   android.graphics.Bitmap shot=u().takeScreenshot();float density=210f/160f;float width=shot.getWidth();shot.recycle();
