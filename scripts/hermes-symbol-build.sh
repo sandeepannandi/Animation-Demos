@@ -13,7 +13,7 @@ mkdir -p /tmp/hermes-source; tar -xzf /tmp/hermes-src.tgz -C /tmp/hermes-source 
 JSI="$RN/ReactCommon/jsi"
 cmake -S /tmp/hermes-source -B /tmp/hermes-host -G Ninja -DCMAKE_BUILD_TYPE=Release -DJSI_DIR="$JSI" -DHERMESVM_HEAP_HV_MODE=HEAP_HV_PREFER32 -DHERMES_ENABLE_TEST_SUITE=OFF
 cmake --build /tmp/hermes-host --target hermesc -j 4
-sdkmanager "ndk;27.1.12297006" >/dev/null
+"$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "ndk;27.1.12297006" >/dev/null
 NDK="$ANDROID_HOME/ndk/27.1.12297006"
 printf 'ndk=%s\n' "$NDK" | tee -a engine-out/build.txt
 # RN pins fbjni 0.7.0. Supply the same Prefab import normally provided by AGP.
