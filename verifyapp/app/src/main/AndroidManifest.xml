@@ -1,0 +1,10 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <queries>
+    <package android:name="com.anonymous.nativeletshowcase"/>
+    <intent><action android:name="android.intent.action.TTS_SERVICE"/></intent>
+  </queries>
+  <application android:label="verify">
+    <activity android:name=".MotionActivity" android:exported="true"/>
+  </application>
+  <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner" android:targetPackage="com.nativelet.verify"/>
+</manifest>
