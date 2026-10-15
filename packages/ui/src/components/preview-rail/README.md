@@ -11,6 +11,7 @@ Copy **PreviewRail.tsx and selection.ts together** into one folder, and retain t
 - `renderPreview(item)`: optional preview node.
 - `orientation`: vertical (default) or horizontal. Horizontal items each need 44px; choose vertical for long lists or narrow layouts. This is a short rail, not a virtualized list.
 - `onSelectionFeedback`: optional haptic adapter, called when user selection/drag preview changes. Catch errors in your adapter. The core does not depend on Expo.
+- `onTouchBegin` / `onTouchFinish`: optional, called when a finger lands on or leaves the rail strip (also on a cancelled touch). Inside a vertical `ScrollView`, hold the scroller still between them (`scrollEnabled` false) so the page cannot take a vertical rail drag. Do this for the vertical rail only; a horizontal rail drag does not compete with vertical page scrolling, and holding the page there would stop people scrolling past it. The native demo does exactly this.
 - `reducedMotion`: override the system reduce-motion setting. System detection defaults to reduced motion while loading.
 - `accessibilityLabel`, `style`: container customization. Item labels, selected state, and previous/next buttons provide non-drag alternatives.
 
