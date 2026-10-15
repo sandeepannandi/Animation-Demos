@@ -26,6 +26,11 @@ launch() { adb shell am force-stop "$PKG"; adb logcat -b all -c; adb shell am st
 evs() { adb logcat -b all -d -v epoch | grep -E "RAILDBG" | grep -v "page scroll " | sed -E 's/^ *([0-9]+)\.[0-9]+ .*RAILDBG [0-9]+ /\1 /' | tr '\n' ';' | cut -c1-600; }
 say() { echo "$*" | tee -a "$OUT/summary.txt"; }
 drag() { local P=($(C "$1" "$3")) Q=($(C "$2" "$3")); [ -z "${P[1]:-}" ] || [ -z "${Q[1]:-}" ] && return 1; adb shell input swipe "${P[0]}" "${P[1]}" "${Q[0]}" "${Q[1]}" 1200; sleep 1.5; return 0; }
+# warm-up: the emulator was just booted, the launcher can ANR; settle, clear dialogs, open the app once before any scored attempt
+sleep 60; adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS >/dev/null 2>&1
+adb shell am start -W -a android.intent.action.VIEW -d "nativelet-showcase://?lock=0" "$PKG" >/dev/null 2>&1; sleep 20; dump warm
+say "warmup: anr_dialog=$(grep -c "isn't responding" $OUT/ui-warm.xml 2>/dev/null)"
+if grep -q "isn't responding" "$OUT/ui-warm.xml" 2>/dev/null; then W=($(C Wait warm)); [ -n "${W[1]:-}" ] && adb shell input tap "${W[0]}" "${W[1]}"; sleep 5; fi
 for i in $(seq 1 "$N"); do
   if [ $((i%2)) = 1 ]; then ORDER="0 1"; else ORDER="1 0"; fi
   for A in $ORDER; do
