@@ -59,6 +59,7 @@ a=sys.argv[1]; print(' '.join(str(d(a,b)) for b in sys.argv[2:]))
 PY
 px() { python3 $OUT/px.py "$@"; }
 
+say "DISPLAY: $(adb shell wm size | tr -d "\r" | tr "\n" " ") $(adb shell wm density | tr -d "\r" | tr "\n" " ")"
 # ---- Remaining gestures. Sources: ToastStack toastLogic.shouldDismiss: dismiss when |dx|>64 or |dy|>64 or (|dx|>12 and |vx|>0.6) or (|dy|>12 and |vy|>0.6); card PanResponder starts on move >8.
 # LiquidTabs: holding the ACTIVE tab for holdDelay=280ms starts a scrub; moveX picks the tab under the finger (cell = track width/4); release leaves the last tab selected; a swipe without a hold has no source-defined slide.
 say "== LIQUID TABS hold-and-slide (observable: selected attribute of tab nodes)"
