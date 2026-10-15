@@ -8,6 +8,9 @@ import {
 } from "react-native";
 import {
   Canvas,
+  Group,
+  Text as SkText,
+  matchFont,
   Circle,
   ColorType,
   AlphaType,
@@ -96,6 +99,8 @@ export interface LightPaintingProps {
   style?: ViewStyle;
   /** Called when the shown painting changes (including once on mount). Optional. */
   onPaintingChange?: (index: number, name: string) => void;
+  /** Draw the demo caption with its artwork in the same canvas presentation. Default false. */
+  showCaption?: boolean;
 }
 
 interface Frame {
@@ -103,6 +108,7 @@ interface Frame {
   bulb: Vec;
   cord: string;
   painting: number;
+  imagePainting: number;
 }
 
 /**
@@ -116,7 +122,7 @@ interface Frame {
  * compile, shading falls back to the JS thread at ~30fps into a 160px
  * buffer upscaled by Skia. Not device-tested; no frame-rate claim.
  */
-export function LightPainting({ size = 320, style, onPaintingChange }: LightPaintingProps) {
+export function LightPainting({ size = 320, style, onPaintingChange, showCaption = false }: LightPaintingProps) {
   const effect = getEffect();
   // GPU path: 256px albedo + depth textures per painting, built once.
   const textures = useMemo<PaintingTextures[] | null>(() => {
@@ -150,12 +156,14 @@ export function LightPainting({ size = 320, style, onPaintingChange }: LightPain
     bulb: { x: 0.5, y: 0.33 },
     cord: "",
     painting: 0,
+    imagePainting: 0,
   });
 
+  const shownPainting = textures ? frame.painting : frame.imagePainting;
   useEffect(() => {
-    onPaintingChange?.(frame.painting, PAINTINGS[frame.painting]?.name ?? "");
+    onPaintingChange?.(shownPainting, PAINTINGS[shownPainting]?.name ?? "");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [frame.painting]);
+  }, [shownPainting]);
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((v) => {
@@ -181,7 +189,7 @@ export function LightPainting({ size = 320, style, onPaintingChange }: LightPain
       if (textures) {
         // GPU shades per pixel; JS only publishes the bulb and cord.
         if (tick++ % 2 === 0) {
-          setFrame((f) => ({ image: f.image, bulb, cord, painting: f.painting }));
+          setFrame((f) => ({ ...f, bulb, cord }));
         }
       } else if (tick++ % 2 === 0) {
         // ~30fps CPU fallback shading
@@ -204,7 +212,7 @@ export function LightPainting({ size = 320, style, onPaintingChange }: LightPain
         );
         setFrame((f) => {
           f.image?.dispose?.();
-          return { image, bulb, cord, painting: f.painting };
+          return { image, bulb, cord, painting: f.painting, imagePainting: frame.painting };
         });
       }
       requestAnimationFrame(loop);
@@ -282,28 +290,45 @@ export function LightPainting({ size = 320, style, onPaintingChange }: LightPain
     );
   }
 
+  const captionHeight = showCaption ? 29 : 0;
+  const captionFont = useMemo(() => matchFont({ fontFamily: "sans-serif", fontSize: 10 }), []);
+  const nameFont = useMemo(() => matchFont({ fontFamily: "sans-serif", fontSize: 11, fontStyle: "italic" }), []);
+  const prefix = "LIGHT ON PAINTING  ";
+  const prefixWidth = captionFont.measureText(prefix).width + (prefix.length - 1) * 2;
+  const name = PAINTINGS[shownPainting]?.name ?? "";
+  const captionX = (size - prefixWidth - nameFont.measureText(name).width) / 2;
+  let advance = captionX;
+  const captionLetters = prefix.split("").map((letter, i) => {
+    const x = advance;
+    advance += captionFont.measureText(letter).width + 2;
+    return <SkText key={i} x={x} y={10} text={letter} font={captionFont} color="#52695a" />;
+  });
+
   return (
-    <View style={[styles.wrap, { width: size, height: size }, style]} {...responder.panHandlers}>
-      <Canvas style={StyleSheet.absoluteFill}>
-        <Rect x={0} y={0} width={size} height={size} color="#0a0c10" />
-        {paint ? (
-          <Rect x={fx} y={fx} width={fs} height={fs} paint={paint} />
-        ) : frame.image ? (
-          <SkImageElement image={frame.image} x={fx} y={fx} width={fs} height={fs} fit="fill" />
-        ) : null}
+    <View
+      style={[styles.wrap, { width: size, height: size + captionHeight }, style]}
+      accessible={showCaption || undefined}
+      accessibilityRole={showCaption ? "image" : undefined}
+      accessibilityLabel={showCaption ? `Light on painting, ${name}` : undefined}
+    >
+      <Canvas style={StyleSheet.absoluteFill} pointerEvents="none">
+        {showCaption ? <Group>{captionLetters}<SkText x={captionX + prefixWidth} y={10} text={name} font={nameFont} color="#7a6a52" /></Group> : null}
+        <Group transform={[{ translateY: captionHeight }]}>
+          <Rect x={0} y={0} width={size} height={size} color="#0a0c10" />
+          {paint ? (
+            <Rect x={fx} y={fx} width={fs} height={fs} paint={paint} />
+          ) : frame.image ? (
+            <SkImageElement image={frame.image} x={fx} y={fx} width={fs} height={fs} fit="fill" />
+          ) : null}
+          <Rect x={fx - 3} y={fx - 3} width={fs + 6} height={fs + 6} style="stroke" strokeWidth={5} color="#3d2c1c" />
+          {frame.cord ? <Path path={frame.cord} style="stroke" strokeWidth={1.6} color="#2a2f3a" /> : null}
+          <Circle cx={frame.bulb.x * size} cy={frame.bulb.y * size} r={size * 0.18} opacity={0.5}>
+            <RadialGradient c={vec(frame.bulb.x * size, frame.bulb.y * size)} r={size * 0.18} colors={["#ffe9b866", "#ffe9b800"]} />
+          </Circle>
+          <Circle cx={frame.bulb.x * size} cy={frame.bulb.y * size} r={size * 0.035} color="#ffe9b8" />
+        </Group>
       </Canvas>
-      <Canvas style={StyleSheet.absoluteFill}>
-        <Rect x={fx - 3} y={fx - 3} width={fs + 6} height={fs + 6} style="stroke" strokeWidth={5} color="#3d2c1c" />
-        {frame.cord ? <Path path={frame.cord} style="stroke" strokeWidth={1.6} color="#2a2f3a" /> : null}
-        <Circle cx={frame.bulb.x * size} cy={frame.bulb.y * size} r={size * 0.18} opacity={0.5}>
-          <RadialGradient
-            c={vec(frame.bulb.x * size, frame.bulb.y * size)}
-            r={size * 0.18}
-            colors={["#ffe9b866", "#ffe9b800"]}
-          />
-        </Circle>
-        <Circle cx={frame.bulb.x * size} cy={frame.bulb.y * size} r={size * 0.035} color="#ffe9b8" />
-      </Canvas>
+      <View style={{ position: "absolute", top: captionHeight, width: size, height: size }} {...responder.panHandlers} />
     </View>
   );
 }

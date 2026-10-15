@@ -33,3 +33,17 @@ frame-rate claim. Reduced-motion users get a static bulb with the scene
 still lit from it.
 
 MIT licensed - see LICENSE.
+
+## Caption
+
+`showCaption` (default `false`) draws the current painting name above the art
+inside the same Skia canvas. The example enables it so the caption and art
+are presented together. It adds 29 layout units above the square painting;
+without it the component keeps its original square size. The example exposes
+an image label with the current name to native accessibility.
+
+The Android API 34 x86_64 emulator regression checked eight painting changes
+in both directions and a bulb drag with no title/art mismatch in 276 captured
+frames. This is emulator evidence, not a physical-device or frame-rate claim.
+`onPaintingChange` remains available for external consumers; a separate native
+text caption supplied by a consumer can still present independently of Skia.
