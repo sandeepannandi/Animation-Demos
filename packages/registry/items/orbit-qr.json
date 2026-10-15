@@ -5,6 +5,7 @@
   "files": [
     "OrbitQR.tsx",
     "orbitMath.ts",
+    "timing.ts",
     "Example.tsx",
     "README.md",
     "LICENSE"
