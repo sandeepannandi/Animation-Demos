@@ -226,9 +226,12 @@ export function SplitFlapBoard({
   const beat = useSharedValue(0);
   useFrameCallback((info) => {
     const dt = Math.min(info.timeSincePreviousFrame ?? 16.7, 48) * (slowM.value ? 0.25 : 1);
-    beat.value = (beat.value + dt) % 100000;
     if (cells.value.length === 0) return; // not yet initialized
-    cells.value = stepCells(cells.value, dt).cells;
+    const r = stepCells(cells.value, dt);
+    cells.value = r.cells;
+    // Beat only while the board is active: a settled board stays quiet so
+    // accessibility dumps and battery are unaffected.
+    if (r.active) beat.value = (beat.value + dt) % 100000;
   });
   const beatStyle = useAnimatedStyle(() => ({ transform: [{ translateX: beat.value % 2 }] }));
 

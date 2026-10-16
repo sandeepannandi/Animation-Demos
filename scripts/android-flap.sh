@@ -31,7 +31,7 @@ center() {
 }
 
 open flap; sleep 3; shot flap-a
-XY=$(center "Departure board"); [ -z "${XY:-}" ] && XY="540 1176"
+XY=$(center "Departure board"); [ -z "${XY:-}" ] && XY="540 1080"
 echo "board center: $XY" >> "$OUT/summary.txt"
 # No screenrecord: concurrent screencaps kill it on this emulator.
 adb shell input tap $XY
@@ -41,7 +41,7 @@ adb logcat -d > "$OUT/flap-session.logcat.txt"
 report flap-advance flap-a flap-c
 
 # Bubble Picker selection tap, content-desc fix
-open bubbles; sleep 3; shot bub-a
+open bubbles; sleep 15; shot bub-a  # let the field settle so uiautomator dump succeeds
 XY=$(center "Music"); [ -z "${XY:-}" ] && XY="540 1200"
 echo "music center: $XY" >> "$OUT/summary.txt"
 adb shell input tap $XY; sleep 1; shot bub-b
