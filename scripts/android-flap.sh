@@ -33,12 +33,17 @@ center() {
 open flap; sleep 3; shot flap-a
 XY=$(center "Departure board"); [ -z "${XY:-}" ] && XY="540 1080"
 echo "board center: $XY" >> "$OUT/summary.txt"
-# No screenrecord: concurrent screencaps kill it on this emulator.
+# Decisive quiet-window test: after the tap, NO pokes (no screencaps, dumps,
+# or screenrecord - each buys the Reanimated loop a few frames on Android).
+# If the heartbeat works, the cascade completes during total quiet.
 adb shell input tap $XY
-for i in 1 2 3 4 5 6 7 8; do sleep 0.6; shot flap-t$i; done
-sleep 3; shot flap-c
+sleep 6; shot flap-c
+# Now that the board has settled, exercise one more word via the Next button area (same tap)
+adb shell input tap $XY
+sleep 6; shot flap-d
 adb logcat -d > "$OUT/flap-session.logcat.txt"
 report flap-advance flap-a flap-c
+report flap-advance-2 flap-c flap-d
 
 # Bubble Picker selection tap, content-desc fix
 open bubbles; sleep 15; shot bub-a  # let the field settle so uiautomator dump succeeds

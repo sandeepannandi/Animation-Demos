@@ -206,9 +206,18 @@ export function SplitFlapBoard({
   useEffect(() => { slowM.value = slowMotion; }, [slowMotion, slowM]);
 
   // (Re)target whenever the shown word, geometry or motion mode changes.
+  // Single retarget path: advance() only moves the index and lets this
+  // effect write, so each word change queues exactly one cascade. (A second
+  // retarget from the tap handler would restart the cascade from the stale
+  // JS mirror of the shared array - device-verified.)
+  const lastWord = useRef<{ word: string; cols: number; reduce: boolean } | null>(null);
   useEffect(() => {
+    const key = { word: words[current], cols: m.cols, reduce };
+    const prev = lastWord.current;
+    if (prev && prev.word === key.word && prev.cols === key.cols && prev.reduce === key.reduce) return;
+    lastWord.current = key;
     if (reduce) {
-      cells.value = retarget(cells.value.length ? cells.value : makeCells('', m.cols), words[current], DEFAULT_FLAP, true);
+      cells.value = retarget(cells.value.length === m.cols ? cells.value : makeCells('', m.cols), words[current], DEFAULT_FLAP, true);
     } else if (cells.value.length !== m.cols) {
       cells.value = makeCells(words[current], m.cols);
     } else {
@@ -240,8 +249,6 @@ export function SplitFlapBoard({
     if (index === undefined) setInternal(n);
     onIndexChange?.(n);
     onFeedback?.('flip', n);
-    const base = cells.value.length === m.cols ? cells.value : makeCells(words[current], m.cols);
-    cells.value = retarget(base, words[n], DEFAULT_FLAP, reduce);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, words, index, reduce, onIndexChange, onFeedback]);
 
