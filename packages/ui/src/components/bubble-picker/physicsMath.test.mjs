@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { clamp, hashSeed, bubbleRadius, insetBounds, spawnBodies, pickBody, totalSpeed, stepBodies, popKick, wobbleScale, hexToRgb, shade, DEFAULT_PHYSICS } from './physicsMath.ts';
+import { clamp, hashSeed, bubbleRadius, insetBounds, spawnBodies, pickBody, totalSpeed, stepBodies, popKick, deformation, breathPhase, hexToRgb, shade, DEFAULT_PHYSICS, BREATH_AMP, MAX_STRETCH } from './physicsMath.ts';
 
 const bounds = insetBounds(340, 360, 8);
 const idle = { x: 0, y: 0, active: 0 };
@@ -85,20 +85,59 @@ test('pickBody returns the topmost hit or -1', () => {
   assert.equal(pickBody(bodies, b.x, b.y), 3);
 });
 
-test('selection springs: popKick direction, radius grows toward selected size', () => {
+test('selection: radius stays, glow rises, burst sweeps and ends', () => {
   assert.ok(popKick(1) > 0 && popKick(0) < 0);
   const single = spawnBodies([{ id: 'sel' }], bounds);
-  single[0].selected = 1; single[0].scaleV = popKick(1);
+  single[0].selected = 1; single[0].scaleV = popKick(1); single[0].burst = 0; single[0].burstV = 0;
   let out = single;
-  for (let i = 0; i < 40; i++) out = stepBodies(out, 33, bounds, idle, DEFAULT_PHYSICS);
-  assert.ok(out[0].r > single[0].baseR * 1.15, `radius did not grow: ${out[0].r}`);
+  for (let i = 0; i < 45; i++) out = stepBodies(out, 33, bounds, idle, DEFAULT_PHYSICS);
+  assert.ok(Math.abs(out[0].r - single[0].baseR) < 1, `radius should rest: ${out[0].r}`);
+  assert.ok(out[0].glow > 0.95, `glow did not rise: ${out[0].glow}`);
+  assert.ok(out[0].burst >= 1 - 1e-6, `burst did not finish: ${out[0].burst}`);
   assert.ok(Math.abs(out[0].scale - 1) < 0.1, 'pop settled');
+  assert.equal(spawnBodies([{ id: 'fresh' }], bounds)[0].burst, 1, 'spawn starts with the burst already done');
 });
 
-test('wobble clamps and renders as opposite squash', () => {
-  const w = wobbleScale(0.05);
-  assert.ok(w.scaleX > 1 && w.scaleY < 1);
-  assert.deepEqual(wobbleScale(99), { scaleX: 1.09, scaleY: 0.91 });
+test('deformation: breathing stays within its amplitude and is phased per bubble', () => {
+  const b = spawnBodies([{ id: 'calm' }], bounds)[0];
+  for (const t of [0, 0.7, 1.9, 3.3, 5.1]) {
+    const d = deformation(b, t, breathPhase('calm'));
+    assert.ok(Math.abs(d.sx - 1) <= BREATH_AMP + 1e-9 && Math.abs(d.sy - 1) <= BREATH_AMP + 1e-9, `breath overflow at ${t}`);
+    assert.equal(d.angle, 0);
+  }
+  assert.notEqual(breathPhase('a'), breathPhase('b'));
+});
+
+test('deformation: moving bubbles stretch along the velocity direction', () => {
+  const b = spawnBodies([{ id: 'fast' }], bounds)[0];
+  b.vx = 1200; b.vy = 0;
+  const d = deformation(b, 0, 0);
+  assert.ok(d.sx > 1 + 0.1, `sx=${d.sx}`); assert.ok(d.sy < 1 - 0.1);
+  assert.ok(Math.abs(d.angle) < 1e-9, 'stretches along +x');
+  b.vx = 0; b.vy = -3000;
+  const d2 = deformation(b, 0, 0);
+  assert.ok(Math.abs(d2.angle + Math.PI / 2) < 1e-9, 'stretches along -y');
+  assert.ok(d2.sx - 1 <= MAX_STRETCH + BREATH_AMP + 1e-9, 'stretch is capped');
+});
+
+test('deformation: impact wobble squashes along the recorded impact axis', () => {
+  const b = spawnBodies([{ id: 'hit' }], bounds)[0];
+  b.wob = 0.08; b.wobAng = Math.PI / 2;
+  const d = deformation(b, 0, 0);
+  assert.ok(d.sx > 1.1 && d.sy < 0.9, `wobble squash: ${d.sx},${d.sy}`);
+  assert.ok(Math.abs(d.angle - Math.PI / 2) < 1e-9);
+  b.wob = 99;
+  const d2 = deformation(b, 0, 0);
+  assert.ok(d2.sx - 1 <= 0.24 + BREATH_AMP + 1e-9, 'wobble is clamped');
+});
+
+test('collisions record the impact axis on both bodies', () => {
+  const two = spawnBodies([{ id: 'a' }, { id: 'b' }], bounds);
+  two[0].x = 100; two[0].y = 100; two[0].vx = 400; two[0].vy = 0;
+  two[1].x = 150; two[1].y = 100;
+  const out = stepBodies(two, 30, bounds, { x: 0, y: 0, active: 0 }, { ...DEFAULT_PHYSICS, gravity: 0, drag: 0 });
+  assert.ok(Math.abs(out[0].wobAng) < 1e-9 || Math.abs(Math.abs(out[0].wobAng) - Math.PI) < 1e-9, `axis: ${out[0].wobAng}`);
+  assert.ok(out[0].wobV > 0 && out[1].wobV > 0, 'both ring');
 });
 
 test('color math: rgb parse and shade clamp', () => {

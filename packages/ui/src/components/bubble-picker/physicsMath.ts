@@ -11,8 +11,11 @@ export type BubbleBody = {
   baseR: number;              // resting radius, px
   rv: number;                 // radius spring velocity
   selected: number;           // 0 or 1
+  glow: number; glowV: number;   // selection glow spring, 0..1
+  burst: number; burstV: number; // selection burst ring, springs 0 -> 1 on toggle
   scale: number; scaleV: number; // pop spring (1 = rest)
   wob: number; wobV: number;  // impact wobble oscillator (0 = still)
+  wobAng: number;           // axis of the impact squash, radians
   grabbed: number;            // 0 or 1
 };
 export type BubbleBounds = { left: number; top: number; right: number; bottom: number };
@@ -30,9 +33,10 @@ export const DEFAULT_PHYSICS: PhysicsOptions = { gravity: 34, drag: 1.05, restit
 // rings after an impact. Tuned so a tap feels like a soft rubber ball.
 const RADIUS_SPRING = { k: 210, c: 17 };
 const SCALE_SPRING = { k: 300, c: 13 };
+const GLOW_SPRING = { k: 140, c: 15 };
+const BURST_SPRING = { k: 110, c: 14 };
 const WOBBLE_SPRING = { k: 130, c: 4.2 };
 const GRAB_SPRING = { k: 150, c: 15 };
-const SELECTED_GROWTH = 1.24;
 const IMPACT_WOBBLE = 0.0035;   // wobble kick per px/s of impact speed
 const MAX_WOBBLE = 0.09;
 
@@ -74,7 +78,7 @@ export function spawnBodies(items: readonly { id: string }[], bounds: BubbleBoun
       id: item.id,
       x: clamp(cx + Math.cos(angle) * ring, bounds.left + r, bounds.right - r),
       y: clamp(cy + Math.sin(angle) * ring * 0.82, bounds.top + r, bounds.bottom - r),
-      vx: 0, vy: 0, r, baseR: r, rv: 0, selected: 0, scale: 1, scaleV: 0, wob: 0, wobV: 0, grabbed: 0,
+      vx: 0, vy: 0, r, baseR: r, rv: 0, selected: 0, glow: 0, glowV: 0, burst: 1, burstV: 0, scale: 1, scaleV: 0, wob: 0, wobV: 0, wobAng: 0, grabbed: 0,
     };
   });
 }
@@ -117,10 +121,14 @@ function substep(bodies: BubbleBody[], h: number, bounds: BubbleBounds, pointer:
     const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
     if (speed > opts.maxSpeed) { b.vx = (b.vx / speed) * opts.maxSpeed; b.vy = (b.vy / speed) * opts.maxSpeed; }
     b.x += b.vx * h; b.y += b.vy * h;
-    // Radius breathes toward selected/resting size.
-    const targetR = b.baseR * (b.selected ? SELECTED_GROWTH : 1);
-    b.rv += (RADIUS_SPRING.k * (targetR - b.r) - RADIUS_SPRING.c * b.rv) * h;
+    // Radius rests at baseR (selection shows as glow, not growth).
+    b.rv += (RADIUS_SPRING.k * (b.baseR - b.r) - RADIUS_SPRING.c * b.rv) * h;
     b.r = Math.max(4, b.r + b.rv * h);
+    // Selection glow eases in; the burst ring sweeps out once per toggle.
+    b.glowV += (GLOW_SPRING.k * (b.selected - b.glow) - GLOW_SPRING.c * b.glowV) * h;
+    b.glow = clamp(b.glow + b.glowV * h, -0.2, 1.2);
+    b.burstV += (BURST_SPRING.k * (1 - b.burst) - BURST_SPRING.c * b.burstV) * h;
+    b.burst = Math.min(1.4, b.burst + b.burstV * h);
     // Pop spring relaxes to 1; selection toggles kick scaleV from outside.
     b.scaleV += (SCALE_SPRING.k * (1 - b.scale) - SCALE_SPRING.c * b.scaleV) * h;
     b.scale += b.scaleV * h;
@@ -151,16 +159,18 @@ function substep(bodies: BubbleBody[], h: number, bounds: BubbleBounds, pointer:
         b.vx += nx * jimp * imb; b.vy += ny * jimp * imb;
         const kick = clamp(Math.abs(vn) * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2);
         a.wobV += kick; b.wobV += kick;
+        const ang = Math.atan2(ny, nx);
+        a.wobAng = ang; b.wobAng = ang;
       }
     }
   }
   // Walls: clamp inside, bounce, wobble on a hard hit.
   for (let i = 0; i < bodies.length; i++) {
     const b = bodies[i], e = opts.restitution;
-    if (b.x < bounds.left + b.r) { b.x = bounds.left + b.r; if (b.vx < 0) { b.wobV += clamp(-b.vx * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.vx = -b.vx * e; } }
-    if (b.x > bounds.right - b.r) { b.x = bounds.right - b.r; if (b.vx > 0) { b.wobV += clamp(b.vx * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.vx = -b.vx * e; } }
-    if (b.y < bounds.top + b.r) { b.y = bounds.top + b.r; if (b.vy < 0) { b.wobV += clamp(-b.vy * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.vy = -b.vy * e; } }
-    if (b.y > bounds.bottom - b.r) { b.y = bounds.bottom - b.r; if (b.vy > 0) { b.wobV += clamp(b.vy * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.vy = -b.vy * e; } }
+    if (b.x < bounds.left + b.r) { b.x = bounds.left + b.r; if (b.vx < 0) { b.wobV += clamp(-b.vx * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.wobAng = 0; b.vx = -b.vx * e; } }
+    if (b.x > bounds.right - b.r) { b.x = bounds.right - b.r; if (b.vx > 0) { b.wobV += clamp(b.vx * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.wobAng = 0; b.vx = -b.vx * e; } }
+    if (b.y < bounds.top + b.r) { b.y = bounds.top + b.r; if (b.vy < 0) { b.wobV += clamp(-b.vy * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.wobAng = Math.PI / 2; b.vy = -b.vy * e; } }
+    if (b.y > bounds.bottom - b.r) { b.y = bounds.bottom - b.r; if (b.vy > 0) { b.wobV += clamp(b.vy * IMPACT_WOBBLE, 0, MAX_WOBBLE * 2); b.wobAng = Math.PI / 2; b.vy = -b.vy * e; } }
   }
 }
 
@@ -183,11 +193,28 @@ export function popKick(selected: number) {
   return selected ? 2.6 : -1.8;
 }
 
-// Wobble renders as a skewed squash: scaleX/scaleY oscillate out of phase.
-export function wobbleScale(wob: number) {
+// Water-balloon deformation, rendered as rotate(angle) then scale(sx, sy).
+// - breathing: a slow idle pulsation, phased per bubble so the field never syncs
+// - stretch: elongation along the velocity direction while it moves fast
+// - wobble: an oscillating squash along the last impact axis
+export const BREATH_AMP = 0.02;
+export const MAX_STRETCH = 0.17;
+export function breathPhase(id: string) {
   'worklet';
-  const w = clamp(wob, -MAX_WOBBLE, MAX_WOBBLE);
-  return { scaleX: 1 + w, scaleY: 1 - w };
+  return hashSeed(id, 999) * Math.PI * 2;
+}
+export function deformation(b: BubbleBody, timeSec: number, phase: number) {
+  'worklet';
+  const breath = Math.sin(timeSec * 1.7 + phase) * BREATH_AMP;
+  const speed = Math.sqrt(b.vx * b.vx + b.vy * b.vy);
+  const stretch = clamp(speed * 0.00013, 0, MAX_STRETCH);
+  const wob = clamp(b.wob, -MAX_WOBBLE, MAX_WOBBLE) * 2.2;
+  let angle: number, mag: number;
+  if (stretch > 0.006) { angle = Math.atan2(b.vy, b.vx); mag = stretch + wob; }
+  else { angle = b.wobAng; mag = wob; }
+  mag = clamp(mag, -0.24, 0.24);
+  const g = 1 + breath;
+  return { angle, sx: (1 + mag) * g, sy: (1 - mag) * g };
 }
 
 export function hexToRgb(hex: string): [number, number, number] {
@@ -196,6 +223,12 @@ export function hexToRgb(hex: string): [number, number, number] {
   if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
   const n = parseInt(h.length === 6 ? h : '888888', 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+export function withAlpha(hex: string, a: number) {
+  'worklet';
+  const [r, g, b] = hexToRgb(hex);
+  return `rgba(${r}, ${g}, ${b}, ${clamp(a, 0, 1)})`;
 }
 
 // f > 0 lightens toward white, f < 0 darkens toward black.

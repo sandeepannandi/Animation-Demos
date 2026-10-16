@@ -42,8 +42,15 @@ import { BubblePicker } from './BubblePicker';
 
 ## Notes
 
+- Water-balloon rendering: gradient body, top sheen, rim light, gloss,
+  specular dot and a drop shadow per bubble. Selection is shown as light:
+  the bubble lights from within with a colored bloom and one expanding burst
+  ring - no border, no permanent size change. Bubbles breathe (a slow,
+  per-bubble phased pulsation), stretch along their velocity, and squash
+  along the impact axis when they collide.
 - The simulation runs every frame (idle drift keeps the field alive). On
-  low-power screens prefer `reducedMotion`, which removes drift and wobble.
+  low-power screens prefer `reducedMotion`, which removes drift, wobble,
+  breathing and stretch.
 - Tap vs drag: drags are captured after a small movement threshold, taps pass
   through to the bubble's press target (also used by screen readers/keyboard).
 - The physics module (`physicsMath.ts`) is pure and deterministic; the same
