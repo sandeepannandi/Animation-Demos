@@ -220,8 +220,10 @@ export function SplitFlapBoard({
   useFrameCallback((info) => {
     const dt = Math.min(info.timeSincePreviousFrame ?? 16.7, 48) * (slowM.value ? 0.25 : 1);
     if (cells.value.length === 0) return; // not yet initialized
-    const r = stepCells(cells.value, dt);
-    if (r.cells !== cells.value) cells.value = r.cells;
+    // Unconditional write every frame, matching the device-proven Bubble
+    // Picker / Mosaic loops: with a conditional write the frame callback
+    // stalled a few frames after a JS-side write on native.
+    cells.value = stepCells(cells.value, dt).cells;
   });
 
   const advance = useCallback(() => {

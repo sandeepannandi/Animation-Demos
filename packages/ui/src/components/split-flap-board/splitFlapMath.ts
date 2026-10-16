@@ -122,8 +122,9 @@ export function retarget(cells: FlapCell[], text: string, opts: FlapOptions, red
 
 export type StepResult = { cells: FlapCell[]; active: boolean };
 
-// Advances every cell by dtMs. Returns the SAME array when nothing moved so
-// shared-value listeners stay asleep while the board is settled.
+// Advances every cell by dtMs. Always returns a fresh top-level array (the
+// frame callback writes it every frame; settled cells are reused by
+// reference, so a settled board allocates only one small array per frame).
 export function stepCells(cells: FlapCell[], dtMs: number): StepResult {
   'worklet';
   const L = FLAP_CHARSET.length;
@@ -159,8 +160,9 @@ export function stepCells(cells: FlapCell[], dtMs: number): StepResult {
       next[i] = c;
     }
   }
-  if (!changed) return { cells, active };
-  return { cells: next, active: true };
+  // Always a fresh array: the frame callback writes cells.value every frame
+  // (device-proven pattern - conditional writes stalled on native).
+  return { cells: next, active: active || changed };
 }
 
 export function isSettled(cells: FlapCell[]): boolean {

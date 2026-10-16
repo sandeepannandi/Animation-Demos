@@ -75,10 +75,11 @@ test('stepCells advances and fully settles on the target word', () => {
   assert.ok(cells.every((c) => c.flip === 0 && c.wobble === -1));
 });
 
-test('stepCells is a no-op (same array) while settled', () => {
+test('stepCells recycles settled cell objects in a fresh array', () => {
   const cells = makeCells('OK', 4);
   const r = stepCells(cells, 16.7);
-  assert.equal(r.cells, cells);
+  assert.notEqual(r.cells, cells);
+  assert.ok(r.cells.every((c, i) => c === cells[i]));
   assert.equal(r.active, false);
 });
 
