@@ -222,8 +222,3 @@
 .miniFold span { display:block; height: 48px; padding: 17px 12px; box-sizing: border-box; border-radius: 12px 12px 0 0; background: #f3efe4; color:#315843; font-size: 13px; font-weight: 600; box-shadow: 0 1px 0 #cfc4a8; }
 .miniFold i { display:block; height: 38px; margin-top: 3px; background: #e6ddc7; transform: perspective(300px) rotateX(-48deg); transform-origin: top; }
 .miniFold b { display:block; height: 44px; margin-top: 6px; background: repeating-linear-gradient(90deg, #1f3a2c 0 2px, #f3efe4 2px 5px); border-radius: 0 0 12px 12px; opacity: .8; }
-.miniBlur { display: flex; gap: 8px; align-items: center; }
-.miniBlur i { display: block; width: 44px; height: 118px; border-radius: 10px; }
-.miniBlur i:nth-child(1) { background: linear-gradient(90deg, #a8cdb0 0 55%, transparent 55%); opacity: .55; filter: blur(2px); }
-.miniBlur i:nth-child(2) { width: 64px; background: linear-gradient(#dff0e2 0 38%, #8fb894 38% 62%, #5f9468 62% 82%, #315843 82%); box-shadow: 0 8px 18px #31584333; }
-.miniBlur i:nth-child(3) { background: linear-gradient(90deg, transparent 0 45%, #7fa8d4 45%); opacity: .55; filter: blur(2px); }
