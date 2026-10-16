@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  mosaic: { dir: "packages/ui/src/components/mosaic-gallery", files: ["MosaicGallery.tsx", "mosaicMath.ts", "mosaic-data.ts", "Example.tsx", "README.md", "LICENSE"] },
   bubbles: { dir: "packages/ui/src/components/bubble-picker", files: ["BubblePicker.tsx", "physicsMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   transitions: { dir: "packages/ui/src/components/gl-transitions", files: ["GLTransitionPager.tsx", "transitionMath.ts", "transitionShaders.ts", "scenes.ts", "Example.tsx", "README.md", "LICENSE"] },
   fold: { dir: "packages/ui/src/components/folded-pass", files: ["FoldedPass.tsx", "foldMath.ts", "passDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -42,6 +43,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    mosaic: read(components.mosaic.dir, components.mosaic.files),
     bubbles: read(components.bubbles.dir, components.bubbles.files),
     transitions: read(components.transitions.dir, components.transitions.files),
     fold: read(components.fold.dir, components.fold.files),
