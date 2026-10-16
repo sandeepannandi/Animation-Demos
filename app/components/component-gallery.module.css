@@ -228,3 +228,11 @@
 .miniTransitions b { position: absolute; left: 34%; top: 42%; width: 76px; height: 76px; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #fff3d9aa; }
 .miniBubbles { position: relative; width: 230px; height: 150px; border-radius: 18px; overflow: hidden; background: #10201a; }
 .miniBubbles i { position: absolute; border-radius: 50%; box-shadow: inset -6px -8px 14px rgba(0, 0, 0, 0.22), inset 5px 6px 10px rgba(255, 255, 255, 0.28); }
+.miniMosaic { position: relative; width: 230px; height: 150px; border-radius: 18px; overflow: hidden; background: #0d1526; display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(3, 1fr); gap: 3px; padding: 3px; }
+.miniMosaic i { border-radius: 3px; box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.25), inset -2px -3px 4px rgba(0, 0, 0, 0.3); }
+.miniMosaic i:nth-child(1) { background: #1b3a6b; } .miniMosaic i:nth-child(2) { background: #25477e; }
+.miniMosaic i:nth-child(3) { background: #16294d; } .miniMosaic i:nth-child(4) { background: #2e5b9e; }
+.miniMosaic i:nth-child(5) { background: #e8c53a; } .miniMosaic i:nth-child(6) { background: #1b3a6b; }
+.miniMosaic i:nth-child(7) { background: #3a6ab0; } .miniMosaic i:nth-child(8) { background: #122544; }
+.miniMosaic i:nth-child(9) { background: #22406f; } .miniMosaic i:nth-child(10) { background: #d9b832; }
+.miniMosaic i:nth-child(11) { background: #1a3560; } .miniMosaic i:nth-child(12) { background: #28497f; }
