@@ -28,13 +28,17 @@ export type MosaicGalleryProps = {
 const GAP = 0.14; // grout line, fraction of a cell
 const BEVEL = [1.13, 1.05, 0.95, 0.84]; // per-corner light: tl, tr, bl, br
 
-function shadeVertex(packed: number, factor: number): number {
+function shadeVertex(packed: number, factor: number): string {
   'worklet';
+  // Vertices colors must be color strings (see Skia's VerticesProps) - raw
+  // uint32 numbers are silently dropped by the native materializer.
   const r = Math.min(255, Math.round(((packed >> 16) & 255) * factor));
   const g = Math.min(255, Math.round(((packed >> 8) & 255) * factor));
   const b = Math.min(255, Math.round((packed & 255) * factor));
-  return (0xff000000 | (r << 16) | (g << 8) | b) >>> 0;
+  return `#${HEX[r]}${HEX[g]}${HEX[b]}`;
 }
+
+const HEX = '0123456789abcdef'.split('').flatMap(a => '0123456789abcdef'.split('').map(b => a + b));
 
 export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultIndex = 0, onIndexChange, onFeedback, width = 340, height = 234, label = 'Mosaic gallery', reducedMotion, slowMotion = false }: MosaicGalleryProps) {
   const [systemReduce, setSystemReduce] = useState(false);
