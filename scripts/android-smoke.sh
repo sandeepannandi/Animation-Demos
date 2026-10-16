@@ -12,7 +12,7 @@ adb shell pm list packages | grep -i nativelet > "$OUT/packages.txt"
 PKG=$(sed 's/package://' "$OUT/packages.txt" | head -1 | tr -d '\r')
 echo "package=$PKG" | tee "$OUT/summary.txt"
 adb shell wm size > "$OUT/wm.txt"
-ROUTES="index blur fold genie blossom capsule cards carousel chart curl glass gooey light lens morph orbit pinch ripple sort swipe toasts"
+ROUTES="index fold genie blossom capsule cards carousel chart curl glass gooey light lens morph orbit pinch ripple sort swipe toasts"
 for r in $ROUTES; do
   adb shell am force-stop "$PKG"
   adb logcat -c
