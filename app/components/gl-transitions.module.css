@@ -1,0 +1,18 @@
+.wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 10px 14px; }
+.stage { position: relative; width: min(100%, 340px); background: #f4f1e9; border-radius: 18px; padding: 18px 0 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.canvas { display: block; width: 100%; aspect-ratio: 1 / 1; touch-action: none; cursor: grab; }
+.canvas:active { cursor: grabbing; }
+.caption { display: flex; justify-content: space-between; width: calc(100% - 44px); }
+.title { font-size: 15px; color: #315843; font-weight: 600; margin: 0; }
+.count { font-size: 13px; color: #63705f; margin: 0; }
+.dots { display: flex; gap: 6px; }
+.dot { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: none; border: 0; cursor: pointer; padding: 0; }
+.dot::before { content: ""; width: 6px; height: 6px; border-radius: 3px; background: #c7caba; }
+.dot[aria-current="true"]::before { background: #315843; }
+.hint { font-size: 12px; color: #63705f; margin: 0; text-align: center; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.button { border: 0; border-radius: 24px; padding: 12px 22px; background: #315843; color: #fff; font-size: 14px; cursor: pointer; }
+.chip { background: #eeeade; color: #315843; border: 1px solid #c7caba; border-radius: 24px; padding: 9px 13px; font-size: 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: #315843; color: white; }
+.button:focus-visible, .chip:focus-visible, .canvas:focus-visible, .dot:focus-visible { outline: 3px solid #ae8655; outline-offset: 3px; }
+@media (max-width: 760px) { .wrap { padding: 10px 8px 6px; gap: 8px; } }
