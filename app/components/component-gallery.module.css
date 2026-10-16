@@ -226,3 +226,5 @@
 .miniTransitions { position: relative; width: 118px; height: 118px; border-radius: 12px; overflow: hidden; background: linear-gradient(#c9def2 0 40%, #6e92bd 40% 65%, #44678f 65% 85%, #223d5c 85%); box-shadow: 0 8px 18px #223d5c33; }
 .miniTransitions i { position: absolute; inset: 0; background: linear-gradient(#f8dfae 0 40%, #e9b478 40% 62%, #d69354 62% 82%, #b96f3c 82%); clip-path: circle(32% at 34% 42%); }
 .miniTransitions b { position: absolute; left: 34%; top: 42%; width: 76px; height: 76px; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #fff3d9aa; }
+.miniBubbles { position: relative; width: 230px; height: 150px; border-radius: 18px; overflow: hidden; background: #10201a; }
+.miniBubbles i { position: absolute; border-radius: 50%; box-shadow: inset -6px -8px 14px rgba(0, 0, 0, 0.22), inset 5px 6px 10px rgba(255, 255, 255, 0.28); }
