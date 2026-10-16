@@ -53,6 +53,13 @@ function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedVa
   const burstR = useDerivedValue(() => R * (1 + clamp(bodies.value[index].burst, 0, 1.4) * 0.85));
   const burstO = useDerivedValue(() => clamp(1 - bodies.value[index].burst, 0, 1) * 0.85);
   const coreO = useDerivedValue(() => clamp(bodies.value[index].glow, 0, 1) * 0.6);
+  // Counter-rotation for the specular dot: the highlight is a reflection of a
+  // fixed light source, so it must NOT swing with the jelly deformation.
+  const invAngle = useDerivedValue(() => {
+    if (reduceM.value) return 0;
+    return -deformation(bodies.value[index], clock.value, phase).angle;
+  });
+  const specTransform = useDerivedValue(() => [{ rotateZ: invAngle.value }]);
   return (
     <Group transform={transform}>
       <Circle cx={0} cy={0} r={bloomR} opacity={glow}>
@@ -62,12 +69,10 @@ function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedVa
         <RadialGradient c={vec(-R * 0.3, -R * 0.35)} r={R * 1.75} colors={[hi, color, edge]} />
         <Shadow dx={0} dy={R * 0.16} blur={R * 0.3} color="rgba(6, 20, 14, 0.45)" />
       </Circle>
-      <Circle cx={0} cy={0} r={r}>
-        <RadialGradient c={vec(-R * 0.22, -R * 0.28)} r={R * 1.05} colors={['rgba(255,255,255,0.30)', 'rgba(255,255,255,0)']} />
-      </Circle>
       <Path path={rimPath} style="stroke" strokeWidth={2.5} strokeCap="round" color={rim} opacity={0.6} />
-      <Circle cx={-R * 0.3} cy={-R * 0.36} r={R * 0.22} color="#ffffff" opacity={0.5} />
-      <Circle cx={-R * 0.4} cy={-R * 0.46} r={R * 0.085} color="#ffffff" opacity={0.85} />
+      <Group transform={specTransform}>
+        <Circle cx={-R * 0.38} cy={-R * 0.44} r={R * 0.08} color="#ffffff" opacity={0.75} />
+      </Group>
       <Circle cx={0} cy={0} r={r} opacity={coreO}>
         <RadialGradient c={vec(0, 0)} r={R} colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0)']} />
       </Circle>

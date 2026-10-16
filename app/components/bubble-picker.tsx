@@ -33,7 +33,7 @@ export function BubblePickerPreview() {
   const downAt = useRef<{ x: number; y: number; t: number } | null>(null);
   const groups = useRef<(SVGGElement | null)[]>([]);
   const balls = useRef<(SVGCircleElement | null)[]>([]);
-  const sheens = useRef<(SVGCircleElement | null)[]>([]);
+  const specs = useRef<(SVGCircleElement | null)[]>([]);
   const cores = useRef<(SVGCircleElement | null)[]>([]);
   const blooms = useRef<(SVGCircleElement | null)[]>([]);
   const bursts = useRef<(SVGCircleElement | null)[]>([]);
@@ -61,13 +61,14 @@ export function BubblePickerPreview() {
       if (reduce) next = next.map(b => ({ ...b, wob: 0, wobV: 0, scale: 1, scaleV: 0 }));
       bodies.current = next;
       for (let i = 0; i < next.length; i++) {
-        const b = next[i], g = groups.current[i], ball = balls.current[i], sheen = sheens.current[i], core = cores.current[i], bloom = blooms.current[i], burst = bursts.current[i], label = labels.current[i];
-        if (!g || !ball || !sheen || !core || !bloom || !burst || !label) continue;
+        const b = next[i], g = groups.current[i], ball = balls.current[i], spec = specs.current[i], core = cores.current[i], bloom = blooms.current[i], burst = bursts.current[i], label = labels.current[i];
+        if (!g || !ball || !spec || !core || !bloom || !burst || !label) continue;
         const d = reduce ? { angle: 0, sx: 1, sy: 1 } : deformation(b, time, breathPhase(b.id));
         g.setAttribute('transform', `translate(${b.x} ${b.y}) rotate(${d.angle * 180 / Math.PI}) scale(${d.sx} ${d.sy})`);
         const r = b.r * b.scale, glow = clamp(b.glow, 0, 1);
         ball.setAttribute('r', String(r));
-        sheen.setAttribute('r', String(r));
+        // Specular stays world-fixed: counter-rotate against the jelly spin.
+        spec.setAttribute('transform', `rotate(${-d.angle * 180 / Math.PI})`);
         core.setAttribute('r', String(r)); core.setAttribute('opacity', String(glow * 0.6));
         bloom.setAttribute('r', String(b.baseR * (1 + 0.42 * glow))); bloom.setAttribute('opacity', String(glow));
         burst.setAttribute('r', String(b.baseR * (1 + clamp(b.burst, 0, 1.4) * 0.85))); burst.setAttribute('opacity', String(clamp(1 - b.burst, 0, 1) * 0.85));
@@ -141,9 +142,6 @@ export function BubblePickerPreview() {
               <radialGradient id={`bub-${t.id}`} gradientUnits="userSpaceOnUse" cx={-R * 0.3} cy={-R * 0.35} r={R * 1.75}>
                 <stop offset="0" stopColor={shade(t.color, 0.6)} /><stop offset="0.55" stopColor={t.color} /><stop offset="1" stopColor={shade(t.color, -0.2)} />
               </radialGradient>
-              <radialGradient id={`sheen-${t.id}`} gradientUnits="userSpaceOnUse" cx={-R * 0.22} cy={-R * 0.28} r={R * 1.05}>
-                <stop offset="0" stopColor="rgba(255,255,255,0.30)" /><stop offset="1" stopColor="rgba(255,255,255,0)" />
-              </radialGradient>
               <radialGradient id={`core-${t.id}`} gradientUnits="userSpaceOnUse" cx={0} cy={0} r={R}>
                 <stop offset="0" stopColor="rgba(255,255,255,0.9)" /><stop offset="1" stopColor="rgba(255,255,255,0)" />
               </radialGradient>
@@ -158,10 +156,8 @@ export function BubblePickerPreview() {
           return <g key={t.id} className={styles.bubble} role="button" tabIndex={0} aria-label={t.label} aria-pressed={selected.includes(t.id)} onKeyDown={e => onKey(e, t.id)} ref={el => { groups.current[i] = el; }}>
             <circle ref={el => { blooms.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#bloom-${t.id})`} opacity={0} />
             <circle ref={el => { balls.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#bub-${t.id})`} filter="url(#ball-shadow)" />
-            <circle ref={el => { sheens.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#sheen-${t.id})`} />
             <path d={rimPathFor(R)} fill="none" stroke={shade(t.color, 0.42)} strokeWidth={2.5} strokeLinecap="round" opacity={0.6} />
-            <circle cx={-R * 0.3} cy={-R * 0.36} r={R * 0.22} fill="#ffffff" opacity={0.5} />
-            <circle cx={-R * 0.4} cy={-R * 0.46} r={R * 0.085} fill="#ffffff" opacity={0.85} />
+            <circle ref={el => { specs.current[i] = el; }} cx={-R * 0.38} cy={-R * 0.44} r={R * 0.08} fill="#ffffff" opacity={0.75} />
             <circle ref={el => { cores.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#core-${t.id})`} opacity={0} />
             <circle ref={el => { bursts.current[i] = el; }} cx={0} cy={0} r={R} fill="none" stroke="#ffffff" strokeWidth={3} opacity={0} />
           </g>;
