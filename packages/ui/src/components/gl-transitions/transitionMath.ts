@@ -31,14 +31,16 @@ export function snapTarget(scroll: number, velocityPages: number, last: number) 
   return clamp(Math.round(target), 0, last);
 }
 
-// The four transition effects, in the order page hops cycle through them.
-export const EFFECTS = ["ripple", "slices", "zoom", "melt"] as const;
+// The six transition effects, in the order page hops cycle through them.
+export const EFFECTS = ["ripple", "slices", "zoom", "melt", "vortex", "wave"] as const;
 export type TransitionEffect = (typeof EFFECTS)[number];
 export const EFFECT_LABELS: Record<TransitionEffect, string> = {
   ripple: "Ripple",
   slices: "Slices",
   zoom: "Zoom",
   melt: "Melt",
+  vortex: "Vortex",
+  wave: "Wave",
 };
 
 // Each page-to-page hop uses the next effect in the cycle, so a long gallery sees them all.

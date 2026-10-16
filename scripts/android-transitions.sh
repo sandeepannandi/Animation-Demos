@@ -25,7 +25,7 @@ crash() { adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in 
 md() { md5sum < "$OUT/$1.png" | cut -c1-8; }
 differs() { [ "$(md "$1")" != "$(md "$2")" ] && echo yes || echo no; }
 say() { echo "$*" | tee -a "$OUT/summary.txt"; }
-counter() { adb shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; adb pull /sdcard/u.xml "$OUT/ui.xml" >/dev/null 2>&1; grep -oE '[0-9] of 5' "$OUT/ui.xml" | head -1; }
+counter() { adb shell uiautomator dump /sdcard/u.xml >/dev/null 2>&1; adb pull /sdcard/u.xml "$OUT/ui.xml" >/dev/null 2>&1; grep -oE '[0-9] of 7' "$OUT/ui.xml" | head -1; }
 
 open; shot a-rest
 C=$(center "Landscape gallery"); say "pager at: ${C:-not found}"

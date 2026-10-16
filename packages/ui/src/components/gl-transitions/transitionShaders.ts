@@ -1,7 +1,7 @@
 import { Skia, type SkRuntimeEffect } from "@shopify/react-native-skia";
 import type { TransitionEffect } from "./transitionMath";
 
-// Four original transition effects as Skia runtime shaders. Every shader crossfades two page
+// Six original transition effects as Skia runtime shaders. Every shader crossfades two page
 // textures (`fromI` -> `toI`) on a 0..1 `progress` that the drag scrubs directly. Each returns
 // exactly `fromI` at progress 0 and exactly `toI` at progress 1, so a page at rest is pixel-clean.
 
@@ -91,6 +91,48 @@ half4 main(float2 p) {
   return mix(b, a, half(1.0 - local));
 }`;
 
+// Vortex: the outgoing page twists down a whirlpool and grows while the incoming page untwists
+// from the opposite spin - the drain is strongest at the centre, so the middle lets go first.
+const VORTEX = `
+uniform shader fromI;
+uniform shader toI;
+uniform float progress;
+uniform float2 size;
+half4 main(float2 p) {
+  float2 c = size * 0.5;
+  float2 d = p - c;
+  float dist = length(d) / length(c);
+  float ta = progress * 5.0 * exp(-2.5 * dist);
+  float sa = sin(ta), ca = cos(ta);
+  float2 ra = float2(d.x * ca - d.y * sa, d.x * sa + d.y * ca);
+  half4 a = fromI.eval(c + ra * (1.0 + progress * 0.35));
+  float tb = (1.0 - progress) * -5.0 * exp(-2.5 * dist);
+  float sb = sin(tb), cb = cos(tb);
+  float2 rb = float2(d.x * cb - d.y * sb, d.x * sb + d.y * cb);
+  half4 b = toI.eval(c + rb * (1.0 + (1.0 - progress) * 0.35));
+  float m = smoothstep(0.25, 0.75, progress);
+  return mix(a, b, half(m));
+}`;
+
+// Wave: a traveling wavy front rips across the page, and both pictures shear along the wave while
+// it passes - most bent mid-transition, flat again at both ends.
+const WAVE = `
+uniform shader fromI;
+uniform shader toI;
+uniform float progress;
+uniform float2 size;
+half4 main(float2 p) {
+  float2 uv = p / size;
+  float amp = 0.06;
+  float wob = sin(uv.y * 14.0 + progress * 5.0);
+  float edge = progress * (1.0 + 2.0 * amp) - amp + amp * wob;
+  float m = smoothstep(edge + 0.04, edge - 0.04, uv.x);
+  float bend = (1.0 - abs(2.0 * progress - 1.0)) * 0.05 * wob;
+  half4 a = fromI.eval(p + float2(bend * size.x, 0.0));
+  half4 b = toI.eval(p + float2(bend * 0.5 * size.x, 0.0));
+  return mix(a, b, half(m));
+}`;
+
 function compile(name: string, source: string): SkRuntimeEffect {
   const effect = Skia.RuntimeEffect.Make(source);
   if (!effect) throw new Error(`GL Transitions: the ${name} shader failed to compile`);
@@ -102,6 +144,8 @@ const compiled: Record<TransitionEffect, SkRuntimeEffect> = {
   slices: compile("slices", SLICES),
   zoom: compile("zoom", ZOOM),
   melt: compile("melt", MELT),
+  vortex: compile("vortex", VORTEX),
+  wave: compile("wave", WAVE),
 };
 
 export function transitionEffect(name: TransitionEffect): SkRuntimeEffect {

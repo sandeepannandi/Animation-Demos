@@ -71,6 +71,26 @@ export const SCENES: Scene[] = [
     ],
   },
   {
+    title: "Ember",
+    sky: ["#f5c98f", "#d4694a"],
+    body: { x: 0.3, y: 0.3, r: 0.12, color: "#ffe9c4", halo: "#ffb87744" },
+    ridges: [
+      { color: "#b4553c", base: 0.6, amp: 0.07, seed: 0.17 },
+      { color: "#7d3527", base: 0.74, amp: 0.08, seed: 0.49 },
+      { color: "#3d1c16", base: 0.9, amp: 0.07, seed: 0.71 },
+    ],
+  },
+  {
+    title: "Frost",
+    sky: ["#eef4f8", "#bccfda"],
+    body: { x: 0.72, y: 0.28, r: 0.11, color: "#ffffff", halo: "#e8f0f655" },
+    ridges: [
+      { color: "#9fb4c4", base: 0.6, amp: 0.06, seed: 0.33 },
+      { color: "#64798c", base: 0.74, amp: 0.08, seed: 0.57 },
+      { color: "#2e3d4c", base: 0.89, amp: 0.07, seed: 0.79 },
+    ],
+  },
+  {
     title: "Night",
     sky: ["#27304d", "#0d1322"],
     body: { x: 0.7, y: 0.24, r: 0.1, color: "#f2efe2", halo: "#dfe3f055" },
