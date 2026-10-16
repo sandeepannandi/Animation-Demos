@@ -11,7 +11,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native';
 import { Canvas, Group, Path, Rect, Skia } from '@shopify/react-native-skia';
-import { useDerivedValue, useSharedValue, type SharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useDerivedValue, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import {
   DEFAULT_FLAP, FLAP_CHARSET,
   makeCells, retarget, stepCells,
@@ -231,6 +231,8 @@ export function SplitFlapBoard({
   // fed by that same loop dies with it. ReactChoreographer-backed JS rAF
   // keeps firing on a quiet screen; each cells.value write crosses to the UI
   // runtime, recomputes the deriveds and invalidates the canvas.
+  const beat = useSharedValue(0);
+  const beatStyle = useAnimatedStyle(() => ({ transform: [{ translateX: beat.value }] }));
   const slowMotionRef = useRef(slowMotion);
   useEffect(() => { slowMotionRef.current = slowMotion; }, [slowMotion]);
   useEffect(() => {
@@ -244,6 +246,14 @@ export function SplitFlapBoard({
         const r = stepCells(cells.value, dt);
         cells.value = r.cells;
       }
+      // Device-proven: on a quiet Android screen, shared-value changes alone
+      // do not redraw the Skia canvas - the screen only repaints when Fabric
+      // commits flow. Flip a 1px view's style every tick so each frame
+      // carries a commit and the canvas repaints with it. The JS clock is
+      // the independent power source; a heartbeat fed by Reanimated's own
+      // UI frame loop dies with it (run 6/7), and clock-without-heartbeat
+      // animates invisibly (run 8/9).
+      beat.value = (beat.value + 1) % 2;
       requestAnimationFrame(tick);
     };
     const id = requestAnimationFrame(tick);
@@ -289,6 +299,7 @@ export function SplitFlapBoard({
       style={[styles.box, { width, height: m.cellH }]}
       {...pan.panHandlers}
     >
+      <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: 1, height: 1, opacity: 0 }, beatStyle]} />
       <Canvas style={{ width, height: m.cellH }} pointerEvents="none">
         {Array.from({ length: m.cols }, (_, i) => (
           <FlapCellView key={i} cells={cells} index={i} x={i * (m.cellW + GAP)} m={m} clipPath={clipPath} />
