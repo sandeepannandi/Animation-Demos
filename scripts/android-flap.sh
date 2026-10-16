@@ -41,6 +41,8 @@ open bubbles; sleep 3; shot bub-a
 XY=$(center "Music"); [ -z "${XY:-}" ] && XY="540 1200"
 echo "music center: $XY" >> "$OUT/summary.txt"
 adb shell input tap $XY; sleep 1; shot bub-b
-SEL=$(adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1; adb shell cat /sdcard/ui.xml 2>/dev/null | tr '<' '\n<' | grep -E '(text|content-desc)="Music"' | grep -o 'selected="true"' | head -1)
+adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+adb shell cat /sdcard/ui.xml > "$OUT/bub-ui.xml" 2>/dev/null
+SEL=$(tr '<' '\n<' < "$OUT/bub-ui.xml" | grep -E '(text|content-desc)="Music"' | grep -o 'selected="true"' | head -1)
 echo "bubbles-select selected_attr=${SEL:-no}" | tee -a "$OUT/summary.txt"
 report bubbles-select bub-a bub-b

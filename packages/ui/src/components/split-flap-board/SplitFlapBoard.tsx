@@ -13,7 +13,7 @@ import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native'
 import { Canvas, Group, Path, Rect, Skia } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import {
-  DEFAULT_FLAP, FLAP_CHARSET, WOBBLE_MS,
+  DEFAULT_FLAP, FLAP_CHARSET,
   makeCells, retarget, stepCells,
   fallScale, revealScale, fallShade, revealShade, castShade, wobbleOffset,
   strokeGlyph, glyphAdvance,
@@ -67,6 +67,8 @@ function metricsFor(width: number, words: string[]): Metrics {
   };
 }
 
+const EMPTY_CELL: FlapCell = { ch: 0, queue: 0, flip: 0, flipMs: DEFAULT_FLAP.stepMs, delay: 0, wobble: -1 };
+
 type CellViewProps = {
   cells: SharedValue<FlapCell[]>;
   index: number;
@@ -82,7 +84,9 @@ function FlapCellView({ cells, index, x, m, clipPath }: CellViewProps) {
 
   const cellOf = () => {
     'worklet';
-    return cells.value[index];
+    // The shared array can lag behind the children at mount or after a
+    // geometry change; never read past its end (device-verified crash).
+    return cells.value[index] || EMPTY_CELL;
   };
 
   // Glyph paths rebuilt only for the two characters a cell can show during a
@@ -191,7 +195,13 @@ export function SplitFlapBoard({
   }, []);
   const reduce = reducedMotion ?? sysReduce;
 
-  const cells = useSharedValue<FlapCell[]>([]);
+  // Mount constants come from React state: a shared value created empty and
+  // filled in an effect races the children's derived readers on native.
+  const initial = useRef<{ cols: number; cells: FlapCell[] } | null>(null);
+  if (!initial.current || initial.current.cols !== m.cols) {
+    initial.current = { cols: m.cols, cells: makeCells(words[current], m.cols) };
+  }
+  const cells = useSharedValue<FlapCell[]>(initial.current.cells);
   const slowM = useSharedValue(false);
   useEffect(() => { slowM.value = slowMotion; }, [slowMotion, slowM]);
 
@@ -209,7 +219,7 @@ export function SplitFlapBoard({
 
   useFrameCallback((info) => {
     const dt = Math.min(info.timeSincePreviousFrame ?? 16.7, 48) * (slowM.value ? 0.25 : 1);
-    if (cells.value.length === 0) return;
+    if (cells.value.length === 0) return; // not yet initialized
     const r = stepCells(cells.value, dt);
     if (r.cells !== cells.value) cells.value = r.cells;
   });
@@ -219,7 +229,8 @@ export function SplitFlapBoard({
     if (index === undefined) setInternal(n);
     onIndexChange?.(n);
     onFeedback?.('flip', n);
-    cells.value = retarget(cells.value, words[n], DEFAULT_FLAP, reduce);
+    const base = cells.value.length === m.cols ? cells.value : makeCells(words[current], m.cols);
+    cells.value = retarget(base, words[n], DEFAULT_FLAP, reduce);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, words, index, reduce, onIndexChange, onFeedback]);
 
@@ -259,4 +270,3 @@ const styles = StyleSheet.create({
   box: { alignSelf: 'center' },
 });
 
-export { WOBBLE_MS };
