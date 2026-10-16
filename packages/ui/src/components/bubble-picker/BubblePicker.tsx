@@ -95,6 +95,10 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   const selection = selectedIds ?? internal;
   const bounds = useMemo(() => insetBounds(width, height, PAD), [width, height]);
   const bodies = useSharedValue<BubbleBody[]>([]);
+  // Children read bodies.value[index] at mount, so they may only render once
+  // the spawn effect has filled the shared value for THIS item set (first
+  // render would otherwise crash on native: bodies.value[index] undefined).
+  const [spawnedKey, setSpawnedKey] = useState('');
   const pointer = useSharedValue<BubblePointer>({ x: 0, y: 0, active: 0 });
   const clock = useSharedValue(0);
   const reduceM = useSharedValue(false);
@@ -120,6 +124,7 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
     });
     grabbedIndex.current = -1;
     pointer.value = { x: 0, y: 0, active: 0 };
+    setSpawnedKey(items.map(i => i.id).join('\u0001'));
   }, [items, bounds, bodies, pointer]);
 
   useEffect(() => {
@@ -188,10 +193,10 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   return (
     <View style={{ width, height, borderRadius: 24, backgroundColor: '#10201a', overflow: 'hidden' }} accessibilityLabel={label}>
       <Canvas pointerEvents="none" style={{ width, height }}>
-        {items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} color={itemColor(item, i)} clock={clock} reduceM={reduceM} />)}
+        {spawnedKey === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} color={itemColor(item, i)} clock={clock} reduceM={reduceM} />)}
       </Canvas>
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
-        {items.map((item, i) => <BubbleLabel key={item.id} bodies={bodies} index={i} item={item} color={itemColor(item, i)} selected={selection.includes(item.id)} onToggle={toggle} />)}
+        {spawnedKey === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleLabel key={item.id} bodies={bodies} index={i} item={item} color={itemColor(item, i)} selected={selection.includes(item.id)} onToggle={toggle} />)}
       </View>
     </View>
   );
