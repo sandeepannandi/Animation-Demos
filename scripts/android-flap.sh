@@ -33,14 +33,9 @@ center() {
 open flap; sleep 3; shot flap-a
 XY=$(center "Departure board"); [ -z "${XY:-}" ] && XY="540 1176"
 echo "board center: $XY" >> "$OUT/summary.txt"
-adb shell rm -f /sdcard/flap.mp4
-adb shell screenrecord --time-limit 12 /sdcard/flap.mp4 &
-RP=$!
-sleep 1
+# No screenrecord: concurrent screencaps kill it on this emulator.
 adb shell input tap $XY
 for i in 1 2 3 4 5 6 7 8; do sleep 0.6; shot flap-t$i; done
-wait $RP 2>/dev/null
-adb pull /sdcard/flap.mp4 "$OUT/flap.mp4" >/dev/null 2>&1
 sleep 3; shot flap-c
 adb logcat -d > "$OUT/flap-session.logcat.txt"
 report flap-advance flap-a flap-c

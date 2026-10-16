@@ -11,7 +11,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native';
 import { Canvas, Group, Path, Rect, Skia } from '@shopify/react-native-skia';
-import { useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import {
   DEFAULT_FLAP, FLAP_CHARSET,
   makeCells, retarget, stepCells,
@@ -217,14 +217,20 @@ export function SplitFlapBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, words, m.cols, reduce]);
 
+  // Heartbeat: on Android (new arch) Reanimated's frame loop is only
+  // re-posted while Fabric commits or events keep flowing - pure Skia-canvas
+  // updates do NOT keep it alive, so a canvas-only board freezes a few frames
+  // after the last touch (device-verified). One invisible Animated.View whose
+  // style changes every frame keeps the loop posted, exactly like the Bubble
+  // Picker's label views do as a side effect.
+  const beat = useSharedValue(0);
   useFrameCallback((info) => {
     const dt = Math.min(info.timeSincePreviousFrame ?? 16.7, 48) * (slowM.value ? 0.25 : 1);
+    beat.value = (beat.value + dt) % 100000;
     if (cells.value.length === 0) return; // not yet initialized
-    // Unconditional write every frame, matching the device-proven Bubble
-    // Picker / Mosaic loops: with a conditional write the frame callback
-    // stalled a few frames after a JS-side write on native.
     cells.value = stepCells(cells.value, dt).cells;
   });
+  const beatStyle = useAnimatedStyle(() => ({ transform: [{ translateX: beat.value % 2 }] }));
 
   const advance = useCallback(() => {
     const n = (current + 1) % words.length;
@@ -259,6 +265,7 @@ export function SplitFlapBoard({
       style={[styles.box, { width, height: m.cellH }]}
       {...pan.panHandlers}
     >
+      <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: 1, height: 1, opacity: 0 }, beatStyle]} />
       <Canvas style={{ width, height: m.cellH }} pointerEvents="none">
         {Array.from({ length: m.cols }, (_, i) => (
           <FlapCellView key={i} cells={cells} index={i} x={i * (m.cellW + GAP)} m={m} clipPath={clipPath} />
