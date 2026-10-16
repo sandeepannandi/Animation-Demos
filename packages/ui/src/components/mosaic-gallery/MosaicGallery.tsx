@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native';
-import { Canvas, Group, Vertices } from '@shopify/react-native-skia';
+import { Canvas, Group, ImageShader, Skia, Vertices } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import {
   beginShuffle, clampView, decodeBase64, evalMosaicFrame, makeFrame, makeState,
@@ -26,6 +26,11 @@ export type MosaicGalleryProps = {
 };
 
 const GAP = 0.14; // grout line, fraction of a cell
+// 1x1 white PNG: tinting via a texture rides the device-proven Vertices+ImageShader
+// path - the colors-only path renders nothing on native Android (fine on web).
+const WHITE_PIXEL = Skia.Image.MakeImageFromEncoded(
+  Skia.Data.fromBase64('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==')
+);
 const BEVEL = [1.13, 1.05, 0.95, 0.84]; // per-corner light: tl, tr, bl, br
 
 function shadeVertex(packed: number, factor: number): string {
@@ -168,6 +173,7 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
     evalMosaicFrame(st.value, cols, rows, clock.value, reduceM.value, frame);
   });
 
+  const textures = useMemo(() => new Array<{ x: number; y: number }>(cellCount * 4).fill({ x: 0, y: 0 }), [cellCount]);
   const indices = useMemo(() => {
     const idx: number[] = [];
     for (let i = 0; i < cellCount; i++) {
@@ -224,7 +230,9 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
     >
       <Canvas style={StyleSheet.absoluteFill}>
         <Group transform={transform}>
-          <Vertices vertices={vertices} colors={vcolors} indices={indices} />
+          <Vertices vertices={vertices} textures={textures} colors={vcolors} indices={indices} mode="triangles" blendMode="modulate">
+            {WHITE_PIXEL ? <ImageShader image={WHITE_PIXEL} tx="clamp" ty="clamp" /> : null}
+          </Vertices>
         </Group>
       </Canvas>
     </View>
