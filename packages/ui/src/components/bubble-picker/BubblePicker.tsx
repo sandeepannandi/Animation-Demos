@@ -31,9 +31,9 @@ export function itemColor(item: BubbleItem, index: number) {
 
 // One bubble's Skia half: shaded water balloon - drop shadow, gradient body,
 // rim light and a soft gradient body - plus the selection glow and burst.
-function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedValue<BubbleBody[]>; index: number; color: string; clock: SharedValue<number>; reduceM: SharedValue<boolean> }) {
-  const R = useMemo(() => bodies.value[index].baseR, []); // eslint-disable-line react-hooks/exhaustive-deps
-  const phase = useMemo(() => breathPhase(bodies.value[index].id), []); // eslint-disable-line react-hooks/exhaustive-deps
+function BubbleBall({ bodies, index, initial, color, clock, reduceM }: { bodies: SharedValue<BubbleBody[]>; index: number; initial: BubbleBody; color: string; clock: SharedValue<number>; reduceM: SharedValue<boolean> }) {
+  const R = useMemo(() => initial.baseR, [initial]);
+  const phase = useMemo(() => breathPhase(initial.id), [initial]);
   const hi = useMemo(() => shade(color, 0.6), [color]);
   const edge = useMemo(() => shade(color, -0.2), [color]);
   const rim = useMemo(() => shade(color, 0.42), [color]);
@@ -72,8 +72,8 @@ function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedVa
 }
 
 // One bubble's DOM half: upright label and the accessible press target.
-function BubbleLabel({ bodies, index, item, color, selected, onToggle }: { bodies: SharedValue<BubbleBody[]>; index: number; item: BubbleItem; color: string; selected: boolean; onToggle: (id: string) => void }) {
-  const width = useMemo(() => bodies.value[index].baseR * 2 + 28, []); // eslint-disable-line react-hooks/exhaustive-deps
+function BubbleLabel({ bodies, index, initial, item, color, selected, onToggle }: { bodies: SharedValue<BubbleBody[]>; index: number; initial: BubbleBody; item: BubbleItem; color: string; selected: boolean; onToggle: (id: string) => void }) {
+  const width = useMemo(() => initial.baseR * 2 + 28, [initial]);
   const style = useAnimatedStyle(() => {
     const b = bodies.value[index];
     return { left: b.x - width / 2, top: b.y - 16 };
@@ -95,10 +95,11 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   const selection = selectedIds ?? internal;
   const bounds = useMemo(() => insetBounds(width, height, PAD), [width, height]);
   const bodies = useSharedValue<BubbleBody[]>([]);
-  // Children read bodies.value[index] at mount, so they may only render once
-  // the spawn effect has filled the shared value for THIS item set (first
-  // render would otherwise crash on native: bodies.value[index] undefined).
-  const [spawnedKey, setSpawnedKey] = useState('');
+  // Children read per-bubble constants (baseR, id) at mount. They receive
+  // them from this React state copy of the spawn - never from the shared
+  // value - so mounting can never race the shared-value write (it crashed
+  // on native with bodies.value[index] undefined when it did).
+  const [spawn, setSpawn] = useState<{ key: string; bodies: BubbleBody[] } | null>(null);
   const pointer = useSharedValue<BubblePointer>({ x: 0, y: 0, active: 0 });
   const clock = useSharedValue(0);
   const reduceM = useSharedValue(false);
@@ -117,14 +118,14 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
 
   // Spawn once per item set; pre-selected bubbles start lit, with no burst.
   useEffect(() => {
-    const spawned = spawnBodies(items, bounds);
-    bodies.value = spawned.map(b => {
+    const seeded = spawnBodies(items, bounds).map(b => {
       const sel = latest.current.selection.includes(b.id) ? 1 : 0;
       return { ...b, selected: sel, glow: sel, burst: 1 };
     });
+    bodies.value = seeded;
     grabbedIndex.current = -1;
     pointer.value = { x: 0, y: 0, active: 0 };
-    setSpawnedKey(items.map(i => i.id).join('\u0001'));
+    setSpawn({ key: items.map(i => i.id).join('\u0001'), bodies: seeded });
   }, [items, bounds, bodies, pointer]);
 
   useEffect(() => {
@@ -193,10 +194,10 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   return (
     <View style={{ width, height, borderRadius: 24, backgroundColor: '#10201a', overflow: 'hidden' }} accessibilityLabel={label}>
       <Canvas pointerEvents="none" style={{ width, height }}>
-        {spawnedKey === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} color={itemColor(item, i)} clock={clock} reduceM={reduceM} />)}
+        {spawn && spawn.key === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} initial={spawn.bodies[i]} color={itemColor(item, i)} clock={clock} reduceM={reduceM} />)}
       </Canvas>
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
-        {spawnedKey === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleLabel key={item.id} bodies={bodies} index={i} item={item} color={itemColor(item, i)} selected={selection.includes(item.id)} onToggle={toggle} />)}
+        {spawn && spawn.key === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleLabel key={item.id} bodies={bodies} index={i} initial={spawn.bodies[i]} item={item} color={itemColor(item, i)} selected={selection.includes(item.id)} onToggle={toggle} />)}
       </View>
     </View>
   );
