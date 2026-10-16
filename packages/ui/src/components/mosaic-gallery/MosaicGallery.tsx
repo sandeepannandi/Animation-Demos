@@ -3,9 +3,10 @@ import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native'
 import { Canvas, Group, ImageShader, Skia, Vertices } from '@shopify/react-native-skia';
 import { useDerivedValue, useFrameCallback, useSharedValue } from 'react-native-reanimated';
 import {
-  beginShuffle, clampView, decodeBase64, evalMosaicFrame, makeFrame, makeState,
-  zoomAbout,
-  type MosaicFrame, type MosaicState, type MosaicView,
+  cellDelay, clamp01, clampView, decodeBase64, easeInOutCubic, rand01,
+  shufflePermutation, zoomAbout,
+  ARC_AMOUNT, POP_SCALE, SHUFFLE_DURATION, SHUFFLE_JITTER, SHUFFLE_SPREAD,
+  type MosaicView,
 } from './mosaicMath';
 import { MOSAIC_COLS, MOSAIC_ROWS, MOSAIC_PAINTINGS, type MosaicPainting } from './mosaic-data';
 
@@ -61,8 +62,27 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
   const offY = (height - fieldH) / 2;
 
   const decoded = useMemo(() => paintings.map(p => decodeBase64(p.colorsB64)), [paintings]);
-  const st = useSharedValue<MosaicState>(makeState(Math.min(shown, paintings.length - 1), decoded[Math.min(shown, paintings.length - 1)], cellCount));
-  const frame: MosaicFrame = useMemo(() => makeFrame(cellCount), [cellCount]);
+  // Transition state lives in shared values with replace semantics only.
+  // The previous design mutated a captured state object from both threads;
+  // on native the worklet closures received frozen copies, so the frame
+  // callback's writes never reached the render deriveds (blank canvas) and
+  // JS-side shuffles never reached the UI thread. Pure reads only below:
+  // the render deriveds compute each frame from these values, like
+  // FoldedPass computes its mesh from a progress shared value.
+  const identity = useMemo(() => {
+    const perm = new Uint16Array(cellCount);
+    for (let i = 0; i < cellCount; i++) perm[i] = i;
+    return perm;
+  }, [cellCount]);
+  const homePerm = useSharedValue<Uint16Array>(identity);
+  const targetPerm = useSharedValue<Uint16Array>(identity);
+  const paintingA = useSharedValue(Math.min(shown, paintings.length - 1));
+  const paintingB = useSharedValue(Math.min(shown, paintings.length - 1));
+  const startT = useSharedValue(0);
+  const originX = useSharedValue(0);
+  const originY = useSharedValue(0);
+  const seedSV = useSharedValue(0);
+  const activeSV = useSharedValue(0);
   const clock = useSharedValue(0);
   const reduceM = useSharedValue(false);
   const slowM = useSharedValue(false);
@@ -79,23 +99,43 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
   useEffect(() => { reduceM.value = reduce; }, [reduce, reduceM]);
   useEffect(() => { slowM.value = slowMotion; }, [slowMotion, slowM]);
 
-  // Rebuild state when the painting set changes (must stay stable per mount).
+  // Reset state when the painting set changes (must stay stable per mount).
   useEffect(() => {
     const idx = Math.min(shown, decoded.length - 1);
-    st.value = makeState(idx, decoded[idx], cellCount);
-  }, [decoded, cellCount, st]); // eslint-disable-line react-hooks/exhaustive-deps
+    homePerm.value = identity;
+    targetPerm.value = identity;
+    paintingA.value = idx;
+    paintingB.value = idx;
+    activeSV.value = 0;
+  }, [decoded, cellCount, identity, homePerm, targetPerm, paintingA, paintingB, activeSV]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const goTo = useCallback((next: number, gx: number, gy: number) => {
     const { paintings: ps, decoded: dec, onIndexChange: cb, onFeedback: fb } = latest.current;
     if (ps.length < 2) return;
     const target = ((next % ps.length) + ps.length) % ps.length;
     const seed = (target + 1) * 7919 + Math.floor(gx * 13 + gy * 17);
-    // Mutate the shareable on the JS thread; worklets see the same object.
-    beginShuffle(st.value, target, dec[target], clock.value, gx, gy, seed);
+    const perm = shufflePermutation(cellCount, seed);
+    paintingB.value = target;
+    if (!latest.current.reduce) targetPerm.value = perm;
+    startT.value = clock.value;
+    originX.value = gx;
+    originY.value = gy;
+    seedSV.value = seed;
+    activeSV.value = 1;
+    // Commit once the last cell has landed (JS owns the bookkeeping; the UI
+    // thread only reads). Superseded by a newer shuffle via the seed token.
+    const durS = latest.current.reduce ? 0.24 : SHUFFLE_SPREAD + SHUFFLE_JITTER + SHUFFLE_DURATION + 0.3;
+    const reducedNow = latest.current.reduce;
+    setTimeout(() => {
+      if (seedSV.value !== seed) return;
+      if (!reducedNow) homePerm.value = perm;
+      paintingA.value = target;
+      activeSV.value = 0;
+    }, durS * 1000);
     if (index === undefined) setInternal(target);
     cb?.(target);
     fb?.('shuffle', target);
-  }, [index, st, clock]);
+  }, [index, clock, cellCount, paintingB, targetPerm, startT, originX, originY, seedSV, activeSV, homePerm, paintingA]);
 
   // Tap / double-tap / pan / pinch through one PanResponder (no gesture-handler dep).
   const originRef = useRef({ x: 0, y: 0 }); // canvas origin in page coords
@@ -166,11 +206,9 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
   const containerRef = useRef<View>(null);
 
   useFrameCallback((info) => {
-    const prev = clock.value;
     const dt = Math.min(48, info.timeSincePreviousFrame ?? 16.7) / 1000;
     const scale = slowM.value && !reduceM.value ? 0.25 : 1;
-    clock.value = prev + dt * scale;
-    evalMosaicFrame(st.value, cols, rows, clock.value, reduceM.value, frame);
+    clock.value = clock.value + dt * scale;
   });
 
   const textures = useMemo(() => new Array<{ x: number; y: number }>(cellCount * 4).fill({ x: 0, y: 0 }), [cellCount]);
@@ -184,27 +222,84 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
   }, [cellCount]);
 
   const vertices = useDerivedValue(() => {
-    clock.value; // recompute per frame
+    const t = clock.value; // recompute per frame
+    const home = homePerm.value;
+    const targ = targetPerm.value;
+    const act = activeSV.value === 1;
+    const t0 = startT.value;
+    const ox = originX.value;
+    const oy = originY.value;
+    const seed = seedSV.value;
+    const reduced = reduceM.value;
     const out = new Array<{ x: number; y: number }>(cellCount * 4);
     const half = (cell * (1 - GAP)) / 2;
     for (let i = 0; i < cellCount; i++) {
-      const cx = offX + frame.x[i] * cell;
-      const cy = offY + frame.y[i] * cell;
-      const h = half * frame.s[i];
+      const fromSlot = home[i];
+      const toSlot = reduced ? fromSlot : targ[i];
+      let p = 1;
+      if (act) {
+        p = reduced
+          ? clamp01((t - t0) / 0.24)
+          : easeInOutCubic(clamp01((t - t0 - cellDelay(fromSlot, cols, rows, ox, oy, seed)) / SHUFFLE_DURATION));
+      }
+      let cx: number;
+      let cy: number;
+      let sc = 1;
+      if (reduced) {
+        cx = (fromSlot % cols) + 0.5;
+        cy = Math.floor(fromSlot / cols) + 0.5;
+      } else {
+        const fx = (fromSlot % cols) + 0.5;
+        const fy = Math.floor(fromSlot / cols) + 0.5;
+        const tx = (toSlot % cols) + 0.5;
+        const ty = Math.floor(toSlot / cols) + 0.5;
+        const flight = act ? Math.sin(Math.PI * clamp01(p)) : 0;
+        const r1 = rand01(seed * 131 + i * 17) - 0.5;
+        const r2 = rand01(seed * 733 + i * 29) - 0.5;
+        cx = fx + (tx - fx) * p + r1 * ARC_AMOUNT * 2 * flight;
+        cy = fy + (ty - fy) * p + r2 * ARC_AMOUNT * 2 * flight;
+        sc = 1 + POP_SCALE * flight;
+      }
+      const px = offX + cx * cell;
+      const py = offY + cy * cell;
+      const h = half * sc;
       const o = i * 4;
-      out[o] = { x: cx - h, y: cy - h };
-      out[o + 1] = { x: cx + h, y: cy - h };
-      out[o + 2] = { x: cx - h, y: cy + h };
-      out[o + 3] = { x: cx + h, y: cy + h };
+      out[o] = { x: px - h, y: py - h };
+      out[o + 1] = { x: px + h, y: py - h };
+      out[o + 2] = { x: px - h, y: py + h };
+      out[o + 3] = { x: px + h, y: py + h };
     }
     return out;
-  });
+  }, [cellCount, cols, rows, cell, offX, offY]);
 
   const vcolors = useDerivedValue(() => {
-    clock.value;
+    const t = clock.value;
+    const home = homePerm.value;
+    const targ = targetPerm.value;
+    const act = activeSV.value === 1;
+    const t0 = startT.value;
+    const ox = originX.value;
+    const oy = originY.value;
+    const seed = seedSV.value;
+    const reduced = reduceM.value;
+    const A = decoded[paintingA.value];
+    const B = decoded[paintingB.value];
     const out = new Array(cellCount * 4);
     for (let i = 0; i < cellCount; i++) {
-      const c = frame.color[i];
+      const fromSlot = home[i];
+      const toSlot = reduced ? fromSlot : targ[i];
+      let p = 1;
+      if (act) {
+        p = reduced
+          ? clamp01((t - t0) / 0.24)
+          : easeInOutCubic(clamp01((t - t0 - cellDelay(fromSlot, cols, rows, ox, oy, seed)) / SHUFFLE_DURATION));
+      }
+      const ai = fromSlot * 3;
+      const bi = toSlot * 3;
+      const cr = A[ai] + (B[bi] - A[ai]) * p;
+      const cg = A[ai + 1] + (B[bi + 1] - A[ai + 1]) * p;
+      const cb = A[ai + 2] + (B[bi + 2] - A[ai + 2]) * p;
+      const c = 0xff000000 | (((cr | 0) & 255) << 16) | (((cg | 0) & 255) << 8) | ((cb | 0) & 255);
       const o = i * 4;
       out[o] = shadeVertex(c, BEVEL[0]);
       out[o + 1] = shadeVertex(c, BEVEL[1]);
@@ -212,7 +307,7 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
       out[o + 3] = shadeVertex(c, BEVEL[3]);
     }
     return out;
-  });
+  }, [cellCount, cols, rows, decoded]);
 
   const transform = useDerivedValue(() => {
     const v = view.value;
