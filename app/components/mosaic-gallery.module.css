@@ -1,6 +1,6 @@
 .stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
 .caption { color: #31513b; font-size: 13px; text-align: center; }
-.sub { color: #637e6b; font-size: 11px; text-align: center; margin-top: -10px; }
+
 .canvas { border-radius: 16px; background: #101c15; cursor: pointer; touch-action: none; display: block; }
 .canvas:focus { outline: none; }
 .canvas:focus-visible { outline: 2px solid #31513b; outline-offset: 3px; }
@@ -8,6 +8,4 @@
 .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
 .chip { min-height: 44px; padding: 0 16px; border-radius: 14px; background: #e6edde; border: 0; color: #31513b; font-size: 13px; cursor: pointer; }
 .chipPrimary { composes: chip; background: #31513b; color: #f3f6ee; }
-.dots { display: flex; gap: 6px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: #cfdcc6; border: 0; padding: 0; cursor: pointer; }
-.dotActive { composes: dot; background: #31513b; }
+
