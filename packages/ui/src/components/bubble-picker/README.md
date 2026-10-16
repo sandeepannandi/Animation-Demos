@@ -42,8 +42,8 @@ import { BubblePicker } from './BubblePicker';
 
 ## Notes
 
-- Water-balloon rendering: gradient body, top sheen, rim light, gloss,
-  specular dot and a drop shadow per bubble. Selection is shown as light:
+- Water-balloon rendering: soft gradient body, rim light and a drop
+  shadow per bubble - no moving highlights. Selection is shown as light:
   the bubble lights from within with a colored bloom and one expanding burst
   ring - no border, no permanent size change. Bubbles breathe (a slow,
   per-bubble phased pulsation), stretch along their velocity, and squash

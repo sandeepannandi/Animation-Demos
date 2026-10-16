@@ -30,7 +30,7 @@ export function itemColor(item: BubbleItem, index: number) {
 }
 
 // One bubble's Skia half: shaded water balloon - drop shadow, gradient body,
-// top sheen, rim light, gloss and specular - plus the selection glow and burst.
+// rim light and a soft gradient body - plus the selection glow and burst.
 function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedValue<BubbleBody[]>; index: number; color: string; clock: SharedValue<number>; reduceM: SharedValue<boolean> }) {
   const R = useMemo(() => bodies.value[index].baseR, []); // eslint-disable-line react-hooks/exhaustive-deps
   const phase = useMemo(() => breathPhase(bodies.value[index].id), []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -53,13 +53,6 @@ function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedVa
   const burstR = useDerivedValue(() => R * (1 + clamp(bodies.value[index].burst, 0, 1.4) * 0.85));
   const burstO = useDerivedValue(() => clamp(1 - bodies.value[index].burst, 0, 1) * 0.85);
   const coreO = useDerivedValue(() => clamp(bodies.value[index].glow, 0, 1) * 0.6);
-  // Counter-rotation for the specular dot: the highlight is a reflection of a
-  // fixed light source, so it must NOT swing with the jelly deformation.
-  const invAngle = useDerivedValue(() => {
-    if (reduceM.value) return 0;
-    return -deformation(bodies.value[index], clock.value, phase).angle;
-  });
-  const specTransform = useDerivedValue(() => [{ rotateZ: invAngle.value }]);
   return (
     <Group transform={transform}>
       <Circle cx={0} cy={0} r={bloomR} opacity={glow}>
@@ -70,9 +63,6 @@ function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedVa
         <Shadow dx={0} dy={R * 0.16} blur={R * 0.3} color="rgba(6, 20, 14, 0.45)" />
       </Circle>
       <Path path={rimPath} style="stroke" strokeWidth={2.5} strokeCap="round" color={rim} opacity={0.6} />
-      <Group transform={specTransform}>
-        <Circle cx={-R * 0.38} cy={-R * 0.44} r={R * 0.08} color="#ffffff" opacity={0.75} />
-      </Group>
       <Circle cx={0} cy={0} r={r} opacity={coreO}>
         <RadialGradient c={vec(0, 0)} r={R} colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0)']} />
       </Circle>
