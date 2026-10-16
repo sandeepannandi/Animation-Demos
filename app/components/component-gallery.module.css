@@ -222,3 +222,7 @@
 .miniFold span { display:block; height: 48px; padding: 17px 12px; box-sizing: border-box; border-radius: 12px 12px 0 0; background: #f3efe4; color:#315843; font-size: 13px; font-weight: 600; box-shadow: 0 1px 0 #cfc4a8; }
 .miniFold i { display:block; height: 38px; margin-top: 3px; background: #e6ddc7; transform: perspective(300px) rotateX(-48deg); transform-origin: top; }
 .miniFold b { display:block; height: 44px; margin-top: 6px; background: repeating-linear-gradient(90deg, #1f3a2c 0 2px, #f3efe4 2px 5px); border-radius: 0 0 12px 12px; opacity: .8; }
+
+.miniTransitions { position: relative; width: 118px; height: 118px; border-radius: 12px; overflow: hidden; background: linear-gradient(#c9def2 0 40%, #6e92bd 40% 65%, #44678f 65% 85%, #223d5c 85%); box-shadow: 0 8px 18px #223d5c33; }
+.miniTransitions i { position: absolute; inset: 0; background: linear-gradient(#f8dfae 0 40%, #e9b478 40% 62%, #d69354 62% 82%, #b96f3c 82%); clip-path: circle(32% at 34% 42%); }
+.miniTransitions b { position: absolute; left: 34%; top: 42%; width: 76px; height: 76px; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid #fff3d9aa; }

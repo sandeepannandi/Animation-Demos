@@ -40,14 +40,16 @@ import { BlossomQRPreview } from "./blossom-qr";
 import { LightPaintingPreview } from "./light-painting";
 import { GenieDismissPreview } from "./genie-dismiss";
 import { FoldedPassPreview } from "./folded-pass";
+import { GLTransitionsPreview } from "./gl-transitions";
 import { TextMorphPreview } from "./text-morph";
 import { PinchGalleryPreview } from "./pinch-gallery";
 import { SourceDropdown } from "./source-dropdown";
 import styles from "../page.module.css";
 import gallery from "./component-gallery.module.css";
 
-type ComponentId = "fold" | "genie" | "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit" | "blossom" | "light" | "morph";
+type ComponentId = "transitions" | "fold" | "genie" | "rail" | "capsule" | "toast" | "glass" | "swipe" | "expand" | "sort" | "carousel" | "gooey" | "ripple" | "lens" | "chart" | "pinch" | "curl" | "orbit" | "blossom" | "light" | "morph";
 const META = {
+  transitions: { title: "GL Transitions", number: "21", folder: "gl-transitions", note: "Original React Native Skia component. Copy GLTransitionPager.tsx, transitionMath.ts and transitionShaders.ts together and keep LICENSE. A photo pager where the drag itself scrubs the transition between pages: the scroll position between two pages is the effect's progress, followed one to one, and a flick completes or reverses the hop. Four original runtime shaders cycle per hop - Ripple grows a wavefront from where you touched, Slices slides seven bands in behind the drag, Zoom trades the pages through a zoom with a radial channel split, Melt lets columns of the old page go in a fixed shuffled order. Each is exact at both ends, so a resting page is pixel-clean. Rubber-band ends, mid-flight catch, tap the left or right third to walk a page. Slow motion and Reduce Motion (instant snap) are built in. Pages are prepared SkImage textures, so live text and controls sit outside the pager. Only the active hop draws. Physical-device frame rate unverified. Web preview shares the maths and draws the same shaders in WebGL GLSL, not Skia. No third-party shader collection or artwork is used.", footer: "Preview: React · WebGL adapter. Source: React Native · Skia · Reanimated" },
   fold: { title: "Folded Pass", number: "20", folder: "folded-pass", note: "Original React Native Skia component. Copy FoldedPass.tsx, foldMath.ts and passDesign.ts (Example only) together and keep LICENSE. A three-panel paper pass joined by two creases. Drag it down and the panels unfold through a perspective camera: each one is a textured mesh, the free middle panel bows, the paper back shows when a panel turns over, and crease shading follows the fold angle. Release hands the finger's speed to a spring; touch it mid-flight to catch it and reverse. Frozen paper while it moves, real RN content at rest. Slow motion and Reduce Motion (no fold, instant swap) are built in. Perspective comes from a dense mesh with affine triangles, not per-pixel projection. Not device-tested beyond the Android emulator. Web preview shares the geometry and shading and draws with WebGL, not Skia.", footer: "Preview: React · WebGL adapter. Source: React Native · Skia · Reanimated" },
   genie: { title: "Genie Dismiss", number: "19", folder: "genie-dismiss", note: "Original React Native Skia textured triangle mesh. Copy GenieDismiss.tsx and genieMath.ts together and keep LICENSE. A frozen card narrows from the bottom, bends toward a target, and tucks into it. Drag down/up to scrub, release to settle, or tap to reverse. Includes slow motion and system Reduce Motion crossfade. Pass a prepared SkImage; native snapshot helper must be called explicitly after layout. Frozen content during the warp, not live controls. Native capture and physical-device performance remain unverified. Website uses a WebGL texture adapter sharing the maths, not Skia.", footer: "Preview: React · WebGL adapter. Source: React Native · Skia · Reanimated" },
   orbit: { title: "Orbit QR", number: "15", folder: "orbit-qr", note: "Original React Native Skia component. Copy OrbitQR.tsx and orbitMath.ts together and keep LICENSE. Pass any QR matrix; the Example uses the MIT-licensed qrcode-generator. Tiles on a sphere rotate under your finger, then a top-down wave lands each one on its module while rotation and perspective unwind to zero. The final frame is a flat code with a quiet zone; tests decode it with jsQR at several sizes. Toggle again to reverse from wherever it is. Not device-tested. Web preview shares the maths and draws with Canvas 2D, not Skia.", footer: "Preview: React · Canvas 2D adapter. Source: React Native · Skia · Reanimated" },
@@ -156,6 +158,7 @@ const sections = [
 ];
 
 const COMPONENT_NAMES: [string, string][] = [
+  ["GL Transitions", "Drag scrubs a shader transition · flick to fly"],
   ["Folded Pass", "A paper pass that unfolds under your finger · drag to fold"],
   ["Genie Dismiss", "A textured card funnels into a target · drag to reverse"],
   ["Preview Rail", "Vertical and horizontal navigation · switch inside"],
@@ -526,6 +529,10 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniGenie}><span>FIELD NOTES</span><strong>A little room<br />to wander.</strong><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 19</span><strong>Genie Dismiss</strong><small>A textured card funnels into a target · drag to reverse</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} hidden={!matches("GL Transitions", "Drag scrubs a shader transition · flick to fly")} onClick={(event) => openComponent(event, "transitions")} aria-haspopup="dialog" aria-label="Open GL Transitions web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniTransitions}><i /><b /></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 21</span><strong>GL Transitions</strong><small>Drag scrubs a shader transition · flick to fly</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
               <button className={gallery.tile} hidden={!matches("Folded Pass", "A paper pass that unfolds under your finger · drag to fold")} onClick={(event) => openComponent(event, "fold")} aria-haspopup="dialog" aria-label="Open Folded Pass web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniFold}><span>BLR → LHR</span><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 20</span><strong>Folded Pass</strong><small>A paper pass that unfolds under your finger · drag to fold</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
@@ -585,7 +592,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "fold" ? <FoldedPassPreview /> : which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "transitions" ? <GLTransitionsPreview /> : which === "fold" ? <FoldedPassPreview /> : which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
