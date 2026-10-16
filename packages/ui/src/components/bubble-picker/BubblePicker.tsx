@@ -41,18 +41,37 @@ function BubbleBall({ bodies, index, initial, color, clock, reduceM }: { bodies:
     const rr = R - 2.5, a1 = 0.44, a2 = 1.31;
     return `M ${Math.cos(a1) * rr} ${Math.sin(a1) * rr} A ${rr} ${rr} 0 0 1 ${Math.cos(a2) * rr} ${Math.sin(a2) * rr}`;
   }, [R]);
-  const r = useDerivedValue(() => bodies.value[index].r * bodies.value[index].scale);
+  const r = useDerivedValue(() => {
+    const b = bodies.value[index];
+    return b ? b.r * b.scale : 0;
+  });
   const transform = useDerivedValue(() => {
     const b = bodies.value[index];
+    if (!b) return [{ translateX: -9999 }, { translateY: -9999 }];
     if (reduceM.value) return [{ translateX: b.x }, { translateY: b.y }];
     const d = deformation(b, clock.value, phase);
     return [{ translateX: b.x }, { translateY: b.y }, { rotateZ: d.angle }, { scaleX: d.sx }, { scaleY: d.sy }];
   });
-  const glow = useDerivedValue(() => clamp(bodies.value[index].glow, 0, 1));
-  const bloomR = useDerivedValue(() => R * (1 + 0.42 * clamp(bodies.value[index].glow, 0, 1)));
-  const burstR = useDerivedValue(() => R * (1 + clamp(bodies.value[index].burst, 0, 1.4) * 0.85));
-  const burstO = useDerivedValue(() => clamp(1 - bodies.value[index].burst, 0, 1) * 0.85);
-  const coreO = useDerivedValue(() => clamp(bodies.value[index].glow, 0, 1) * 0.6);
+  const glow = useDerivedValue(() => {
+    const b = bodies.value[index];
+    return b ? clamp(b.glow, 0, 1) : 0;
+  });
+  const bloomR = useDerivedValue(() => {
+    const b = bodies.value[index];
+    return b ? R * (1 + 0.42 * clamp(b.glow, 0, 1)) : 0;
+  });
+  const burstR = useDerivedValue(() => {
+    const b = bodies.value[index];
+    return b ? R * (1 + clamp(b.burst, 0, 1.4) * 0.85) : 0;
+  });
+  const burstO = useDerivedValue(() => {
+    const b = bodies.value[index];
+    return b ? clamp(1 - b.burst, 0, 1) * 0.85 : 0;
+  });
+  const coreO = useDerivedValue(() => {
+    const b = bodies.value[index];
+    return b ? clamp(b.glow, 0, 1) * 0.6 : 0;
+  });
   return (
     <Group transform={transform}>
       <Circle cx={0} cy={0} r={bloomR} opacity={glow}>
@@ -76,7 +95,8 @@ function BubbleLabel({ bodies, index, initial, item, color, selected, onToggle }
   const width = useMemo(() => initial.baseR * 2 + 28, [initial]);
   const style = useAnimatedStyle(() => {
     const b = bodies.value[index];
-    return { left: b.x - width / 2, top: b.y - 16 };
+    if (!b) return { left: -9999, top: -9999, opacity: 0 };
+    return { left: b.x - width / 2, top: b.y - 16, opacity: 1 };
   });
   const ink = useMemo(() => { const [r, g, b] = hexToRgb(color); return r * 0.3 + g * 0.59 + b * 0.11 > 150 ? '#23312b' : '#ffffff'; }, [color]);
   return (
@@ -129,6 +149,11 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   }, [items, bounds, bodies, pointer]);
 
   useEffect(() => {
+    // Never rewrite an empty array: right after spawn the JS-side read can
+    // still observe the pre-spawn value, and writing that back would wipe
+    // the freshly spawned bodies (this dead-locked the whole component on
+    // native).
+    if (bodies.value.length === 0) return;
     bodies.value = bodies.value.map(b => {
       const sel = latest.current.selection.includes(b.id) ? 1 : 0;
       return sel === b.selected ? b : { ...b, selected: sel, scaleV: b.scaleV + popKick(sel), burst: 0, burstV: 0 };
