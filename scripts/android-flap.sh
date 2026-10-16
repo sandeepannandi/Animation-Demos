@@ -37,17 +37,22 @@ echo "board center: $XY" >> "$OUT/summary.txt"
 # or screenrecord - each buys the Reanimated loop a few frames on Android).
 # If the heartbeat works, the cascade completes during total quiet.
 adb shell input tap $XY
-sleep 6; shot flap-c
+# The emulator's JS clock runs slower than real time (software rendering,
+# shared CI CPU), so the ~2.5s cascade can need >10s wall time. Wait long,
+# then prove SETTLED (not stalled) with two identical frames 3s apart.
+sleep 14; shot flap-c; sleep 3; shot flap-c2
 # Now that the board has settled, exercise one more word via the Next button area (same tap)
 adb shell input tap $XY
-sleep 6; shot flap-d
+sleep 14; shot flap-d; sleep 3; shot flap-d2
 adb logcat -d > "$OUT/flap-session.logcat.txt"
 report flap-advance flap-a flap-c
+report flap-settle-1 flap-c flap-c2
 report flap-advance-2 flap-c flap-d
+report flap-settle-2 flap-d flap-d2
 
 # Bubble Picker selection tap, content-desc fix
 open bubbles; sleep 15; shot bub-a  # let the field settle so uiautomator dump succeeds
-XY=$(center "Music"); [ -z "${XY:-}" ] && XY="540 1200"
+XY=$(center "Music"); [ -z "${XY:-}" ] && XY="670 1115"  # measured Music center from run-8 frames (540 1200 missed between bubbles)
 echo "music center: $XY" >> "$OUT/summary.txt"
 adb shell input tap $XY; sleep 1; shot bub-b
 dumpui && adb shell cat /sdcard/ui.xml > "$OUT/bub-ui.xml" 2>/dev/null
