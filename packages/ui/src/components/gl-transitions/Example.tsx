@@ -55,7 +55,6 @@ function drawScene(scene: Scene): SkImage {
 export default function Example({ onSnap }: { onSnap?: () => void } = {}) {
   const [index, setIndex] = useState(0);
   const [slow, setSlow] = useState(false);
-  const [reduce, setReduce] = useState(false);
   const pages = useMemo(() => SCENES.map(drawScene), []);
   useEffect(() => () => pages.forEach((p) => p.dispose()), [pages]);
   const chip = (on: boolean) => ({
@@ -66,17 +65,16 @@ export default function Example({ onSnap }: { onSnap?: () => void } = {}) {
   const go = (next: number) => setIndex(Math.max(0, Math.min(SCENES.length - 1, next)));
   return (
     <View style={{ alignItems: "center", gap: 10, paddingVertical: 14 }}>
-      <View style={{ width: BOX_W, borderRadius: 18, backgroundColor: "#f4f1e9", paddingVertical: 18, alignItems: "center", gap: 12 }}>
+      <View style={{ width: BOX_W, borderRadius: 18, backgroundColor: "#f4f1e9", paddingBottom: 18, alignItems: "center", gap: 12, overflow: "hidden" }}>
         <GLTransitionPager
           pages={pages}
           labels={SCENES.map((s) => s.title)}
-          width={BOX_W - 36}
+          width={BOX_W}
           height={CANVAS_H}
           radius={16}
           index={index}
           onIndexChange={setIndex}
           slowMotion={slow}
-          reducedMotion={reduce}
           label="Landscape gallery"
           onFeedback={onSnap}
         />
@@ -113,9 +111,6 @@ export default function Example({ onSnap }: { onSnap?: () => void } = {}) {
       <View style={{ flexDirection: "row", gap: 8 }}>
         <Pressable accessibilityRole="switch" accessibilityState={{ checked: slow }} onPress={() => setSlow((v) => !v)} style={chip(slow)}>
           <Text style={{ fontSize: 12, color: slow ? "#fff" : "#315843", fontFamily: "Geist-Regular" }}>Slow motion: {slow ? "on" : "off"}</Text>
-        </Pressable>
-        <Pressable accessibilityRole="switch" accessibilityState={{ checked: reduce }} onPress={() => setReduce((v) => !v)} style={chip(reduce)}>
-          <Text style={{ fontSize: 12, color: reduce ? "#fff" : "#315843", fontFamily: "Geist-Regular" }}>Reduce motion: {reduce ? "on" : "off"}</Text>
         </Pressable>
       </View>
       <Text style={{ fontSize: 12, color: "#63705f", fontFamily: "Geist-Regular" }}>

@@ -107,6 +107,7 @@ export function GLTransitionsPreview() {
   const [slow, setSlow] = useState(false),
     [reduce, setReduce] = useState(false),
     [error, setError] = useState(false);
+  // Reduce follows the OS setting only; there is no demo toggle.
   const latest = useRef({ slow, reduce });
   latest.current = { slow, reduce };
   const drag = useRef<{ id: number; x: number; start: number; lastX: number; at: number; v: number } | null>(null);
@@ -379,9 +380,6 @@ export function GLTransitionsPreview() {
       <div className={styles.row}>
         <button className={styles.chip} aria-pressed={slow} onClick={() => setSlow(!slow)}>
           Slow motion: {slow ? "on" : "off"}
-        </button>
-        <button className={styles.chip} aria-pressed={reduce} onClick={() => setReduce(!reduce)}>
-          Reduce motion: {reduce ? "on" : "off"}
         </button>
       </div>
       <p className={styles.hint}>Drag slowly to scrub the transition, flick to fly through. Each hop plays the next effect.</p>
