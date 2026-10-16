@@ -59,3 +59,5 @@ report sortx-motion-noshot sortx-a sortx-motion-noshot
 open nativelet-showcase:///sort
 adb shell input swipe 900 824 900 1100 1200; sleep 4; shot sortx-swipe
 report sortx-swipe sortx-a sortx-swipe
+
+bash "$(dirname "$0")/android-fold.sh"
