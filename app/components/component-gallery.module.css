@@ -236,3 +236,6 @@
 .miniMosaic i:nth-child(7) { background: #3a6ab0; } .miniMosaic i:nth-child(8) { background: #122544; }
 .miniMosaic i:nth-child(9) { background: #22406f; } .miniMosaic i:nth-child(10) { background: #d9b832; }
 .miniMosaic i:nth-child(11) { background: #1a3560; } .miniMosaic i:nth-child(12) { background: #28497f; }
+
+.miniFlap { display: flex; gap: 3px; align-items: center; }
+.miniFlap i { width: 13px; height: 19px; border-radius: 3px; background: linear-gradient(to bottom, #262931 47%, #0a0b0e 50%, #1b1d23 53%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
