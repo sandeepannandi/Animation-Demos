@@ -32,13 +32,15 @@ function shadeVertex(packed: number, factor: number): string {
   'worklet';
   // Vertices colors must be color strings (see Skia's VerticesProps) - raw
   // uint32 numbers are silently dropped by the native materializer.
+  // Self-contained on purpose: Reanimated captures a worklet's module-scope
+  // bindings at the worklet's position in the module, so a const declared
+  // below would be captured undefined (crash on device).
+  const C = '0123456789abcdef';
   const r = Math.min(255, Math.round(((packed >> 16) & 255) * factor));
   const g = Math.min(255, Math.round(((packed >> 8) & 255) * factor));
   const b = Math.min(255, Math.round((packed & 255) * factor));
-  return `#${HEX[r]}${HEX[g]}${HEX[b]}`;
+  return '#' + C[r >> 4] + C[r & 15] + C[g >> 4] + C[g & 15] + C[b >> 4] + C[b & 15];
 }
-
-const HEX = '0123456789abcdef'.split('').flatMap(a => '0123456789abcdef'.split('').map(b => a + b));
 
 export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultIndex = 0, onIndexChange, onFeedback, width = 340, height = 234, label = 'Mosaic gallery', reducedMotion, slowMotion = false }: MosaicGalleryProps) {
   const [systemReduce, setSystemReduce] = useState(false);
