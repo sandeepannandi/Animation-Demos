@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  blur: { dir: "packages/ui/src/components/motion-blur", files: ["MotionBlurPager.tsx", "motionMath.ts", "blurShader.ts", "scenes.ts", "Example.tsx", "README.md", "LICENSE"] },
   fold: { dir: "packages/ui/src/components/folded-pass", files: ["FoldedPass.tsx", "foldMath.ts", "passDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   genie: { dir: "packages/ui/src/components/genie-dismiss", files: ["GenieDismiss.tsx", "genieMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   blossom: { dir: "packages/ui/src/components/blossom-qr", files: ["BlossomQR.tsx", "blossomMath.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -40,6 +41,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    blur: read(components.blur.dir, components.blur.files),
     fold: read(components.fold.dir, components.fold.files),
     genie: read(components.genie.dir, components.genie.files),
     orbit: read(components.orbit.dir, components.orbit.files),
