@@ -217,3 +217,8 @@
 
 .miniGenie { width: 160px; height: 180px; padding: 22px; border-radius: 16px; background: #e9e6db; color: #315843; position: relative; transform: perspective(400px) rotateY(-8deg) rotateZ(-8deg); }
 .miniGenie span { font-size: 8px; letter-spacing: 2px; } .miniGenie strong { display:block; font-size:22px; margin-top:12px; line-height:1.1; } .miniGenie i { position:absolute; width:75px; height:75px; background:#ae8655; border-radius:50%; bottom:18px; right:12px; } .miniGenie b { position:absolute; width:42px; height:42px; background:#315843; border-radius:50%; bottom:-16px; right:-35px; }
+
+.miniFold { width: 150px; height: 170px; position: relative; transform: perspective(500px) rotateX(18deg) rotateZ(-6deg); }
+.miniFold span { display:block; height: 48px; padding: 17px 12px; box-sizing: border-box; border-radius: 12px 12px 0 0; background: #f3efe4; color:#315843; font-size: 13px; font-weight: 600; box-shadow: 0 1px 0 #cfc4a8; }
+.miniFold i { display:block; height: 38px; margin-top: 3px; background: #e6ddc7; transform: perspective(300px) rotateX(-48deg); transform-origin: top; }
+.miniFold b { display:block; height: 44px; margin-top: 6px; background: repeating-linear-gradient(90deg, #1f3a2c 0 2px, #f3efe4 2px 5px); border-radius: 0 0 12px 12px; opacity: .8; }
