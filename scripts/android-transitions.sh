@@ -55,13 +55,5 @@ if [ -n "$NB" ]; then
   adb shell input motionevent MOVE $((X-120)) "$Y"; sleep 0.3; adb shell input motionevent UP $((X-120)) "$Y"; sleep 2.5; shot i-caught-settled
   say "catch crash=$(crash) caught!=settled=$(differs h-caught i-caught-settled) counter=$(counter)"
 fi
-# Reduce motion: instant swap, no scrub
-RM=$(center "Reduce motion: off")
-say "reduce toggle at: ${RM:-not found}"
-if [ -n "$RM" ] && [ -n "$NB" ]; then
-  adb shell input tap ${RM% *} ${RM#* }; sleep 0.6; shot j-reduce-before
-  adb shell input tap ${NB% *} ${NB#* }; sleep 0.15; shot k-reduce-after; sleep 1
-  say "reduce-motion crash=$(crash) swapped=$(differs j-reduce-before k-reduce-after) counter=$(counter)"
-fi
 say "transitions final crash=$(crash)"
 adb logcat -d | tail -300 > "$OUT/logcat-tail.txt"

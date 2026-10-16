@@ -1,5 +1,5 @@
 .wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 10px 14px; }
-.stage { position: relative; width: min(100%, 340px); background: #f4f1e9; border-radius: 18px; padding: 18px 0 12px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.stage { position: relative; width: min(100%, 340px); background: #f4f1e9; border-radius: 18px; padding: 0 0 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .canvas { display: block; width: 100%; aspect-ratio: 1 / 1; touch-action: none; cursor: grab; }
 .canvas:active { cursor: grabbing; }
 .caption { display: flex; justify-content: space-between; width: calc(100% - 44px); }
