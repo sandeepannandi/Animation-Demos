@@ -52,9 +52,11 @@ test("scrub decomposes scroll into from/to/progress", () => {
   assert.deepEqual(scrub(-2, 4).t, 0, "overshoot below zero clamps");
 });
 
-test("effects cycle through all four and wrap", () => {
-  assert.deepEqual([0, 1, 2, 3].map(effectForTransition), [...EFFECTS]);
-  assert.equal(effectForTransition(4), EFFECTS[0]);
+test("effects cycle through all six and wrap", () => {
+  assert.equal(EFFECTS.length, 6);
+  assert.deepEqual([0, 1, 2, 3, 4, 5].map(effectForTransition), [...EFFECTS]);
+  assert.equal(effectForTransition(6), EFFECTS[0]);
+  assert.deepEqual(EFFECTS, ["ripple", "slices", "zoom", "melt", "vortex", "wave"]);
 });
 
 test("slices start staggered, land in order, and all complete", () => {

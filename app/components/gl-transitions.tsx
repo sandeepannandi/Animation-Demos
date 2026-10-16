@@ -85,6 +85,27 @@ const FRAGMENTS: Record<string, string> = {
     float bl = texture2D(toI, pb + d * split).b;
     float m = smoothstep(0.2, 0.8, progress);
     gl_FragColor = mix(a, vec4(r, b.g, bl, b.a), m);`,
+  vortex: `
+    vec2 c = vec2(0.5);
+    vec2 d = tex - c;
+    float dist = length(d) / 0.7071;
+    float ta = progress * 5.0 * exp(-2.5 * dist);
+    vec2 ra = vec2(d.x * cos(ta) - d.y * sin(ta), d.x * sin(ta) + d.y * cos(ta));
+    vec4 a = texture2D(fromI, c + ra * (1.0 + progress * 0.35));
+    float tb = (1.0 - progress) * -5.0 * exp(-2.5 * dist);
+    vec2 rb = vec2(d.x * cos(tb) - d.y * sin(tb), d.x * sin(tb) + d.y * cos(tb));
+    vec4 b = texture2D(toI, c + rb * (1.0 + (1.0 - progress) * 0.35));
+    float m = smoothstep(0.25, 0.75, progress);
+    gl_FragColor = mix(a, b, m);`,
+  wave: `
+    float amp = 0.06;
+    float wob = sin(tex.y * 14.0 + progress * 5.0);
+    float edge = progress * (1.0 + 2.0 * amp) - amp + amp * wob;
+    float m = smoothstep(edge + 0.04, edge - 0.04, tex.x);
+    float bend = (1.0 - abs(2.0 * progress - 1.0)) * 0.05 * wob;
+    vec4 a = texture2D(fromI, tex + vec2(bend, 0.0));
+    vec4 b = texture2D(toI, tex + vec2(bend * 0.5, 0.0));
+    gl_FragColor = mix(a, b, m);`,
   melt: `
     float col = floor(tex.x * 24.0);
     float rnd = fract(sin(col * 12.9898) * 43758.5453);
