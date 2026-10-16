@@ -11,7 +11,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native';
 import { Canvas, Group, Path, Rect, Skia } from '@shopify/react-native-skia';
-import Animated, { useAnimatedStyle, useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
+import { useDerivedValue, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import {
   DEFAULT_FLAP, FLAP_CHARSET,
   makeCells, retarget, stepCells,
@@ -202,8 +202,6 @@ export function SplitFlapBoard({
     initial.current = { cols: m.cols, cells: makeCells(words[current], m.cols) };
   }
   const cells = useSharedValue<FlapCell[]>(initial.current.cells);
-  const slowM = useSharedValue(false);
-  useEffect(() => { slowM.value = slowMotion; }, [slowMotion, slowM]);
 
   // (Re)target whenever the shown word, geometry or motion mode changes.
   // Single retarget path: advance() only moves the index and lets this
@@ -226,23 +224,34 @@ export function SplitFlapBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, words, m.cols, reduce]);
 
-  // Heartbeat: on Android (new arch) Reanimated's frame loop is only
-  // re-posted while Fabric commits or events keep flowing - pure Skia-canvas
-  // updates do NOT keep it alive, so a canvas-only board freezes a few frames
-  // after the last touch (device-verified). One invisible Animated.View whose
-  // style changes every frame keeps the loop posted, exactly like the Bubble
-  // Picker's label views do as a side effect.
-  const beat = useSharedValue(0);
-  useFrameCallback((info) => {
-    const dt = Math.min(info.timeSincePreviousFrame ?? 16.7, 48) * (slowM.value ? 0.25 : 1);
-    if (cells.value.length === 0) return; // not yet initialized
-    const r = stepCells(cells.value, dt);
-    cells.value = r.cells;
-    // Beat only while the board is active: a settled board stays quiet so
-    // accessibility dumps and battery are unaffected.
-    if (r.active) beat.value = (beat.value + dt) % 100000;
-  });
-  const beatStyle = useAnimatedStyle(() => ({ transform: [{ translateX: beat.value % 2 }] }));
+  // The board's clock runs on the JS thread. Device-proven: Reanimated's
+  // UI-thread frame callback is not an independent power source on Android -
+  // its Choreographer loop dies a few frames after the UI goes quiet (pure
+  // Skia-canvas updates neither re-post it nor wake it), and any "heartbeat"
+  // fed by that same loop dies with it. ReactChoreographer-backed JS rAF
+  // keeps firing on a quiet screen; each cells.value write crosses to the UI
+  // runtime, recomputes the deriveds and invalidates the canvas.
+  const slowMotionRef = useRef(slowMotion);
+  useEffect(() => { slowMotionRef.current = slowMotion; }, [slowMotion]);
+  useEffect(() => {
+    let cancelled = false;
+    let last = 0;
+    const tick = (ts: number) => {
+      if (cancelled) return;
+      const dt = Math.min(last ? ts - last : 16.7, 48) * (slowMotionRef.current ? 0.25 : 1);
+      last = ts;
+      if (cells.value.length > 0) {
+        const r = stepCells(cells.value, dt);
+        cells.value = r.cells;
+      }
+      requestAnimationFrame(tick);
+    };
+    const id = requestAnimationFrame(tick);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(id);
+    };
+  }, [cells]);
 
   const advance = useCallback(() => {
     const n = (current + 1) % words.length;
@@ -252,11 +261,16 @@ export function SplitFlapBoard({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current, words, index, reduce, onIndexChange, onFeedback]);
 
+  // PanResponder handlers close over the FIRST render's advance (created
+  // once via useRef) - route through a latest-ref so later taps see the
+  // current word (device-verified: the second tap was a no-op).
+  const advanceRef = useRef(advance);
+  useEffect(() => { advanceRef.current = advance; }, [advance]);
   const pan = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
       onPanResponderRelease: (_evt, g) => {
-        if (Math.abs(g.dx) < 12 && Math.abs(g.dy) < 12) advance();
+        if (Math.abs(g.dx) < 12 && Math.abs(g.dy) < 12) advanceRef.current();
       },
     }),
   ).current;
@@ -275,7 +289,6 @@ export function SplitFlapBoard({
       style={[styles.box, { width, height: m.cellH }]}
       {...pan.panHandlers}
     >
-      <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: 1, height: 1, opacity: 0 }, beatStyle]} />
       <Canvas style={{ width, height: m.cellH }} pointerEvents="none">
         {Array.from({ length: m.cols }, (_, i) => (
           <FlapCellView key={i} cells={cells} index={i} x={i * (m.cellW + GAP)} m={m} clipPath={clipPath} />
