@@ -13,8 +13,8 @@ export default function FoldScreen() {
         paddingBottom: inset.bottom + 16,
       }}
     >
-      <Link href="/genie" style={{ marginHorizontal: 24, color: "#31513b" }}>
-        ← Genie Dismiss
+      <Link href="/" style={{ marginHorizontal: 24, color: "#31513b" }}>
+        ← All components
       </Link>
       <View style={{ flex: 1, justifyContent: "center" }}>
         <Example />
