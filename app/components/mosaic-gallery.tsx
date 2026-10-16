@@ -157,7 +157,6 @@ export function MosaicGalleryPreview() {
   return (
     <div className={styles.stage}>
       <p className={styles.caption} aria-live="polite">{painting.title} · {painting.artist}, {painting.year}</p>
-      <p className={styles.sub}>{index + 1} of {MOSAIC_PAINTINGS.length} · 2,816 tiles</p>
       <canvas
         ref={canvasRef}
         className={styles.canvas}
@@ -172,11 +171,6 @@ export function MosaicGalleryPreview() {
         <button type="button" className={styles.chipPrimary} onClick={() => goTo(index + 1, COLS / 2, ROWS / 2)}>Next painting</button>
         <button type="button" className={styles.chip} aria-pressed={slow} onClick={() => setSlow(!slow)}>Slow motion: {slow ? 'on' : 'off'}</button>
         <button type="button" className={styles.chip} aria-pressed={reduced === true} onClick={() => setReduced(reduced === true ? undefined : true)}>Motion: {reduced === true ? 'reduced' : 'system'}</button>
-      </div>
-      <div className={styles.dots}>
-        {MOSAIC_PAINTINGS.map((p, i) => (
-          <button key={p.id} type="button" className={i === index ? styles.dotActive : styles.dot} aria-label={`Show ${p.title}`} onClick={() => goTo(i, COLS / 2, ROWS / 2)} />
-        ))}
       </div>
     </div>
   );

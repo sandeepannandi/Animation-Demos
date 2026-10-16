@@ -14,7 +14,6 @@ export default function Example({ onFeedback }: { onFeedback?: MosaicGalleryProp
       <Text accessibilityLiveRegion="polite" style={{ color: '#31513b', fontSize: 13, marginBottom: 4 }}>
         {painting.title} · {painting.artist}, {painting.year}
       </Text>
-      <Text style={{ color: '#637e6b', fontSize: 11, marginBottom: 12 }}>{index + 1} of {MOSAIC_PAINTINGS.length}</Text>
       <MosaicGallery label={`Mosaic of ${painting.title} by ${painting.artist}`} index={index} onIndexChange={onChange} slowMotion={slow} reducedMotion={reduce} onFeedback={onFeedback} />
       <Text style={{ color: '#4b6053', fontSize: 12, marginTop: 16 }}>Tap the mosaic for the next painting. Pinch to zoom, double-tap to zoom in.</Text>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8, marginTop: 10 }}>
