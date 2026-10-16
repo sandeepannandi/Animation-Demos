@@ -21,7 +21,7 @@ export default function TransitionsScreen() {
         <Example onSnap={() => void Haptics.selectionAsync().catch(() => {})} />
       </View>
       <Text style={{ padding: 24, color: "#637e6b", fontSize: 12 }}>
-        A gallery that streaks with your swipe, blur growing with speed. Pages are prepared textures;
+        Drag scrubs an original shader transition between pages; a flick completes it. Pages are prepared textures;
         native capture and physical-device performance are unverified.
       </Text>
     </View>
