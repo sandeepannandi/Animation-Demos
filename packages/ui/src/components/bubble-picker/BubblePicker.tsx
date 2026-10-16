@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AccessibilityInfo, PanResponder, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Canvas, Circle, Group, RadialGradient, vec } from '@shopify/react-native-skia';
+import { AccessibilityInfo, PanResponder, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Canvas, Circle, Group, Path, RadialGradient, Shadow, vec } from '@shopify/react-native-skia';
 import Animated, { useAnimatedStyle, useDerivedValue, useFrameCallback, useSharedValue, type SharedValue } from 'react-native-reanimated';
-import { bubbleRadius, clamp, hexToRgb, insetBounds, pickBody, popKick, shade, spawnBodies, stepBodies, wobbleScale, DEFAULT_PHYSICS, type BubbleBody, type BubblePointer } from './physicsMath';
+import { breathPhase, clamp, deformation, hexToRgb, insetBounds, pickBody, popKick, shade, spawnBodies, stepBodies, withAlpha, DEFAULT_PHYSICS, type BubbleBody, type BubblePointer } from './physicsMath';
 
 export type BubbleItem = { id: string; label: string; color?: string };
 export type BubbleFeedback = 'grab' | 'fling' | 'select' | 'deselect';
@@ -29,26 +29,49 @@ export function itemColor(item: BubbleItem, index: number) {
   return item.color ?? PALETTE[index % PALETTE.length];
 }
 
-// One bubble's Skia half: glossy gradient ball, highlight, selection ring.
-function BubbleBall({ bodies, index, color }: { bodies: SharedValue<BubbleBody[]>; index: number; color: string }) {
-  const baseR = useMemo(() => ({ r: bodies.value[index].baseR }), []); // eslint-disable-line react-hooks/exhaustive-deps
+// One bubble's Skia half: shaded water balloon - drop shadow, gradient body,
+// top sheen, rim light, gloss and specular - plus the selection glow and burst.
+function BubbleBall({ bodies, index, color, clock, reduceM }: { bodies: SharedValue<BubbleBody[]>; index: number; color: string; clock: SharedValue<number>; reduceM: SharedValue<boolean> }) {
+  const R = useMemo(() => bodies.value[index].baseR, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const phase = useMemo(() => breathPhase(bodies.value[index].id), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const hi = useMemo(() => shade(color, 0.6), [color]);
+  const edge = useMemo(() => shade(color, -0.2), [color]);
+  const rim = useMemo(() => shade(color, 0.42), [color]);
+  const rimPath = useMemo(() => {
+    const rr = R - 2.5, a1 = 0.44, a2 = 1.31;
+    return `M ${Math.cos(a1) * rr} ${Math.sin(a1) * rr} A ${rr} ${rr} 0 0 1 ${Math.cos(a2) * rr} ${Math.sin(a2) * rr}`;
+  }, [R]);
   const r = useDerivedValue(() => bodies.value[index].r * bodies.value[index].scale);
   const transform = useDerivedValue(() => {
     const b = bodies.value[index];
-    const w = wobbleScale(b.wob);
-    return [{ translateX: b.x }, { translateY: b.y }, { scaleX: w.scaleX }, { scaleY: w.scaleY }];
+    if (reduceM.value) return [{ translateX: b.x }, { translateY: b.y }];
+    const d = deformation(b, clock.value, phase);
+    return [{ translateX: b.x }, { translateY: b.y }, { rotateZ: d.angle }, { scaleX: d.sx }, { scaleY: d.sy }];
   });
-  const ringOpacity = useDerivedValue(() => bodies.value[index].selected);
-  const hi = useMemo(() => shade(color, 0.55), [color]);
-  const edge = useMemo(() => shade(color, -0.14), [color]);
-  const R = baseR.r;
+  const glow = useDerivedValue(() => clamp(bodies.value[index].glow, 0, 1));
+  const bloomR = useDerivedValue(() => R * (1 + 0.42 * clamp(bodies.value[index].glow, 0, 1)));
+  const burstR = useDerivedValue(() => R * (1 + clamp(bodies.value[index].burst, 0, 1.4) * 0.85));
+  const burstO = useDerivedValue(() => clamp(1 - bodies.value[index].burst, 0, 1) * 0.85);
+  const coreO = useDerivedValue(() => clamp(bodies.value[index].glow, 0, 1) * 0.6);
   return (
     <Group transform={transform}>
+      <Circle cx={0} cy={0} r={bloomR} opacity={glow}>
+        <RadialGradient c={vec(0, 0)} r={R * 1.42} colors={[withAlpha(color, 0.5), withAlpha(color, 0)]} />
+      </Circle>
       <Circle cx={0} cy={0} r={r}>
         <RadialGradient c={vec(-R * 0.3, -R * 0.35)} r={R * 1.75} colors={[hi, color, edge]} />
+        <Shadow dx={0} dy={R * 0.16} blur={R * 0.3} color="rgba(6, 20, 14, 0.45)" />
       </Circle>
-      <Circle cx={-R * 0.3} cy={-R * 0.36} r={R * 0.24} color="#ffffff" opacity={0.5} />
-      <Circle cx={0} cy={0} r={r} style="stroke" strokeWidth={3.5} color="#ffffff" opacity={ringOpacity} />
+      <Circle cx={0} cy={0} r={r}>
+        <RadialGradient c={vec(-R * 0.22, -R * 0.28)} r={R * 1.05} colors={['rgba(255,255,255,0.30)', 'rgba(255,255,255,0)']} />
+      </Circle>
+      <Path path={rimPath} style="stroke" strokeWidth={2.5} strokeCap="round" color={rim} opacity={0.6} />
+      <Circle cx={-R * 0.3} cy={-R * 0.36} r={R * 0.22} color="#ffffff" opacity={0.5} />
+      <Circle cx={-R * 0.4} cy={-R * 0.46} r={R * 0.085} color="#ffffff" opacity={0.85} />
+      <Circle cx={0} cy={0} r={r} opacity={coreO}>
+        <RadialGradient c={vec(0, 0)} r={R} colors={['rgba(255,255,255,0.9)', 'rgba(255,255,255,0)']} />
+      </Circle>
+      <Circle cx={0} cy={0} r={burstR} style="stroke" strokeWidth={3} color="#ffffff" opacity={burstO} />
     </Group>
   );
 }
@@ -58,7 +81,7 @@ function BubbleLabel({ bodies, index, item, color, selected, onToggle }: { bodie
   const width = useMemo(() => bodies.value[index].baseR * 2 + 28, []); // eslint-disable-line react-hooks/exhaustive-deps
   const style = useAnimatedStyle(() => {
     const b = bodies.value[index];
-    return { left: b.x - width / 2, top: b.y - 16, opacity: 1 };
+    return { left: b.x - width / 2, top: b.y - 16 };
   });
   const ink = useMemo(() => { const [r, g, b] = hexToRgb(color); return r * 0.3 + g * 0.59 + b * 0.11 > 150 ? '#23312b' : '#ffffff'; }, [color]);
   return (
@@ -78,6 +101,8 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   const bounds = useMemo(() => insetBounds(width, height, PAD), [width, height]);
   const bodies = useSharedValue<BubbleBody[]>([]);
   const pointer = useSharedValue<BubblePointer>({ x: 0, y: 0, active: 0 });
+  const clock = useSharedValue(0);
+  const reduceM = useSharedValue(false);
   const grabbedIndex = useRef(-1);
   const latest = useRef({ items, selection, onSelectionChange, onFeedback, multiSelect, reduce });
   latest.current = { items, selection, onSelectionChange, onFeedback, multiSelect, reduce };
@@ -89,12 +114,14 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
     return () => { alive = false; sub.remove(); };
   }, []);
 
-  // Spawn once per item set; re-sync selection flags from props/state.
+  useEffect(() => { reduceM.value = reduce; }, [reduce, reduceM]);
+
+  // Spawn once per item set; pre-selected bubbles start lit, with no burst.
   useEffect(() => {
     const spawned = spawnBodies(items, bounds);
     bodies.value = spawned.map(b => {
       const sel = latest.current.selection.includes(b.id) ? 1 : 0;
-      return { ...b, selected: sel, r: b.baseR * (sel ? 1.24 : 1) };
+      return { ...b, selected: sel, glow: sel, burst: 1 };
     });
     grabbedIndex.current = -1;
     pointer.value = { x: 0, y: 0, active: 0 };
@@ -103,13 +130,14 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   useEffect(() => {
     bodies.value = bodies.value.map(b => {
       const sel = latest.current.selection.includes(b.id) ? 1 : 0;
-      return sel === b.selected ? b : { ...b, selected: sel, scaleV: b.scaleV + popKick(sel) };
+      return sel === b.selected ? b : { ...b, selected: sel, scaleV: b.scaleV + popKick(sel), burst: 0, burstV: 0 };
     });
   }, [selection, bodies]);
 
   useFrameCallback((frame) => {
     const dt = frame.timeSincePreviousFrame ?? 16;
     const scaled = latest.current.reduce ? Math.min(dt, 48) : dt * (slowMotion ? 0.25 : 1);
+    clock.value += scaled / 1000;
     const opts = latest.current.reduce
       ? { ...DEFAULT_PHYSICS, gravity: 0, drag: 2.6 }
       : DEFAULT_PHYSICS;
@@ -165,7 +193,7 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
   return (
     <View style={{ width, height, borderRadius: 24, backgroundColor: '#10201a', overflow: 'hidden' }} accessibilityLabel={label}>
       <Canvas pointerEvents="none" style={{ width, height }}>
-        {items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} color={itemColor(item, i)} />)}
+        {items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} color={itemColor(item, i)} clock={clock} reduceM={reduceM} />)}
       </Canvas>
       <View style={StyleSheet.absoluteFill} {...pan.panHandlers}>
         {items.map((item, i) => <BubbleLabel key={item.id} bodies={bodies} index={i} item={item} color={itemColor(item, i)} selected={selection.includes(item.id)} onToggle={toggle} />)}

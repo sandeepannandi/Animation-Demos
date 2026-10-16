@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useReducer, useRef, useState } from 'react';
-import { insetBounds, pickBody, popKick, shade, spawnBodies, stepBodies, wobbleScale, DEFAULT_PHYSICS, type BubbleBody } from '../../packages/ui/src/components/bubble-picker/physicsMath';
+import { breathPhase, clamp, deformation, insetBounds, pickBody, popKick, shade, spawnBodies, stepBodies, DEFAULT_PHYSICS, type BubbleBody } from '../../packages/ui/src/components/bubble-picker/physicsMath';
 import styles from './bubble-picker.module.css';
 
 const topics = [
@@ -18,6 +18,7 @@ const topics = [
 const W = 340, H = 380, PAD = 10;
 const bounds = insetBounds(W, H, PAD);
 function inkFor(color: string) { const n = parseInt(color.slice(1), 16); const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255; return r * 0.3 + g * 0.59 + b * 0.11 > 150 ? '#23312b' : '#ffffff'; }
+function rimPathFor(R: number) { const rr = R - 2.5, a1 = 0.44, a2 = 1.31; return `M ${Math.cos(a1) * rr} ${Math.sin(a1) * rr} A ${rr} ${rr} 0 0 1 ${Math.cos(a2) * rr} ${Math.sin(a2) * rr}`; }
 
 export function BubblePickerPreview() {
   const [selected, setSelected] = useState<string[]>([]);
@@ -32,7 +33,10 @@ export function BubblePickerPreview() {
   const downAt = useRef<{ x: number; y: number; t: number } | null>(null);
   const groups = useRef<(SVGGElement | null)[]>([]);
   const balls = useRef<(SVGCircleElement | null)[]>([]);
-  const rings = useRef<(SVGCircleElement | null)[]>([]);
+  const sheens = useRef<(SVGCircleElement | null)[]>([]);
+  const cores = useRef<(SVGCircleElement | null)[]>([]);
+  const blooms = useRef<(SVGCircleElement | null)[]>([]);
+  const bursts = useRef<(SVGCircleElement | null)[]>([]);
   const labels = useRef<(SVGTextElement | null)[]>([]);
   const selRef = useRef(selected);
   selRef.current = selected;
@@ -47,23 +51,26 @@ export function BubblePickerPreview() {
   }, []);
 
   useEffect(() => {
-    let raf = 0, last = performance.now();
+    let raf = 0, last = performance.now(), time = 0;
     const tick = (now: number) => {
       const rawDt = Math.min(now - last, 48); last = now;
       const dt = reduce ? rawDt : slow ? rawDt * 0.25 : rawDt;
+      time += dt / 1000;
       const opts = reduce ? { ...DEFAULT_PHYSICS, gravity: 0, drag: 2.6 } : DEFAULT_PHYSICS;
       let next = stepBodies(bodies.current, dt, bounds, pointer.current, opts);
       if (reduce) next = next.map(b => ({ ...b, wob: 0, wobV: 0, scale: 1, scaleV: 0 }));
       bodies.current = next;
       for (let i = 0; i < next.length; i++) {
-        const b = next[i], g = groups.current[i], ball = balls.current[i], ring = rings.current[i], label = labels.current[i];
-        if (!g || !ball || !ring || !label) continue;
-        const w = wobbleScale(b.wob);
-        g.setAttribute('transform', `translate(${b.x} ${b.y}) scale(${w.scaleX} ${w.scaleY})`);
-        const r = b.r * b.scale;
+        const b = next[i], g = groups.current[i], ball = balls.current[i], sheen = sheens.current[i], core = cores.current[i], bloom = blooms.current[i], burst = bursts.current[i], label = labels.current[i];
+        if (!g || !ball || !sheen || !core || !bloom || !burst || !label) continue;
+        const d = reduce ? { angle: 0, sx: 1, sy: 1 } : deformation(b, time, breathPhase(b.id));
+        g.setAttribute('transform', `translate(${b.x} ${b.y}) rotate(${d.angle * 180 / Math.PI}) scale(${d.sx} ${d.sy})`);
+        const r = b.r * b.scale, glow = clamp(b.glow, 0, 1);
         ball.setAttribute('r', String(r));
-        ring.setAttribute('r', String(r));
-        ring.setAttribute('opacity', String(b.selected));
+        sheen.setAttribute('r', String(r));
+        core.setAttribute('r', String(r)); core.setAttribute('opacity', String(glow * 0.6));
+        bloom.setAttribute('r', String(b.baseR * (1 + 0.42 * glow))); bloom.setAttribute('opacity', String(glow));
+        burst.setAttribute('r', String(b.baseR * (1 + clamp(b.burst, 0, 1.4) * 0.85))); burst.setAttribute('opacity', String(clamp(1 - b.burst, 0, 1) * 0.85));
         label.setAttribute('x', String(b.x)); label.setAttribute('y', String(b.y));
       }
       raf = requestAnimationFrame(tick);
@@ -75,7 +82,7 @@ export function BubblePickerPreview() {
   function toggle(id: string) {
     const cur = selRef.current, on = cur.includes(id);
     setSelected(on ? cur.filter(x => x !== id) : [...cur, id]);
-    bodies.current = bodies.current.map(b => b.id === id ? { ...b, selected: on ? 0 : 1, scaleV: b.scaleV + popKick(on ? 0 : 1) } : b);
+    bodies.current = bodies.current.map(b => b.id === id ? { ...b, selected: on ? 0 : 1, scaleV: b.scaleV + popKick(on ? 0 : 1), burst: 0, burstV: 0 } : b);
     bump();
   }
   function localPoint(e: React.PointerEvent) {
@@ -127,19 +134,36 @@ export function BubblePickerPreview() {
       onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
       <svg className={styles.svg} width={W} height={H} viewBox={`0 0 ${W} ${H}`}>
         <defs>
-          {topics.map((t, i) => {
-            const b = bodies.current[i], R = b.baseR;
-            return <radialGradient key={t.id} id={`bub-${t.id}`} gradientUnits="userSpaceOnUse" cx={-R * 0.3} cy={-R * 0.35} r={R * 1.75}>
-              <stop offset="0" stopColor={shade(t.color, 0.55)} /><stop offset="0.55" stopColor={t.color} /><stop offset="1" stopColor={shade(t.color, -0.14)} />
-            </radialGradient>;
+          <filter id="ball-shadow" x="-60%" y="-60%" width="220%" height="220%"><feDropShadow dx="0" dy="6" stdDeviation="7" floodColor="#06140e" floodOpacity="0.4" /></filter>
+          {topics.map((t) => {
+            const b = bodies.current[topics.indexOf(t)], R = b.baseR;
+            return <g key={t.id}>
+              <radialGradient id={`bub-${t.id}`} gradientUnits="userSpaceOnUse" cx={-R * 0.3} cy={-R * 0.35} r={R * 1.75}>
+                <stop offset="0" stopColor={shade(t.color, 0.6)} /><stop offset="0.55" stopColor={t.color} /><stop offset="1" stopColor={shade(t.color, -0.2)} />
+              </radialGradient>
+              <radialGradient id={`sheen-${t.id}`} gradientUnits="userSpaceOnUse" cx={-R * 0.22} cy={-R * 0.28} r={R * 1.05}>
+                <stop offset="0" stopColor="rgba(255,255,255,0.30)" /><stop offset="1" stopColor="rgba(255,255,255,0)" />
+              </radialGradient>
+              <radialGradient id={`core-${t.id}`} gradientUnits="userSpaceOnUse" cx={0} cy={0} r={R}>
+                <stop offset="0" stopColor="rgba(255,255,255,0.9)" /><stop offset="1" stopColor="rgba(255,255,255,0)" />
+              </radialGradient>
+              <radialGradient id={`bloom-${t.id}`} gradientUnits="userSpaceOnUse" cx={0} cy={0} r={R * 1.42}>
+                <stop offset="0" stopColor={t.color} stopOpacity="0.5" /><stop offset="1" stopColor={t.color} stopOpacity="0" />
+              </radialGradient>
+            </g>;
           })}
         </defs>
         {topics.map((t, i) => {
           const b = bodies.current[i], R = b.baseR;
           return <g key={t.id} className={styles.bubble} role="button" tabIndex={0} aria-label={t.label} aria-pressed={selected.includes(t.id)} onKeyDown={e => onKey(e, t.id)} ref={el => { groups.current[i] = el; }}>
-            <circle ref={el => { balls.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#bub-${t.id})`} />
-            <circle cx={-R * 0.3} cy={-R * 0.36} r={R * 0.24} fill="#ffffff" opacity={0.5} />
-            <circle className="ring" ref={el => { rings.current[i] = el; }} cx={0} cy={0} r={R} fill="none" stroke="#ffffff" strokeWidth={3.5} opacity={0} />
+            <circle ref={el => { blooms.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#bloom-${t.id})`} opacity={0} />
+            <circle ref={el => { balls.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#bub-${t.id})`} filter="url(#ball-shadow)" />
+            <circle ref={el => { sheens.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#sheen-${t.id})`} />
+            <path d={rimPathFor(R)} fill="none" stroke={shade(t.color, 0.42)} strokeWidth={2.5} strokeLinecap="round" opacity={0.6} />
+            <circle cx={-R * 0.3} cy={-R * 0.36} r={R * 0.22} fill="#ffffff" opacity={0.5} />
+            <circle cx={-R * 0.4} cy={-R * 0.46} r={R * 0.085} fill="#ffffff" opacity={0.85} />
+            <circle ref={el => { cores.current[i] = el; }} cx={0} cy={0} r={R} fill={`url(#core-${t.id})`} opacity={0} />
+            <circle ref={el => { bursts.current[i] = el; }} cx={0} cy={0} r={R} fill="none" stroke="#ffffff" strokeWidth={3} opacity={0} />
           </g>;
         })}
         {topics.map((t, i) => <text key={t.id} ref={el => { labels.current[i] = el; }} className={styles.label} x={bodies.current[i].x} y={bodies.current[i].y} fill={inkFor(t.color)}>{t.label}</text>)}
