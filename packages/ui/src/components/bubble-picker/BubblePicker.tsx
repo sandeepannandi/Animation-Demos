@@ -108,6 +108,27 @@ function BubbleLabel({ bodies, index, initial, item, color, selected, onToggle }
   );
 }
 
+// Quiet-screen keep-alive (device-proven on Android new arch): Reanimated's
+// UI loop dies a few frames after the UI goes quiet - pure Skia-canvas
+// updates neither re-post it nor wake it, so canvas animations freeze while
+// the user just watches. A 1px view re-rendered from JS state every rAF
+// emits JS-driven Fabric commits that keep the render pipeline awake.
+// Isolated in its own component so only this view re-renders.
+function CanvasKeepAlive() {
+  const [beat, setBeat] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      setBeat((b) => b + 1);
+      requestAnimationFrame(tick);
+    };
+    const id = requestAnimationFrame(tick);
+    return () => { cancelled = true; cancelAnimationFrame(id); };
+  }, []);
+  return <View pointerEvents="none" style={{ position: 'absolute', width: 1, height: 1, opacity: 0, transform: [{ translateX: beat % 2 }] }} />;
+}
+
 export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelectionChange, onFeedback, multiSelect = true, width = 340, height = 380, label = 'Choose topics', reducedMotion, slowMotion = false }: BubblePickerProps) {
   const [systemReduce, setSystemReduce] = useState(false);
   const reduce = reducedMotion ?? systemReduce;
@@ -218,6 +239,7 @@ export function BubblePicker({ items, selectedIds, defaultSelectedIds, onSelecti
 
   return (
     <View style={{ width, height, borderRadius: 24, backgroundColor: '#10201a', overflow: 'hidden' }} accessibilityLabel={label}>
+      <CanvasKeepAlive />
       <Canvas pointerEvents="none" style={{ width, height }}>
         {spawn && spawn.key === items.map(i => i.id).join('\u0001') && items.map((item, i) => <BubbleBall key={item.id} bodies={bodies} index={i} initial={spawn.bodies[i]} color={itemColor(item, i)} clock={clock} reduceM={reduceM} />)}
       </Canvas>

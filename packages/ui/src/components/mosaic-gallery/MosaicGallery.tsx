@@ -93,6 +93,27 @@ function makeShadeRamp(): SkImage {
 // encoded as ramp x coordinates (higher alpha = darker = lower x).
 const BEVEL_X = [255.5, 236.5, 214.5, 189.5];
 
+// Quiet-screen keep-alive (device-proven on Android new arch): Reanimated's
+// UI loop dies a few frames after the UI goes quiet - pure Skia-canvas
+// updates neither re-post it nor wake it, so canvas animations freeze while
+// the user just watches. A 1px view re-rendered from JS state every rAF
+// emits JS-driven Fabric commits that keep the render pipeline awake.
+// Isolated in its own component so only this view re-renders.
+function CanvasKeepAlive() {
+  const [beat, setBeat] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    const tick = () => {
+      if (cancelled) return;
+      setBeat((b) => b + 1);
+      requestAnimationFrame(tick);
+    };
+    const id = requestAnimationFrame(tick);
+    return () => { cancelled = true; cancelAnimationFrame(id); };
+  }, []);
+  return <View pointerEvents="none" style={{ position: 'absolute', width: 1, height: 1, opacity: 0, transform: [{ translateX: beat % 2 }] }} />;
+}
+
 export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultIndex = 0, onIndexChange, onFeedback, width = 340, height = 234, label = 'Mosaic gallery', reducedMotion, slowMotion = false }: MosaicGalleryProps) {
   const [systemReduce, setSystemReduce] = useState(false);
   const reduce = reducedMotion ?? systemReduce;
@@ -392,6 +413,7 @@ export function MosaicGallery({ paintings = MOSAIC_PAINTINGS, index, defaultInde
       onLayout={() => containerRef.current?.measure((_x, _y, _w, _h, px, py) => { originRef.current = { x: px, y: py }; })}
       {...pan.panHandlers}
     >
+      <CanvasKeepAlive />
       <Canvas style={StyleSheet.absoluteFill}>
         <Group transform={transform}>
           <Vertices vertices={vertices} textures={texCoords} indices={indices} mode="triangles">
