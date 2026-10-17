@@ -50,8 +50,18 @@ report flap-settle-1 flap-c flap-c2
 report flap-advance-2 flap-c flap-d
 report flap-settle-2 flap-d flap-d2
 
+# Mosaic Gallery quiet-window transition check (keep-alive experiment):
+# tap advances the painting, then NO pokes while the transition runs.
+open mosaic; sleep 4; shot mos-a
+adb shell input tap 540 1150
+sleep 10; shot mos-c; sleep 3; shot mos-c2
+report mosaic-quiet mos-a mos-c
+report mosaic-settle mos-c mos-c2
+
 # Bubble Picker selection tap, content-desc fix
-open bubbles; sleep 15; shot bub-a  # let the field settle so uiautomator dump succeeds
+open bubbles; sleep 6; shot bub-a
+sleep 8; shot bub-drift  # quiet-window drift proof: must differ from bub-a
+report bubbles-drift bub-a bub-drift
 XY=$(center "Music"); [ -z "${XY:-}" ] && XY="670 1115"  # measured Music center from run-8 frames (540 1200 missed between bubbles)
 echo "music center: $XY" >> "$OUT/summary.txt"
 adb shell input tap $XY; sleep 1; shot bub-b
