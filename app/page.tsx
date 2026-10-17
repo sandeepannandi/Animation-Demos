@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  vinyl: { dir: "packages/ui/src/components/vinyl-player", files: ["VinylPlayer.tsx", "vinylMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   flap: { dir: "packages/ui/src/components/split-flap-board", files: ["SplitFlapBoard.tsx", "splitFlapMath.ts", "flapWords.ts", "Example.tsx", "README.md", "LICENSE"] },
   mosaic: { dir: "packages/ui/src/components/mosaic-gallery", files: ["MosaicGallery.tsx", "mosaicMath.ts", "mosaic-data.ts", "Example.tsx", "README.md", "LICENSE"] },
   bubbles: { dir: "packages/ui/src/components/bubble-picker", files: ["BubblePicker.tsx", "physicsMath.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -44,6 +45,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    vinyl: read(components.vinyl.dir, components.vinyl.files),
     flap: read(components.flap.dir, components.flap.files),
     mosaic: read(components.mosaic.dir, components.mosaic.files),
     bubbles: read(components.bubbles.dir, components.bubbles.files),
