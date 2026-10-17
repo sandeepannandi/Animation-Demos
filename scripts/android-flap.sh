@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Split-Flap Board: rest frame, tap to advance, cascade frames, settled frame.
+# Plus the Bubble Picker selection-tap check with the content-desc fix
+# (uiautomator text lookup misses labels inside accessible Pressables).
+set -u
+OUT=smoke-out/flap; mkdir -p "$OUT"
+PKG=$(adb shell pm list packages | grep -i nativelet | sed 's/package://' | head -1 | tr -d '\r')
+open() { adb shell am force-stop "$PKG"; adb logcat -c; adb shell am start -W -a android.intent.action.VIEW -d "nativelet-showcase:///$1" "$PKG" >/dev/null 2>&1; sleep 8; }
+shot() { adb exec-out screencap -p > "$OUT/$1.png"; }
+report() { # name before after
+  A=$(md5sum < "$OUT/$2.png" | cut -c1-8); B=$(md5sum < "$OUT/$3.png" | cut -c1-8)
+  CR=no; adb logcat -d | grep -E "Process: $PKG|Process $PKG .*has died|ANR in $PKG" | grep -q . && CR=yes
+  [ "$CR" = yes ] && adb logcat -d > "$OUT/$1.crash.logcat.txt"
+  echo "$1 crash=$CR changed=$([ "$A" != "$B" ] && echo yes || echo no)" | tee -a "$OUT/summary.txt"
+}
+# center of the node whose text OR content-desc starts with $1 (the fix:
+# accessible Pressables expose their label as content-desc, not text)
+dumpui() { # uiautomator dump is flaky on continuously animating screens; retry
+  for i in 1 2 3 4 5; do
+    adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+    adb shell cat /sdcard/ui.xml 2>/dev/null | grep -q 'Preview Rail' && return 0
+    sleep 1
+  done
+  return 1
+}
+center() {
+  dumpui || return 1
+  B=$(adb shell cat /sdcard/ui.xml 2>/dev/null | tr '<' '\n<' | grep -E "(text|content-desc)=\"$1" | head -1 | grep -o 'bounds="\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]"' | head -1)
+  [ -z "$B" ] && return 1
+  echo "$B" | sed -E 's/bounds="\[([0-9]+),([0-9]+)\]\[([0-9]+),([0-9]+)\]"/\1 \2 \3 \4/' | awk '{printf "%d %d", ($1+$3)/2, ($2+$4)/2}'
+}
+
+open flap; sleep 3; shot flap-a
+XY=$(center "Departure board"); [ -z "${XY:-}" ] && XY="540 1080"
+echo "board center: $XY" >> "$OUT/summary.txt"
+# Decisive quiet-window test: after the tap, NO pokes (no screencaps, dumps,
+# or screenrecord - each buys the Reanimated loop a few frames on Android).
+# If the heartbeat works, the cascade completes during total quiet.
+adb shell input tap $XY
+# The emulator's JS clock runs slower than real time (software rendering,
+# shared CI CPU), so the ~2.5s cascade can need >10s wall time. Wait long,
+# then prove SETTLED (not stalled) with two identical frames 3s apart.
+sleep 14; shot flap-c; sleep 3; shot flap-c2
+# Now that the board has settled, exercise one more word via the Next button area (same tap)
+adb shell input tap $XY
+sleep 14; shot flap-d; sleep 3; shot flap-d2
+adb logcat -d > "$OUT/flap-session.logcat.txt"
+report flap-advance flap-a flap-c
+report flap-settle-1 flap-c flap-c2
+report flap-advance-2 flap-c flap-d
+report flap-settle-2 flap-d flap-d2
+
+# Bubble Picker selection tap, content-desc fix
+open bubbles; sleep 15; shot bub-a  # let the field settle so uiautomator dump succeeds
+XY=$(center "Music"); [ -z "${XY:-}" ] && XY="670 1115"  # measured Music center from run-8 frames (540 1200 missed between bubbles)
+echo "music center: $XY" >> "$OUT/summary.txt"
+adb shell input tap $XY; sleep 1; shot bub-b
+dumpui && adb shell cat /sdcard/ui.xml > "$OUT/bub-ui.xml" 2>/dev/null
+SEL=$(tr '<' '\n<' < "$OUT/bub-ui.xml" | grep -E '(text|content-desc)="Music"' | grep -o 'selected="true"' | head -1)
+echo "bubbles-select selected_attr=${SEL:-no}" | tee -a "$OUT/summary.txt"
+report bubbles-select bub-a bub-b
