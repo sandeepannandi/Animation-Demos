@@ -7,11 +7,19 @@
 // NOT COPIED FROM ANY TUTORIAL. Inspired by the feel of Reactiive's split
 // flap video; the mechanism, motion, glyphs and code here are original work
 // under this repo's license.
+//
+// ARCHITECTURE (device-proven on Android new arch): the board is driven
+// entirely from the JS thread - rAF clock, React state, plain Skia props.
+// Reanimated's UI-runtime path stalls on a quiet screen in three places at
+// once: its frame callback dies a few frames after the UI goes quiet, and
+// both animated styles and shared-value-driven Skia props only flush when
+// the UI loop is alive - so a canvas-only animation freezes while the user
+// just watches. JS rAF (ReactChoreographer) keeps firing, and JS-driven
+// Fabric commits always reach the screen (run 7-10 evidence in git history).
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AccessibilityInfo, PanResponder, StyleSheet, View } from 'react-native';
 import { Canvas, Group, Path, Rect, Skia } from '@shopify/react-native-skia';
-import Animated, { useAnimatedStyle, useDerivedValue, useSharedValue, type SharedValue } from 'react-native-reanimated';
 import {
   DEFAULT_FLAP, FLAP_CHARSET,
   makeCells, retarget, stepCells,
@@ -70,67 +78,47 @@ function metricsFor(width: number, words: string[]): Metrics {
 const EMPTY_CELL: FlapCell = { ch: 0, queue: 0, flip: 0, flipMs: DEFAULT_FLAP.stepMs, delay: 0, wobble: -1 };
 
 type CellViewProps = {
-  cells: SharedValue<FlapCell[]>;
-  index: number;
+  cell: FlapCell;
   x: number;
   m: Metrics;
   clipPath: ReturnType<typeof Skia.Path.Make>;
 };
 
-function FlapCellView({ cells, index, x, m, clipPath }: CellViewProps) {
+// Memoized per cell: stepCells recycles settled cell objects by reference,
+// so only cells that actually moved re-render in a frame.
+const FlapCellView = memo(function FlapCellView({ cell: c, x, m, clipPath }: CellViewProps) {
   const L = FLAP_CHARSET.length;
   const topClip = useMemo(() => ({ x: 0, y: 0, width: m.cellW, height: m.split }), [m]);
   const botClip = useMemo(() => ({ x: 0, y: m.split, width: m.cellW, height: m.split }), [m]);
 
-  const cellOf = () => {
-    'worklet';
-    // The shared array can lag behind the children at mount or after a
-    // geometry change; never read past its end (device-verified crash).
-    return cells.value[index] || EMPTY_CELL;
-  };
-
   // Glyph paths rebuilt only for the two characters a cell can show during a
   // step: the current one and the next one.
-  const pathCur = useDerivedValue(() => {
-    const c = cellOf();
+  const pathCur = useMemo(() => {
     const p = Skia.Path.Make();
     const adv = glyphAdvance(c.ch);
     strokeGlyph(p, c.ch, (m.cellW - adv * m.glyphScale) / 2, m.glyphY, m.glyphScale);
     return p;
-  });
-  const pathNext = useDerivedValue(() => {
-    const c = cellOf();
+  }, [c.ch, m]);
+  const pathNext = useMemo(() => {
     const nch = c.queue > 0 ? (c.ch + 1) % L : c.ch;
     const p = Skia.Path.Make();
     const adv = glyphAdvance(nch);
     strokeGlyph(p, nch, (m.cellW - adv * m.glyphScale) / 2, m.glyphY, m.glyphScale);
     return p;
-  });
+  }, [c.ch, c.queue, m, L]);
 
-  const wobbleT = useDerivedValue(() => [{ translateY: wobbleOffset(cellOf().wobble) }]);
-
-  const leafT = useDerivedValue(() => {
-    const c = cellOf();
+  const wobbleT = useMemo(() => [{ translateY: wobbleOffset(c.wobble) }], [c.wobble]);
+  const leafT = useMemo(() => {
     const s = c.queue > 0 || c.flip > 0 ? fallScale(Math.min(c.flip * 2, 1)) : 0;
     return [{ translateY: m.split }, { scaleY: s }, { translateY: -m.split }];
-  });
-  const leafShade = useDerivedValue(() => {
-    const c = cellOf();
-    return c.queue > 0 || c.flip > 0 ? fallShade(Math.min(c.flip * 2, 1)) : 0;
-  });
-  const revealT = useDerivedValue(() => {
-    const c = cellOf();
+  }, [c.queue, c.flip, m]);
+  const leafShade = c.queue > 0 || c.flip > 0 ? fallShade(Math.min(c.flip * 2, 1)) : 0;
+  const revealT = useMemo(() => {
     const s = c.queue > 0 && c.flip > 0.5 ? revealScale(c.flip * 2 - 1) : 0;
     return [{ translateY: m.split }, { scaleY: s }, { translateY: -m.split }];
-  });
-  const revealShadeOp = useDerivedValue(() => {
-    const c = cellOf();
-    return c.queue > 0 && c.flip > 0.5 ? revealShade(c.flip * 2 - 1) : 0;
-  });
-  const shadowOp = useDerivedValue(() => {
-    const c = cellOf();
-    return c.queue > 0 || c.flip > 0 ? castShade(c.flip) : 0;
-  });
+  }, [c.queue, c.flip, m]);
+  const revealShadeOp = c.queue > 0 && c.flip > 0.5 ? revealShade(c.flip * 2 - 1) : 0;
+  const shadowOp = c.queue > 0 || c.flip > 0 ? castShade(c.flip) : 0;
 
   return (
     <Group transform={[{ translateX: x }]}>
@@ -171,7 +159,7 @@ function FlapCellView({ cells, index, x, m, clipPath }: CellViewProps) {
       <Path path={clipPath} style="stroke" strokeWidth={1} color="#ffffff" opacity={0.07} />
     </Group>
   );
-}
+});
 
 export function SplitFlapBoard({
   words = DEFAULT_FLAP_WORDS,
@@ -195,44 +183,15 @@ export function SplitFlapBoard({
   }, []);
   const reduce = reducedMotion ?? sysReduce;
 
-  // Mount constants come from React state: a shared value created empty and
-  // filled in an effect races the children's derived readers on native.
-  const initial = useRef<{ cols: number; cells: FlapCell[] } | null>(null);
-  if (!initial.current || initial.current.cols !== m.cols) {
-    initial.current = { cols: m.cols, cells: makeCells(words[current], m.cols) };
-  }
-  const cells = useSharedValue<FlapCell[]>(initial.current.cells);
+  const [cells, setCells] = useState<FlapCell[]>(() => makeCells(words[current], m.cols));
+  // The clock reads the latest state through a ref so it never restarts on
+  // re-render; the ref is updated in the render body (same commit).
+  const cellsRef = useRef(cells);
+  cellsRef.current = cells;
 
-  // (Re)target whenever the shown word, geometry or motion mode changes.
-  // Single retarget path: advance() only moves the index and lets this
-  // effect write, so each word change queues exactly one cascade. (A second
-  // retarget from the tap handler would restart the cascade from the stale
-  // JS mirror of the shared array - device-verified.)
-  const lastWord = useRef<{ word: string; cols: number; reduce: boolean } | null>(null);
-  useEffect(() => {
-    const key = { word: words[current], cols: m.cols, reduce };
-    const prev = lastWord.current;
-    if (prev && prev.word === key.word && prev.cols === key.cols && prev.reduce === key.reduce) return;
-    lastWord.current = key;
-    if (reduce) {
-      cells.value = retarget(cells.value.length === m.cols ? cells.value : makeCells('', m.cols), words[current], DEFAULT_FLAP, true);
-    } else if (cells.value.length !== m.cols) {
-      cells.value = makeCells(words[current], m.cols);
-    } else {
-      cells.value = retarget(cells.value, words[current], DEFAULT_FLAP, false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current, words, m.cols, reduce]);
-
-  // The board's clock runs on the JS thread. Device-proven: Reanimated's
-  // UI-thread frame callback is not an independent power source on Android -
-  // its Choreographer loop dies a few frames after the UI goes quiet (pure
-  // Skia-canvas updates neither re-post it nor wake it), and any "heartbeat"
-  // fed by that same loop dies with it. ReactChoreographer-backed JS rAF
-  // keeps firing on a quiet screen; each cells.value write crosses to the UI
-  // runtime, recomputes the deriveds and invalidates the canvas.
-  const beat = useSharedValue(0);
-  const beatStyle = useAnimatedStyle(() => ({ transform: [{ translateX: beat.value }] }));
+  // The board's clock: JS rAF keeps firing on a quiet screen (device-proven;
+  // Reanimated's UI-thread frame callback does not). Only publishes while
+  // something is moving - a settled board renders nothing.
   const slowMotionRef = useRef(slowMotion);
   useEffect(() => { slowMotionRef.current = slowMotion; }, [slowMotion]);
   useEffect(() => {
@@ -242,18 +201,10 @@ export function SplitFlapBoard({
       if (cancelled) return;
       const dt = Math.min(last ? ts - last : 16.7, 48) * (slowMotionRef.current ? 0.25 : 1);
       last = ts;
-      if (cells.value.length > 0) {
-        const r = stepCells(cells.value, dt);
-        cells.value = r.cells;
+      if (cellsRef.current.length > 0) {
+        const r = stepCells(cellsRef.current, dt);
+        if (r.active) setCells(r.cells);
       }
-      // Device-proven: on a quiet Android screen, shared-value changes alone
-      // do not redraw the Skia canvas - the screen only repaints when Fabric
-      // commits flow. Flip a 1px view's style every tick so each frame
-      // carries a commit and the canvas repaints with it. The JS clock is
-      // the independent power source; a heartbeat fed by Reanimated's own
-      // UI frame loop dies with it (run 6/7), and clock-without-heartbeat
-      // animates invisibly (run 8/9).
-      beat.value = (beat.value + 1) % 2;
       requestAnimationFrame(tick);
     };
     const id = requestAnimationFrame(tick);
@@ -261,7 +212,29 @@ export function SplitFlapBoard({
       cancelled = true;
       cancelAnimationFrame(id);
     };
-  }, [cells]);
+  }, []);
+
+  // (Re)target whenever the shown word, geometry or motion mode changes.
+  // Single retarget path: advance() only moves the index and lets this
+  // effect write, so each word change queues exactly one cascade. (A second
+  // retarget from the tap handler would restart the cascade mid-flight -
+  // device-verified.)
+  const lastWord = useRef<{ word: string; cols: number; reduce: boolean } | null>(null);
+  useEffect(() => {
+    const key = { word: words[current], cols: m.cols, reduce };
+    const prev = lastWord.current;
+    if (prev && prev.word === key.word && prev.cols === key.cols && prev.reduce === key.reduce) return;
+    lastWord.current = key;
+    const prevCells = cellsRef.current;
+    if (reduce) {
+      setCells(retarget(prevCells.length === m.cols ? prevCells : makeCells('', m.cols), words[current], DEFAULT_FLAP, true));
+    } else if (prevCells.length !== m.cols) {
+      setCells(makeCells(words[current], m.cols));
+    } else {
+      setCells(retarget(prevCells, words[current], DEFAULT_FLAP, false));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, words, m.cols, reduce]);
 
   const advance = useCallback(() => {
     const n = (current + 1) % words.length;
@@ -299,10 +272,9 @@ export function SplitFlapBoard({
       style={[styles.box, { width, height: m.cellH }]}
       {...pan.panHandlers}
     >
-      <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: 1, height: 1, opacity: 0 }, beatStyle]} />
       <Canvas style={{ width, height: m.cellH }} pointerEvents="none">
         {Array.from({ length: m.cols }, (_, i) => (
-          <FlapCellView key={i} cells={cells} index={i} x={i * (m.cellW + GAP)} m={m} clipPath={clipPath} />
+          <FlapCellView key={i} cell={cells[i] || EMPTY_CELL} x={i * (m.cellW + GAP)} m={m} clipPath={clipPath} />
         ))}
       </Canvas>
     </View>
@@ -312,4 +284,3 @@ export function SplitFlapBoard({
 const styles = StyleSheet.create({
   box: { alignSelf: 'center' },
 });
-
