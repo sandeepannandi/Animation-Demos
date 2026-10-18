@@ -75,12 +75,17 @@ half4 main(float2 xy) {
     float2 e = 1.0 / texSize;
     float gx = fogTex.eval(tuv + float2(e.x, 0.0)).g - fogTex.eval(tuv - float2(e.x, 0.0)).g;
     float gy = fogTex.eval(tuv + float2(0.0, e.y)).g - fogTex.eval(tuv - float2(0.0, e.y)).g;
-    float2 off = clamp(float2(gx, gy) * 0.16 * dome, -0.035, 0.035);
+    // Lens: the dome bends the view toward the bead centre and magnifies it.
+    float2 off = clamp(float2(gx, gy) * 0.24 * dome, -0.05, 0.05);
     half3 bead = sceneSharp.eval(clamp(uv + off, 0.0, 1.0) * sceneSize).rgb;
-    float shade = 1.0 - 0.4 * clamp(gy * 2.2, -1.0, 1.0);
-    float rim = (1.0 - smoothstep(0.0, 0.5, dome)) * 0.3;
-    float spec = clamp(-(gx + gy) * 3.0, 0.0, 1.0) * dome * 0.9;
-    half3 bcol = bead * (shade - rim) + spec;
+    // Light from the upper left: bright rim there, contact shadow lower right.
+    float lit = clamp((gx * 0.55 + gy * 0.83) * 2.8, -1.0, 1.0);
+    float hi = max(lit, 0.0);
+    float shadow = max(-lit, 0.0);
+    // Small beads stay glassy; the strong shading grows in with size.
+    float body = smoothstep(0.05, 0.45, dome);
+    float spec = hi * hi * dome * 1.1;
+    half3 bcol = bead * (1.04 + 0.26 * hi * body - 0.4 * shadow * body) + spec * body;
     col = mix(col, bcol, smoothstep(0.004, 0.08, dome));
   }
   return half4(col, 1.0);

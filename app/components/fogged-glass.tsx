@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
-  FOG_DEFAULTS, applyWipe, createFog, packFrame, stepFogFixed, maxDrops,
+  FOG_DEFAULTS, STRIDE, applyWipe, createFog, packFrame, stepFogFixed, maxDrops,
   type FogConfig, type FogState,
 } from "../../packages/ui/src/components/fogged-glass/fogMath";
 import { PANE_H, PANE_W, sceneDesign, type Item } from "../../packages/ui/src/components/fogged-glass/sceneDesign";
@@ -130,29 +130,44 @@ export function FoggedGlassPreview() {
       ctx.drawImage(art, 0, 0, PANE_W, PANE_H);
       ctx.drawImage(layer, 0, 0, PANE_W, PANE_H);
 
-      // Beads: a magnified cut of the sharp scene, a rim and a highlight.
+      // Beads: an inverted, magnified lens cut of the sharp scene, a bright
+      // upper-left rim with a specular dot, and a contact shadow lower right.
+      // Small beads stay glassy; the strong shading grows in with size.
       for (let s = 0; s < maxDrops(); s++) {
-        if (sim.drops[s * 4 + 3] === 0) continue;
-        const x = sim.drops[s * 4];
-        const y = sim.drops[s * 4 + 1];
-        const r = sim.drops[s * 4 + 2];
+        if (sim.drops[s * STRIDE + 3] === 0) continue;
+        const x = sim.drops[s * STRIDE];
+        const y = sim.drops[s * STRIDE + 1];
+        const r = sim.drops[s * STRIDE + 2];
+        const body = Math.min(1, r / 4);
         ctx.save();
         ctx.beginPath();
         ctx.arc(x, y, r, 0, Math.PI * 2);
         ctx.clip();
-        const k = 0.72;
-        ctx.drawImage(art, (x - r * k) * S, (y - r * k) * S, 2 * r * k * S, 2 * r * k * S, x - r, y - r, 2 * r, 2 * r);
-        const rim = ctx.createRadialGradient(x, y, r * 0.55, x, y, r);
-        rim.addColorStop(0, "rgba(0,0,0,0)");
-        rim.addColorStop(1, "rgba(10,16,28,0.35)");
-        ctx.fillStyle = rim;
+        const k = 0.75;
+        ctx.translate(x, y);
+        ctx.scale(-1, -1);
+        ctx.drawImage(art, (x - r * k) * S, (y - r * k) * S, 2 * r * k * S, 2 * r * k * S, -r, -r, 2 * r, 2 * r);
+        ctx.restore();
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.clip();
+        const shadow = ctx.createRadialGradient(x + r * 0.3, y + r * 0.36, r * 0.4, x + r * 0.3, y + r * 0.36, r * 1.05);
+        shadow.addColorStop(0, "rgba(0,0,0,0)");
+        shadow.addColorStop(1, `rgba(8,14,26,${0.5 * body})`);
+        ctx.fillStyle = shadow;
         ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
-        const spec = ctx.createRadialGradient(x - r * 0.38, y - r * 0.42, 0, x - r * 0.38, y - r * 0.42, r * 0.7);
-        spec.addColorStop(0, "rgba(255,255,255,0.75)");
-        spec.addColorStop(0.5, "rgba(255,255,255,0.12)");
-        spec.addColorStop(1, "rgba(255,255,255,0)");
-        ctx.fillStyle = spec;
+        const glow = ctx.createRadialGradient(x - r * 0.34, y - r * 0.4, 0, x - r * 0.34, y - r * 0.4, r * 1.1);
+        glow.addColorStop(0, `rgba(255,255,255,${0.5 * body})`);
+        glow.addColorStop(0.45, `rgba(255,255,255,${0.14 * body})`);
+        glow.addColorStop(1, "rgba(255,255,255,0)");
+        ctx.fillStyle = glow;
         ctx.fillRect(x - r, y - r, 2 * r, 2 * r);
+        ctx.beginPath();
+        ctx.ellipse(x - r * 0.34, y - r * 0.42, r * 0.26, r * 0.17, -0.6, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${0.85 * Math.min(1, r / 2.4)})`;
+        ctx.fill();
         ctx.restore();
       }
     };
