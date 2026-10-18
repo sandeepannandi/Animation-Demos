@@ -1,10 +1,11 @@
 // Pure condensation physics for Fogged Glass. A pane mists over; a finger
-// wipes clear streaks, water beads nucleate, grow by absorbing fog, and run
-// down the glass with stick-slip, leaving clear trails that slowly fog over
-// again. The pane is a grid of fog cells plus a small set of droplets; every
-// function is a worklet so the sim can run on either thread, and plain JS
-// (tests, web preview) ignores the tag. No Math.random anywhere: a seeded
-// generator keeps web, native and tests in agreement frame for frame.
+// wipes clear streaks, water beads nucleate, grow by absorbing fog and by
+// swallowing each other, and run down the glass with stick-slip, leaving
+// wet trails that slowly fog over again. The pane is a grid of fog cells
+// plus a small set of droplets; every function is a worklet so the sim can
+// run on either thread, and plain JS (tests, web preview) ignores the tag.
+// No Math.random anywhere: a seeded generator keeps web, native and tests
+// in agreement frame for frame.
 
 export type FogPointer = { x: number; y: number; active: number };
 
@@ -16,10 +17,13 @@ export type FogConfig = {
   height: number;
 };
 
+/** Per-drop stride: x, y, r, mode (0 empty, 1 stuck, 2 sliding), vel, pin. */
+export const STRIDE = 6;
+
 export type FogState = {
   /** Fog per cell, 0 (clear) .. 1 (opaque), row-major. */
   fog: Float32Array;
-  /** Droplet slots, 4 floats each: x, y, r, mode (0 empty, 1 stuck, 2 sliding). */
+  /** Droplet slots, STRIDE floats each. */
   drops: Float32Array;
   dropCount: number;
   /** Seeded PRNG state. */
@@ -47,26 +51,30 @@ export const FOG_DEFAULTS = {
   /** Seconds between ambient bead nucleation attempts. */
   nucleationInterval: 0.45,
   /** Beads at or below this radius never slide, px. */
-  stickRadius: 3.4,
+  stickRadius: 3.2,
   /** Slide speed scale, px/s. */
-  slideSpeed: 120,
+  slideSpeed: 130,
+  /** Top slide speed, px/s. */
+  maxSpeed: 210,
   /** Sideways wobble of a running bead, px. */
-  wobble: 2.2,
+  wobble: 2.4,
   /** Radius a sliding bead sheds per second, px/s. */
-  shedRate: 0.32,
+  shedRate: 0.4,
   /** Growth of a bead from fog it absorbs, px radius per (fog * px traveled / diameter). */
   absorb: 0.85,
   /** Growth of a stuck bead from surrounding condensation, px/s at fog 1. */
-  condense: 0.045,
+  condense: 0.085,
   /** Largest bead radius, px. */
-  maxRadius: 14,
+  maxRadius: 13,
+  /** Fog a drip trail keeps (a wet streak) before it creeps back, of the local fog. */
+  trailResidual: 0.16,
+  /** Chance a sliding bead leaves a micro droplet, per px traveled. */
+  microShed: 0.012,
   /** Fixed timestep ceiling for the sim. */
   fixedDt: 1 / 120,
 };
 
 export type FogOptions = typeof FOG_DEFAULTS;
-
-const STRIDE = 4;
 
 export function cellCount(cfg: FogConfig): number {
   'worklet';
@@ -134,6 +142,8 @@ function spawnDrop(state: FogState, cfg: FogConfig, x: number, y: number, r: num
     state.drops[k + 1] = Math.max(r, Math.min(cfg.height - r, y));
     state.drops[k + 2] = r;
     state.drops[k + 3] = 1;
+    state.drops[k + 4] = 0;
+    state.drops[k + 5] = 0.8 + rand(state) * 0.5;
     state.dropCount++;
     return s;
   }
@@ -148,7 +158,8 @@ function removeDrop(state: FogState, slot: number): void {
 
 /**
  * Clear fog along the segment (x0,y0)-(x1,y1) with a soft circular brush.
- * Returns the average fog removed across touched cells (0..1).
+ * residual keeps a fraction of the local fog (a wet streak that creeps
+ * back). Returns the average fog removed across touched cells (0..1).
  */
 export function clearBand(
   state: FogState,
@@ -158,6 +169,7 @@ export function clearBand(
   x1: number,
   y1: number,
   radius: number,
+  residual = 0,
 ): number {
   'worklet';
   const cw = cfg.width / cfg.cols;
@@ -186,7 +198,7 @@ export function clearBand(
       const soft = f <= 0 ? 0 : f >= 0.55 ? 1 : f / 0.55;
       const i = row * cfg.cols + col;
       const before = state.fog[i];
-      const after = Math.max(0, before - soft);
+      const after = Math.max(before * residual, before - soft);
       state.fog[i] = after;
       removed += before - after;
       touched++;
@@ -202,7 +214,7 @@ function nucleate(state: FogState, cfg: FogConfig, opts: FogOptions): void {
     const y = rand(state) * cfg.height * 0.92;
     if (fogAt(state, cfg, x, y) < 0.8) continue;
     if (rand(state) < 0.55) {
-      spawnDrop(state, cfg, x, y, 1.4 + rand(state) * 1.6);
+      spawnDrop(state, cfg, x, y, 0.9 + rand(state) * 1.8);
       return;
     }
   }
@@ -228,11 +240,42 @@ export function applyWipe(state: FogState, cfg: FogConfig, x: number, y: number,
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
     const px = (-dy / len) * side * opts.wipeRadius * (0.75 + 0.35 * rand(state));
     const py = (dx / len) * side * opts.wipeRadius * (0.75 + 0.35 * rand(state));
-    spawnDrop(state, cfg, x0 + dx * t + px, y0 + dy * t + py, 2 + rand(state) * 2.8);
+    spawnDrop(state, cfg, x0 + dx * t + px, y0 + dy * t + py, 1.6 + rand(state) * 2.4);
   }
 }
 
-/** One fixed substep: regrowth, condensation, droplet stick-slip. */
+/** Merge any two drops whose domes touch; the bigger one keeps its slot. */
+function mergeTouching(state: FogState, opts: FogOptions): void {
+  'worklet';
+  for (let a = 0; a < MAX_DROPS; a++) {
+    const ka = a * STRIDE;
+    if (state.drops[ka + 3] === 0) continue;
+    const ra = state.drops[ka + 2];
+    for (let b = a + 1; b < MAX_DROPS; b++) {
+      const kb = b * STRIDE;
+      if (state.drops[kb + 3] === 0) continue;
+      const rb = state.drops[kb + 2];
+      const dx = state.drops[kb] - state.drops[ka];
+      const dy = state.drops[kb + 1] - state.drops[ka + 1];
+      const rr = (ra + rb) * 0.68;
+      if (dx * dx + dy * dy >= rr * rr) continue;
+      const big = ra >= rb ? ka : kb;
+      const small = ra >= rb ? kb : ka;
+      const rs = state.drops[small + 2];
+      const rb2 = state.drops[big + 2];
+      const wa = rb2 * rb2;
+      const wb = rs * rs;
+      state.drops[big] = (state.drops[big] * wa + state.drops[small] * wb) / (wa + wb);
+      state.drops[big + 1] = (state.drops[big + 1] * wa + state.drops[small + 1] * wb) / (wa + wb);
+      state.drops[big + 2] = Math.min(opts.maxRadius, Math.sqrt(wa + wb));
+      if (state.drops[small + 4] > state.drops[big + 4]) state.drops[big + 4] = state.drops[small + 4];
+      removeDrop(state, small === ka ? a : b);
+      if (small === ka) break;
+    }
+  }
+}
+
+/** One fixed substep: regrowth, condensation, droplet stick-slip, merging. */
 export function stepFog(state: FogState, cfg: FogConfig, dt: number, opts: FogOptions): void {
   'worklet';
   state.time += dt;
@@ -249,53 +292,53 @@ export function stepFog(state: FogState, cfg: FogConfig, dt: number, opts: FogOp
     nucleate(state, cfg, opts);
   }
 
-  const cw = cfg.width / cfg.cols;
   for (let s = 0; s < MAX_DROPS; s++) {
     const k = s * STRIDE;
-    const mode = state.drops[k + 3];
+    let mode = state.drops[k + 3];
     if (mode === 0) continue;
     let x = state.drops[k];
     let y = state.drops[k + 1];
     let r = state.drops[k + 2];
+    let vel = state.drops[k + 4];
+    const pin = state.drops[k + 5];
 
-    if (r <= opts.stickRadius) {
-      // Stuck bead: drink the condensation around it until it can run.
+    if (mode === 1) {
+      // Pinned bead: drink the condensation around it until gravity wins.
       const local = fogAt(state, cfg, x, y);
-      r = Math.min(opts.stickRadius + 0.35, r + opts.condense * local * dt);
-      state.drops[k + 2] = r;
-      continue;
+      r = Math.min(opts.maxRadius, r + opts.condense * local * dt);
+      if (r > opts.stickRadius * (1.25 + 0.55 * pin)) {
+        mode = 2;
+        vel = 24 + 30 * pin;
+      } else {
+        state.drops[k + 2] = r;
+        continue;
+      }
     }
 
-    // Sliding bead: speed grows with size, wobbles on the way down.
-    const v = Math.max(10, Math.min(260, (opts.slideSpeed * (r - opts.stickRadius)) / opts.stickRadius));
-    const dy = v * dt;
-    const wob = Math.sin(state.time * 11 + s * 2.7) * opts.wobble * Math.min(1, v / 60) * dt;
+    // Sliding bead: speed chases a size-based target, pulsing so the run
+    // jerks between slips and near-stops.
+    const target = Math.max(
+      14,
+      Math.min(opts.maxSpeed, (opts.slideSpeed * (r - opts.stickRadius * 0.7)) / opts.stickRadius),
+    );
+    const pulse = 0.55 + 0.65 * Math.max(0, Math.sin(state.time * (5.5 + 3.5 * pin) + s * 2.7));
+    vel += (target * pulse - vel) * Math.min(1, 9 * dt);
+    const dy = vel * dt;
+    const wob = Math.sin(state.time * 11 + s * 2.7) * opts.wobble * Math.min(1, vel / 60) * dt;
     x += wob;
     if (x < r) x = r;
     if (x > cfg.width - r) x = cfg.width - r;
     const yNext = y + dy;
 
-    // Absorb the fog on the path, then leave a narrow clear trail.
+    // Drink the fog on the path, leave a wet streak, shed a little water.
     const bandFog = sampleBand(state, cfg, x, y, x, yNext, r * 0.8);
-    clearBand(state, cfg, x, y, x, yNext, r * 0.62);
+    clearBand(state, cfg, x, y, x, yNext, r * 0.62, opts.trailResidual);
     r += (opts.absorb * bandFog * dy) / (2 * r);
-    r -= opts.shedRate * dt;
+    r -= opts.shedRate * (0.5 + vel / 160) * dt;
 
-    // Swallow smaller beads on the way.
-    for (let o = 0; o < MAX_DROPS; o++) {
-      if (o === s) continue;
-      const ok = o * STRIDE;
-      if (state.drops[ok + 3] === 0) continue;
-      const ox = state.drops[ok];
-      const oy = state.drops[ok + 1];
-      const orad = state.drops[ok + 2];
-      const ddx = ox - x;
-      const ddy = oy - yNext;
-      const rr = (r + orad) * 0.72;
-      if (ddx * ddx + ddy * ddy < rr * rr) {
-        r = Math.sqrt(r * r + orad * orad);
-        removeDrop(state, o);
-      }
+    // A fast, big bead leaves micro droplets behind in its trail.
+    if (r > opts.stickRadius * 1.15 && vel > 70 && state.dropCount < 80 && rand(state) < dy * opts.microShed) {
+      spawnDrop(state, cfg, x + (rand(state) - 0.5) * r, y - r * (0.9 + rand(state) * 0.5), 0.6 + rand(state) * 0.7);
     }
 
     if (r > opts.maxRadius) r = opts.maxRadius;
@@ -304,11 +347,23 @@ export function stepFog(state: FogState, cfg: FogConfig, dt: number, opts: FogOp
       removeDrop(state, s);
       continue;
     }
+    // Shed enough water and the bead pins again: stick after slip.
+    if (r < opts.stickRadius * (0.72 + 0.34 * pin)) {
+      mode = 1;
+      vel = 0;
+      if (r < 0.8) {
+        removeDrop(state, s);
+        continue;
+      }
+    }
     state.drops[k] = x;
     state.drops[k + 1] = y;
     state.drops[k + 2] = r;
-    state.drops[k + 3] = r <= opts.stickRadius ? 1 : 2;
+    state.drops[k + 3] = mode;
+    state.drops[k + 4] = vel;
   }
+
+  mergeTouching(state, opts);
 }
 
 /** Average fog along a band without changing it. */

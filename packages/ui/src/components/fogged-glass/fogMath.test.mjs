@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   FOG_DEFAULTS, createFog, stepFogFixed, applyWipe, clearBand, packFrame,
-  fogAt, totalFog, hash01, rand, cellCount, maxDrops,
+  fogAt, totalFog, hash01, rand, cellCount, maxDrops, STRIDE,
 } from './fogMath.ts';
 
 const CFG = { cols: 96, rows: 128, width: 340, height: 460 };
@@ -74,21 +74,21 @@ test('big beads run downhill, clear a trail and can stick again', () => {
   plantBead(s, 100, 60);
   // Find the slot and make it big enough to slide.
   let slot = -1;
-  for (let i = 0; i < maxDrops(); i++) if (s.drops[i * 4 + 3] !== 0) { slot = i; break; }
-  s.drops[slot * 4 + 2] = 8;
-  const y0 = s.drops[slot * 4 + 1];
+  for (let i = 0; i < maxDrops(); i++) if (s.drops[i * STRIDE + 3] !== 0) { slot = i; break; }
+  s.drops[slot * STRIDE + 2] = 8;
+  const y0 = s.drops[slot * STRIDE + 1];
   let stuckAgain = false;
   for (let i = 0; i < 60 * 12; i++) {
     stepFogFixed(s, CFG, 1 / 60, OPTS);
-    if (s.drops[slot * 4 + 3] === 1) { stuckAgain = true; break; }
-    if (s.drops[slot * 4 + 3] === 0) break;
+    if (s.drops[slot * STRIDE + 3] === 1) { stuckAgain = true; break; }
+    if (s.drops[slot * STRIDE + 3] === 0) break;
   }
-  const y1 = s.drops[slot * 4 + 1];
-  const gone = s.drops[slot * 4 + 3] === 0;
+  const y1 = s.drops[slot * STRIDE + 1];
+  const gone = s.drops[slot * STRIDE + 3] === 0;
   assert.ok(gone || y1 > y0 + 40 || stuckAgain, `bead moved ${y0} -> ${y1} gone=${gone} stuck=${stuckAgain}`);
   // Trail behind the bead is clearer than the untouched pane.
   if (!gone) {
-    const trail = fogAt(s, CFG, s.drops[slot * 4], Math.max(6, y1 - 60));
+    const trail = fogAt(s, CFG, s.drops[slot * STRIDE], Math.max(6, y1 - 60));
     assert.ok(trail < 0.65, `trail fog ${trail}`);
   }
 });
@@ -99,12 +99,12 @@ test('a running bead swallows smaller beads in its path', () => {
   plantBead(s, 61, 120);
   assert.ok(s.dropCount >= 2);
   let a = -1, b = -1;
-  for (let i = 0; i < maxDrops(); i++) if (s.drops[i * 4 + 3] !== 0) { if (a < 0) a = i; else { b = i; break; } }
+  for (let i = 0; i < maxDrops(); i++) if (s.drops[i * STRIDE + 3] !== 0) { if (a < 0) a = i; else { b = i; break; } }
   // Upper bead big, lower bead small, same column.
-  s.drops[a * 4] = 100; s.drops[a * 4 + 1] = 60; s.drops[a * 4 + 2] = 8;
-  s.drops[b * 4] = 101; s.drops[b * 4 + 1] = 100; s.drops[b * 4 + 2] = 2;
+  s.drops[a * STRIDE] = 100; s.drops[a * STRIDE + 1] = 60; s.drops[a * STRIDE + 2] = 8;
+  s.drops[b * STRIDE] = 101; s.drops[b * STRIDE + 1] = 100; s.drops[b * STRIDE + 2] = 2;
   const before = s.dropCount;
-  const QUIET = { ...OPTS, nucleationInterval: 99999 };
+  const QUIET = { ...OPTS, nucleationInterval: 99999, microShed: 0 };
   for (let i = 0; i < 240; i++) stepFogFixed(s, CFG, 1 / 60, QUIET);
   assert.ok(s.dropCount < before, `merged ${before} -> ${s.dropCount}`);
 });
@@ -135,8 +135,8 @@ test('packFrame writes fog into R/A and domes into G, beads clear fog', () => {
   // Plant a bead and repack: dome visible, fog cleared under it.
   plantBead(s, 170, 230);
   let slot = -1;
-  for (let i = 0; i < maxDrops(); i++) if (s.drops[i * 4 + 3] !== 0) { slot = i; break; }
-  s.drops[slot * 4] = 170; s.drops[slot * 4 + 1] = 230; s.drops[slot * 4 + 2] = 9;
+  for (let i = 0; i < maxDrops(); i++) if (s.drops[i * STRIDE + 3] !== 0) { slot = i; break; }
+  s.drops[slot * STRIDE] = 170; s.drops[slot * STRIDE + 1] = 230; s.drops[slot * STRIDE + 2] = 9;
   packFrame(s, CFG, bytes);
   const cx = Math.floor((170 / 340) * 96);
   const cy = Math.floor((230 / 460) * 128);
@@ -152,5 +152,5 @@ test('whole sim stays finite over a long run', () => {
     stepFogFixed(s, CFG, 1 / 60, OPTS);
   }
   for (let i = 0; i < s.fog.length; i += 97) assert.ok(Number.isFinite(s.fog[i]));
-  for (let d = 0; d < maxDrops() * 4; d++) assert.ok(Number.isFinite(s.drops[d]));
+  for (let d = 0; d < maxDrops() * STRIDE; d++) assert.ok(Number.isFinite(s.drops[d]));
 });
