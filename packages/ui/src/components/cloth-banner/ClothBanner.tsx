@@ -142,6 +142,9 @@ export function ClothBanner({
 
   const opts = useMemo(() => CLOTH_DEFAULTS, []);
   const sim = useSharedValue<ClothState>(createCloth(cfg));
+  // Frame clock: the sim mutates in place, so this primitive is the change
+  // signal the mesh derived values subscribe to (the MosaicGallery pattern).
+  const frame = useSharedValue(0);
   const pointer = useSharedValue<ClothPointer>({ x: 0, y: 0, active: 0 });
   const slowM = useSharedValue(false);
   const reduceM = useSharedValue(false);
@@ -209,12 +212,14 @@ export function ClothBanner({
     if (!pointer.value.active && s.grabbed >= 0) s.grabbed = -1;
     const dt = Math.min(48, info.timeSincePreviousFrame ?? 16.7) / 1000;
     stepClothFixed(s, cfg, dt * (slowM.value ? 0.25 : 1), pointer.value, opts);
+    frame.value = frame.value + 1;
   });
 
   const indices = useMemo(() => clothIndices(cfg), [cfg]);
   const uv = useMemo(() => clothUV(cfg, image.width(), image.height()), [cfg, image]);
 
   const mesh = useDerivedValue(() => {
+    frame.value; // recompute on every stepped frame; the sim mutates in place
     const xy: { x: number; y: number }[] = [];
     const shade: number[] = [];
     computeMesh(sim.value, cfg, xy, shade, opts);
