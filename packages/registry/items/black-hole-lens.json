@@ -25,7 +25,7 @@
     "web": "0.21.2",
     "skia": "2.6.2",
     "reanimated": "4.5.1",
-    "nativeDeviceVerified": true
+    "nativeDeviceVerified": false
   },
   "nativeDeviceVerified": false
 }

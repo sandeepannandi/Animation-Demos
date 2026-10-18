@@ -5,8 +5,9 @@ import {
   einsteinRadius, sourceOffset, imagePositions, imageMagnification, totalMagnification,
   keplerBeta, lorentzGamma, dopplerFactor, gravRedshift, diskTemperature, DISK_TEMP_PEAK,
   diskAngularVelocity, makeDiskNoise, diskEmission, makeStars, holeTarget,
-  PLANET_DEFAULTS, holeMassFromRs, rocheLimit, tidalAcceleration, planetSurfaceGravity,
-  tidalRatio, debrisKick, makePlanet, planetStep, isCaptured,
+  PLANET_DEFAULTS, holeMassFromRs, rocheLimit, fluidRocheLimit, tidalAcceleration, tidalTensor,
+  planetSurfaceGravity, pwAcceleration, pwPotential, pwCircularL2, pwCircularSpeed,
+  makePlanet, planetStep, isCaptured,
 } from './holeMath.ts';
 
 const RS = HOLE_DEFAULTS.rs;
@@ -131,76 +132,143 @@ test('the hole stays inside the canvas with its shadow fully visible', () => {
 
 test('rigid Roche limit matches R*(2M/m)^(1/3)', () => {
   const q = PLANET_DEFAULTS.massRatio;
-  assert.ok(Math.abs(rocheLimit(PLANET_DEFAULTS.radius, q) - 11 * Math.pow(2 / 0.03, 1 / 3)) < 1e-12);
-  assert.ok(rocheLimit(10, 0.02) > rocheLimit(10, 0.05));
+  assert.ok(Math.abs(rocheLimit(PLANET_DEFAULTS.radius, q) - 16 * Math.pow(2 / 0.08, 1 / 3)) < 1e-12);
   assert.ok(rocheLimit(10, 0.02) === rocheLimit(20, 0.02) / 2);
 });
 
-test('tidal acceleration equals surface gravity exactly at the Roche limit', () => {
+test('fluid Roche limit is 2.44*R*(M/m)^(1/3), about 1.94x the rigid one', () => {
+  const q = PLANET_DEFAULTS.massRatio;
+  const dF = fluidRocheLimit(PLANET_DEFAULTS.radius, q);
+  assert.ok(Math.abs(dF - 2.44 * 16 * Math.pow(1 / 0.08, 1 / 3)) < 1e-12);
+  const ratio = dF / rocheLimit(PLANET_DEFAULTS.radius, q);
+  assert.ok(Math.abs(ratio - 2.44 / Math.pow(2, 1 / 3)) < 1e-9);
+  assert.ok(ratio > 1.9 && ratio < 2.0);
+});
+
+test('tidal tensor stretches radially at 2xi and squeezes transversally at -xi', () => {
   const m = holeMassFromRs(RS);
-  const q = 0.017;
-  const R = 9;
-  const dR = rocheLimit(R, q);
-  const aTide = tidalAcceleration(m, R, dR);
-  const gSurf = planetSurfaceGravity(m, q, R);
+  const t = tidalTensor(m, 16, 90);
+  assert.ok(Math.abs(t.radial / -t.transverse - 2) < 1e-12);
+  assert.ok(t.radial > 0 && t.transverse < 0);
+});
+
+test('tidal acceleration equals surface gravity exactly at the rigid Roche limit', () => {
+  const m = holeMassFromRs(RS);
+  const dR = rocheLimit(11, 0.017);
+  const aTide = tidalAcceleration(m, 11, dR);
+  const gSurf = planetSurfaceGravity(m, 0.017, 11);
   assert.ok(Math.abs(aTide / gSurf - 1) < 1e-12);
 });
 
-test('tidal ratio grows as d^-3 and equals (dR/d)^3', () => {
+test('Paczynski-Wiita acceleration reduces to Newtonian far from the hole', () => {
   const m = holeMassFromRs(RS);
-  const q = 0.03;
-  const R = 11;
-  const dR = rocheLimit(R, q);
-  for (const d of [30, 55, 90, 160]) {
-    assert.ok(Math.abs(tidalRatio(m, q, R, d) - Math.pow(dR / d, 3)) < 1e-9);
+  const r = 800 * RS;
+  const ratio = pwAcceleration(m, r, RS) / (m / (r * r));
+  assert.ok(Math.abs(ratio - 1) < 0.005);
+  assert.ok(pwAcceleration(m, 4 * RS, RS) > m / Math.pow(4 * RS, 2));
+});
+
+test('Paczynski-Wiita circular-orbit angular momentum bottoms out at the ISCO 3rs', () => {
+  const m = holeMassFromRs(RS);
+  let best = Infinity;
+  let bestR = 0;
+  for (let r = 2.2 * RS; r <= 8 * RS; r += 0.01 * RS) {
+    const l2 = pwCircularL2(m, r, RS);
+    if (l2 < best) { best = l2; bestR = r; }
   }
-  assert.ok(Math.abs(tidalRatio(m, q, R, 2 * dR) / tidalRatio(m, q, R, dR) - 1 / 8) < 1e-9);
+  assert.ok(Math.abs(bestR - 3 * RS) < 0.02 * RS);
+  assert.ok(pwCircularL2(m, 2.3 * RS, RS) > pwCircularL2(m, 3 * RS, RS));
 });
 
-test('tidal debris kick scales as R*sqrt(M/d^3)', () => {
+test('debris conserves angular momentum and energy on a Paczynski-Wiita orbit', () => {
+  const bounds = { width: 340, height: 380 };
+  const sim = makePlanet(PLANET_DEFAULTS, 5);
+  const hx = 170, hy = 168;
   const m = holeMassFromRs(RS);
-  assert.ok(Math.abs(debrisKick(m, 11, 50) / debrisKick(m, 11, 100) - Math.pow(2, 1.5)) < 1e-12);
-  assert.ok(Math.abs(debrisKick(m, 22, 50) / debrisKick(m, 11, 50) - 2) < 1e-12);
-  assert.ok(Math.abs(debrisKick(4 * m, 11, 50) / debrisKick(m, 11, 50) - 2) < 1e-12);
+  const r0 = 140;
+  const v0 = 0.9 * pwCircularSpeed(m, r0, RS);
+  sim.debris.push({ x: hx + r0, y: hy, vx: 0, vy: v0, age: 0, size: 1, tone: 0.5 });
+  const p = sim.debris[0];
+  const h0 = r0 * v0;
+  const e0 = 0.5 * v0 * v0 + pwPotential(m, r0, RS);
+  for (let i = 0; i < 600; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  assert.equal(sim.debris.length, 1);
+  const rx = p.x - hx, ry = p.y - hy;
+  const h1 = rx * p.vy - ry * p.vx;
+  const e1 = 0.5 * (p.vx * p.vx + p.vy * p.vy) + pwPotential(m, Math.hypot(rx, ry), RS);
+  assert.ok(Math.abs(h1 / h0 - 1) < 1e-3, `L drift ${h1 / h0 - 1}`);
+  assert.ok(Math.abs(e1 / e0 - 1) < 0.02, `E drift ${e1 / e0 - 1}`);
 });
 
-test('planet disrupts inside the Roche limit and never recovers', () => {
+test('inner debris pulls ahead of outer debris: the tail stretches by real differential orbital speed', () => {
+  const bounds = { width: 340, height: 380 };
+  const sim = makePlanet(PLANET_DEFAULTS, 9);
+  const hx = 170, hy = 168;
+  const m = holeMassFromRs(RS);
+  const rIn = 60, rOut = 76;
+  sim.debris.push({ x: hx + rIn, y: hy, vx: 0, vy: pwCircularSpeed(m, rIn, RS), age: 0, size: 1, tone: 0.2 });
+  sim.debris.push({ x: hx + rOut, y: hy, vx: 0, vy: pwCircularSpeed(m, rOut, RS), age: 0, size: 1, tone: 0.8 });
+  for (let i = 0; i < 240; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  assert.equal(sim.debris.length, 2);
+  const ang = (p) => Math.atan2(p.y - hy, p.x - hx);
+  let sep = ang(sim.debris[0]) - ang(sim.debris[1]);
+  while (sep < 0) sep += Math.PI * 2;
+  assert.ok(sep > 0.15, `angular separation ${sep}`);
+});
+
+test('planet falls toward the hole once it is close enough to feel it', () => {
+  const bounds = { width: 340, height: 380 };
   const sim = makePlanet(PLANET_DEFAULTS, 7);
-  const dR = rocheLimit(PLANET_DEFAULTS.radius, PLANET_DEFAULTS.massRatio);
-  for (let i = 0; i < 240; i++) planetStep(sim, sim.x + dR * 2.5, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
-  assert.equal(sim.state, 'intact');
-  assert.ok(sim.stretch < 0.35);
-  for (let i = 0; i < 60; i++) planetStep(sim, sim.x + dR * 0.9, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+  const roche = fluidRocheLimit(PLANET_DEFAULTS.radius, PLANET_DEFAULTS.massRatio);
+  const hx = 170, hy = 168;
+  sim.x = hx - 1.35 * roche;
+  sim.y = hy;
+  const d0 = Math.hypot(sim.x - hx, sim.y - hy);
+  for (let i = 0; i < 240; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  const d1 = Math.hypot(sim.x - hx, sim.y - hy);
+  assert.ok(d1 < d0 - 1, `planet did not fall: ${d0} -> ${d1}`);
+});
+
+test('grazing pass strips mass that never grows back; deep dive fully disrupts', () => {
+  const bounds = { width: 340, height: 380 };
+  const sim = makePlanet(PLANET_DEFAULTS, 7);
+  const roche = fluidRocheLimit(PLANET_DEFAULTS.radius, PLANET_DEFAULTS.massRatio);
+  const hx = 170, hy = 168;
+  sim.x = hx - 0.88 * roche;
+  sim.y = hy;
+  for (let i = 0; i < 45; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
   assert.equal(sim.state, 'disrupted');
-  for (let i = 0; i < 600; i++) planetStep(sim, sim.x + dR * 3, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
-  assert.notEqual(sim.state, 'intact');
+  const stripped = sim.bodyScale;
+  assert.ok(stripped < 1, 'no mass stripped');
+  for (let i = 0; i < 400; i++) planetStep(sim, hx + 3 * roche, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  assert.ok(sim.bodyScale <= stripped + 1e-9, 'planet regrew');
+  for (let i = 0; i < 2400; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  assert.equal(sim.state, 'gone');
   assert.ok(sim.bodyScale === 0);
 });
 
-test('released debris falls inward and speeds up under 1/r^2 gravity', () => {
-  const sim = makePlanet(PLANET_DEFAULTS, 11);
-  const hx = 170, hy = 168;
-  sim.state = 'disrupted';
-  sim.shedAcc = 0;
-  sim.shedTime = 0;
-  sim.bodyScale = 1;
-  const before = Math.hypot(sim.x - hx, sim.y - hy);
-  for (let i = 0; i < 90; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
-  assert.ok(sim.debris.length > 5);
-  const inward = sim.debris.filter((p) => Math.hypot(p.x - hx, p.y - hy) < before);
-  assert.ok(inward.length >= sim.debris.length * 0.6);
-  const fast = sim.debris.filter((p) => Math.hypot(p.vx, p.vy) > 0.05);
-  assert.ok(fast.length === sim.debris.length);
+test('intact planet recovers its shape when the hole backs off before the limit', () => {
+  const bounds = { width: 340, height: 380 };
+  const sim = makePlanet(PLANET_DEFAULTS, 7);
+  const roche = fluidRocheLimit(PLANET_DEFAULTS.radius, PLANET_DEFAULTS.massRatio);
+  for (let i = 0; i < 150; i++) planetStep(sim, sim.x + 1.1 * roche, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  assert.equal(sim.state, 'intact');
+  assert.ok(sim.stretch > 0.04, `stretch ${sim.stretch}`);
+  for (let i = 0; i < 400; i++) planetStep(sim, 9999, 9999, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
+  assert.equal(sim.state, 'intact');
+  assert.ok(sim.bodyScale === 1);
+  assert.ok(sim.stretch < 0.02);
 });
 
 test('a plunging particle is captured inside the shadow and feeds the disk', () => {
+  const bounds = { width: 340, height: 380 };
   const sim = makePlanet(PLANET_DEFAULTS, 3);
   const hx = 170, hy = 168;
   sim.state = 'disrupted';
   sim.debris.push({ x: hx + 30, y: hy, vx: 0, vy: 0, age: 0, size: 1, tone: 0.5 });
   let fed = 0;
   for (let i = 0; i < 600 && sim.debris.length; i++) {
-    planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+    planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS, bounds);
     fed = Math.max(fed, sim.feed);
   }
   assert.equal(sim.debris.length, 0);

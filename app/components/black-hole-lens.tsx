@@ -5,6 +5,7 @@ import {
   HOLE_DEFAULTS,
   PLANET_DEFAULTS,
   clamp,
+  debrisHeat,
   diskEmission,
   holeTarget,
   iscoRadius,
@@ -85,8 +86,8 @@ function paintPlanet(g: CanvasRenderingContext2D, sim: PlanetSim, hx: number, hy
   const ang = Math.atan2(hy - sim.y, hx - sim.x);
   if (sim.bodyScale > 0.001) {
     const r = PLANET_DEFAULTS.radius * S * sim.bodyScale;
-    const sx = 1 + sim.stretch * sim.bodyScale;
-    const sy = 1 / (1 + sim.stretch * 0.7 * sim.bodyScale);
+    const sx = 1 + sim.stretch;
+    const sy = 1 - sim.squeeze;
     g.save();
     g.translate(px, py);
     g.rotate(ang);
@@ -127,16 +128,38 @@ function paintPlanet(g: CanvasRenderingContext2D, sim: PlanetSim, hx: number, hy
   }
   const [lr, lg2, lb] = PLANET_PALETTE.light;
   const [mr, mg, mb] = PLANET_PALETTE.mid;
+  if (sim.debris.length > 1) {
+    const ordered = [...sim.debris].sort((a, b) => b.age - a.age);
+    g.strokeStyle = `rgba(${mr},${mg},${mb},0.55)`;
+    g.lineWidth = 1.7;
+    g.lineCap = "round";
+    g.beginPath();
+    g.moveTo(ordered[0].x * S, ordered[0].y * S);
+    for (let i = 1; i < ordered.length; i++) g.lineTo(ordered[i].x * S, ordered[i].y * S);
+    g.stroke();
+  }
   for (const d of sim.debris) {
     const fade = clamp(1 - d.age / PLANET_DEFAULTS.debrisLife, 0, 1);
     if (fade <= 0) continue;
-    const rr = Math.round(mr + (lr - mr) * d.tone);
-    const gg2 = Math.round(mg + (lg2 - mg) * d.tone);
-    const bb = Math.round(mb + (lb - mb) * d.tone);
-    g.fillStyle = `rgba(${rr},${gg2},${bb},${(fade * 0.95).toFixed(3)})`;
-    g.beginPath();
-    g.arc(d.x * S, d.y * S, Math.max(0.5, d.size * S), 0, Math.PI * 2);
-    g.fill();
+    const heat = debrisHeat(d.x, d.y, hx, hy, HOLE_DEFAULTS);
+    const rr = Math.round(mr + (lr - mr) * d.tone + (255 - (mr + (lr - mr) * d.tone)) * heat);
+    const gg2 = Math.round(mg + (lg2 - mg) * d.tone + (236 - (mg + (lg2 - mg) * d.tone)) * heat);
+    const bb = Math.round(mb + (lb - mb) * d.tone + (190 - (mb + (lb - mb) * d.tone)) * heat);
+    g.fillStyle = `rgba(${rr},${gg2},${bb},${(fade * (0.55 + 0.45 * heat)).toFixed(3)})`;
+    const sp = Math.hypot(d.vx, d.vy);
+    if (sp > 0.02) {
+      g.save();
+      g.translate(d.x * S, d.y * S);
+      g.rotate(Math.atan2(d.vy, d.vx));
+      g.beginPath();
+      g.ellipse(0, 0, Math.max(0.6, d.size * S * 1.6), Math.max(0.4, d.size * S * 0.6), 0, 0, Math.PI * 2);
+      g.fill();
+      g.restore();
+    } else {
+      g.beginPath();
+      g.arc(d.x * S, d.y * S, Math.max(0.5, d.size * S), 0, Math.PI * 2);
+      g.fill();
+    }
   }
 }
 
@@ -282,7 +305,7 @@ export function BlackHoleLensPreview() {
       if (latest.current.planetOn) {
         if (!planet || !planetWasOn) planet = makePlanet(PLANET_DEFAULTS, HOLE_DEFAULTS.seed ^ 61);
         planetWasOn = true;
-        planetStep(planet, sim.cx, sim.cy, dt, HOLE_DEFAULTS, PLANET_DEFAULTS);
+        planetStep(planet, sim.cx, sim.cy, dt, HOLE_DEFAULTS, PLANET_DEFAULTS, { width: W, height: H });
       } else {
         planetWasOn = false;
         planet = null;
