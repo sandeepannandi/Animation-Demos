@@ -8,7 +8,7 @@ import {
 import { BANNER_H, BANNER_W, bannerDesign, type Item } from "../../packages/ui/src/components/cloth-banner/bannerDesign";
 import styles from "./cloth-banner.module.css";
 
-const COLS = 17, ROWS = 12;
+const COLS = 25, ROWS = 17;
 const PAD_X = 48, PAD_TOP = 40, PAD_BOTTOM = 64;
 const CANVAS_W = BANNER_W + PAD_X * 2;
 const CANVAS_H = BANNER_H + PAD_TOP + PAD_BOTTOM;
@@ -58,6 +58,8 @@ export function ClothBannerPreview() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     canvas.width = CANVAS_W * dpr;
     canvas.height = CANVAS_H * dpr;
@@ -100,14 +102,36 @@ export function ClothBannerPreview() {
       ctx.transform(a, b, cc, d, e, f);
       ctx.drawImage(art, 0, 0);
       ctx.restore();
-      const shadeAvg = (shade[i0] + shade[i1] + shade[i2]) / 3;
-      if (shadeAvg < 0.995) {
+      // Per-vertex shade, filled with the exact linear gradient of the three
+      // vertex alphas (a plane through three values is a linear gradient), so
+      // brightness varies smoothly across the mesh instead of stepping per
+      // triangle.
+      const a0 = 1 - shade[i0], a1 = 1 - shade[i1], a2 = 1 - shade[i2];
+      const aMax = Math.max(a0, a1, a2);
+      if (aMax > 0.004) {
+        const aMin = Math.min(a0, a1, a2);
+        const e1x = p1.x - p0.x, e1y = p1.y - p0.y, e2x = p2.x - p0.x, e2y = p2.y - p0.y;
+        const det = e1x * e2y - e2x * e1y || 1e-6;
+        const gx = ((a1 - a0) * e2y - (a2 - a0) * e1y) / det;
+        const gy = ((a2 - a0) * e1x - (a1 - a0) * e2x) / det;
+        const g2 = gx * gx + gy * gy;
+        let grad;
+        if (g2 < 1e-8) {
+          grad = ctx.createLinearGradient(q0.x, q0.y, q0.x + 1, q0.y);
+          grad.addColorStop(0, `rgba(8,14,10,${a0.toFixed(3)})`);
+          grad.addColorStop(1, `rgba(8,14,10,${a0.toFixed(3)})`);
+        } else {
+          const tMin = (aMin - a0) / g2, tMax = (aMax - a0) / g2;
+          grad = ctx.createLinearGradient(p0.x + gx * tMin, p0.y + gy * tMin, p0.x + gx * tMax, p0.y + gy * tMax);
+          grad.addColorStop(0, `rgba(8,14,10,${aMin.toFixed(3)})`);
+          grad.addColorStop(1, `rgba(8,14,10,${aMax.toFixed(3)})`);
+        }
         ctx.beginPath();
         ctx.moveTo(q0.x, q0.y);
         ctx.lineTo(q1.x, q1.y);
         ctx.lineTo(q2.x, q2.y);
         ctx.closePath();
-        ctx.fillStyle = `rgba(8,14,10,${(1 - shadeAvg).toFixed(3)})`;
+        ctx.fillStyle = grad;
         ctx.fill();
       }
     };
