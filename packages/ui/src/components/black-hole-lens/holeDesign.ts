@@ -25,3 +25,11 @@ export function starColor(tint: number): [number, number, number] {
   if (tint < 0.72) return [0.96, 0.97, 1.0];
   return [0.72, 0.82, 1.0];
 }
+
+export const PLANET_PALETTE = {
+  light: [236, 220, 178] as const,
+  mid: [199, 152, 96] as const,
+  dark: [128, 88, 48] as const,
+  band: [112, 72, 38] as const,
+  glow: [244, 232, 200] as const,
+};

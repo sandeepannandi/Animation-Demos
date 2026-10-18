@@ -3,14 +3,19 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
   HOLE_DEFAULTS,
+  PLANET_DEFAULTS,
+  clamp,
   diskEmission,
   holeTarget,
   iscoRadius,
   makeDiskNoise,
+  makePlanet,
   makeStars,
+  planetStep,
   shadowRadius,
   springStep,
   type HoleConfig,
+  type PlanetSim,
 } from "../../packages/ui/src/components/black-hole-lens/holeMath";
 import {
   GALAXY,
@@ -19,6 +24,7 @@ import {
   HOLE_H,
   HOLE_W,
   NEBULAE,
+  PLANET_PALETTE,
   RING_STRENGTH,
   SPACE_BACKGROUND,
   starColor,
@@ -70,17 +76,79 @@ function paintSpace() {
     g.arc(star.x * S, star.y * S, Math.max(0.5, star.r * S), 0, Math.PI * 2);
     g.fill();
   }
-  return g.getImageData(0, 0, PW, PH);
+  return { canvas: c, image: g.getImageData(0, 0, PW, PH) };
+}
+
+function paintPlanet(g: CanvasRenderingContext2D, sim: PlanetSim, hx: number, hy: number) {
+  const px = sim.x * S;
+  const py = sim.y * S;
+  const ang = Math.atan2(hy - sim.y, hx - sim.x);
+  if (sim.bodyScale > 0.001) {
+    const r = PLANET_DEFAULTS.radius * S * sim.bodyScale;
+    const sx = 1 + sim.stretch * sim.bodyScale;
+    const sy = 1 / (1 + sim.stretch * 0.7 * sim.bodyScale);
+    g.save();
+    g.translate(px, py);
+    g.rotate(ang);
+    g.scale(sx, sy);
+    const [lr, lg2, lb] = PLANET_PALETTE.light;
+    const [mr, mg, mb] = PLANET_PALETTE.mid;
+    const [dr, dg, db] = PLANET_PALETTE.dark;
+    const grad = g.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.1, 0, 0, r * 1.6);
+    grad.addColorStop(0, `rgb(${lr},${lg2},${lb})`);
+    grad.addColorStop(0.55, `rgb(${mr},${mg},${mb})`);
+    grad.addColorStop(1, `rgb(${dr},${dg},${db})`);
+    g.fillStyle = grad;
+    g.beginPath();
+    g.arc(0, 0, r, 0, Math.PI * 2);
+    g.fill();
+    g.save();
+    g.beginPath();
+    g.arc(0, 0, r, 0, Math.PI * 2);
+    g.clip();
+    const [br, bg2, bb] = PLANET_PALETTE.band;
+    g.fillStyle = `rgba(${br},${bg2},${bb},0.55)`;
+    g.beginPath();
+    g.ellipse(0, -r * 0.28, r * 1.2, r * 0.16, 0, 0, Math.PI * 2);
+    g.fill();
+    g.beginPath();
+    g.ellipse(0, r * 0.24, r * 1.2, r * 0.2, 0, 0, Math.PI * 2);
+    g.fill();
+    g.restore();
+    if (r > 1.4) {
+      const [gr, gg3, gb] = PLANET_PALETTE.glow;
+      g.strokeStyle = `rgba(${gr},${gg3},${gb},0.4)`;
+      g.lineWidth = 1.2;
+      g.beginPath();
+      g.arc(0, 0, r - 0.6, 0, Math.PI * 2);
+      g.stroke();
+    }
+    g.restore();
+  }
+  const [lr, lg2, lb] = PLANET_PALETTE.light;
+  const [mr, mg, mb] = PLANET_PALETTE.mid;
+  for (const d of sim.debris) {
+    const fade = clamp(1 - d.age / PLANET_DEFAULTS.debrisLife, 0, 1);
+    if (fade <= 0) continue;
+    const rr = Math.round(mr + (lr - mr) * d.tone);
+    const gg2 = Math.round(mg + (lg2 - mg) * d.tone);
+    const bb = Math.round(mb + (lb - mb) * d.tone);
+    g.fillStyle = `rgba(${rr},${gg2},${bb},${(fade * 0.95).toFixed(3)})`;
+    g.beginPath();
+    g.arc(d.x * S, d.y * S, Math.max(0.5, d.size * S), 0, Math.PI * 2);
+    g.fill();
+  }
 }
 
 export function BlackHoleLensPreview() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [slow, setSlow] = useState(false);
+  const [planetOn, setPlanetOn] = useState(false);
   const systemReduce = useReducedMotion();
   const [reducedOverride, setReducedOverride] = useState<boolean | null>(null);
   const reduced = reducedOverride ?? !!systemReduce;
-  const latest = useRef({ slow, reduced });
-  latest.current = { slow, reduced };
+  const latest = useRef({ slow, reduced, planetOn });
+  latest.current = { slow, reduced, planetOn };
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -90,10 +158,16 @@ export function BlackHoleLensPreview() {
     canvas.width = PW;
     canvas.height = PH;
     const space = paintSpace();
+    const scratch = document.createElement("canvas");
+    scratch.width = PW;
+    scratch.height = PH;
+    const sg = scratch.getContext("2d")!;
     const noise = makeDiskNoise(HOLE_DEFAULTS.noiseRings, HOLE_DEFAULTS.noiseSectors, HOLE_DEFAULTS.seed);
     const out = ctx.createImageData(PW, PH);
     const phaseTable = new Float32Array(PHASES + 1);
     const sim = { cx: W / 2, cy: H / 2, vx: 0, vy: 0, tx: W / 2, ty: H / 2, time: 0 };
+    let planet: PlanetSim | null = null;
+    let planetWasOn = false;
 
     const render = () => {
       const { cx, cy, time } = sim;
@@ -101,7 +175,14 @@ export function BlackHoleLensPreview() {
         const rr = DISK_IN + (k / PHASES) * (CFG.diskOut - DISK_IN);
         phaseTable[k] = CFG.spin * time * Math.pow(DISK_IN / rr, 1.5);
       }
-      const src = space.data;
+      let src = space.image.data;
+      let boost = 1;
+      if (planet) {
+        sg.drawImage(space.canvas, 0, 0);
+        paintPlanet(sg, planet, cx, cy);
+        src = sg.getImageData(0, 0, PW, PH).data;
+        boost = 1 + PLANET_DEFAULTS.feedBoost * planet.feed;
+      }
       const dst = out.data;
       const rc = RING_STRENGTH;
       for (let py = 0; py < PH; py++) {
@@ -132,7 +213,7 @@ export function BlackHoleLensPreview() {
               const pk = ((rr2 - DISK_IN) / (CFG.diskOut - DISK_IN)) * PHASES;
               const pk0 = Math.floor(pk);
               const ph = phaseTable[pk0] + (phaseTable[Math.min(PHASES, pk0 + 1)] - phaseTable[pk0]) * (pk - pk0);
-              const e = diskEmission(rr2, -ang, ph, HALO_TOP.atten, CFG, HOLE_DEFAULTS, noise);
+              const e = diskEmission(rr2, -ang, ph, HALO_TOP.atten * boost, CFG, HOLE_DEFAULTS, noise);
               const w = 1 - t * t;
               R += e[0] * 255 * w;
               G += e[1] * 255 * w;
@@ -146,7 +227,7 @@ export function BlackHoleLensPreview() {
               const pk = ((rr2 - DISK_IN) / (CFG.diskOut - DISK_IN)) * PHASES;
               const pk0 = Math.floor(pk);
               const ph = phaseTable[pk0] + (phaseTable[Math.min(PHASES, pk0 + 1)] - phaseTable[pk0]) * (pk - pk0);
-              const e = diskEmission(rr2, -ang, ph, HALO_BOTTOM.atten, CFG, HOLE_DEFAULTS, noise);
+              const e = diskEmission(rr2, -ang, ph, HALO_BOTTOM.atten * boost, CFG, HOLE_DEFAULTS, noise);
               const w = 1 - t * t;
               R += e[0] * 255 * w;
               G += e[1] * 255 * w;
@@ -163,7 +244,7 @@ export function BlackHoleLensPreview() {
               const pk = ((rr - DISK_IN) / (CFG.diskOut - DISK_IN)) * PHASES;
               const pk0 = Math.floor(pk);
               const ph = phaseTable[pk0] + (phaseTable[Math.min(PHASES, pk0 + 1)] - phaseTable[pk0]) * (pk - pk0);
-              const e = diskEmission(rr, ang, ph, 1, CFG, HOLE_DEFAULTS, noise);
+              const e = diskEmission(rr, ang, ph, boost, CFG, HOLE_DEFAULTS, noise);
               R = R * (1 - ea) + e[0] * 255 * ea;
               G = G * (1 - ea) + e[1] * 255 * ea;
               B = B * (1 - ea) + e[2] * 255 * ea;
@@ -197,6 +278,14 @@ export function BlackHoleLensPreview() {
         sim.cy = b.pos;
         sim.vy = b.vel;
         sim.time += dt * (latest.current.slow ? 0.25 : 1);
+      }
+      if (latest.current.planetOn) {
+        if (!planet || !planetWasOn) planet = makePlanet(PLANET_DEFAULTS, HOLE_DEFAULTS.seed ^ 61);
+        planetWasOn = true;
+        planetStep(planet, sim.cx, sim.cy, dt, HOLE_DEFAULTS, PLANET_DEFAULTS);
+      } else {
+        planetWasOn = false;
+        planet = null;
       }
       render();
       raf = requestAnimationFrame(tick);
@@ -263,8 +352,9 @@ export function BlackHoleLensPreview() {
       <div className={styles.row}>
         <button type="button" className={slow ? styles.chipPrimary : styles.chip} onClick={() => setSlow((v) => !v)} aria-pressed={slow}>Slow motion: {slow ? "on" : "off"}</button>
         <button type="button" className={reduced ? styles.chipPrimary : styles.chip} onClick={() => setReducedOverride(!reduced)} aria-pressed={reduced}>Reduce motion: {reduced ? "on" : "off"}</button>
+        <button type="button" className={planetOn ? styles.chipPrimary : styles.chip} onClick={() => setPlanetOn((v) => !v)} aria-pressed={planetOn}>Planet: {planetOn ? "on" : "off"}</button>
       </div>
-      <p className={styles.hint}>Drag the black hole across the starfield, or focus it and use the arrow keys.</p>
+      <p className={styles.hint}>Drag the black hole across the starfield, or focus it and use the arrow keys. Turn the planet on and drag the hole right up to it: tides stretch it at the Roche limit, then it shreds into a stream that spirals into the disk.</p>
     </div>
   );
 }

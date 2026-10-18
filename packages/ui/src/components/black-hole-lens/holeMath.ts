@@ -217,3 +217,190 @@ export function diskEdgeAlpha(rr: number, cfg: HoleConfig, opts: HoleDefaults) {
 export function photonRingGlow(r: number, rs: number) {
   return Math.exp(-Math.abs(r - shadowRadius(rs)) / 2.1) * 0.65;
 }
+
+export const PLANET_DEFAULTS = {
+  x: 84,
+  y: 268,
+  radius: 11,
+  massRatio: 0.03,
+  stretchGain: 0.55,
+  debrisCount: 26,
+  debrisSpan: 1.15,
+  debrisLife: 8.5,
+  timeWarp: 48,
+  feedBoost: 1.4,
+  feedDecay: 2.6,
+  dragRate: 2.2,
+  inspiralRate: 0.55,
+} as const;
+
+export type PlanetDefaults = typeof PLANET_DEFAULTS;
+
+export function holeMassFromRs(rs: number) {
+  return rs / 2;
+}
+
+export function rocheLimit(radius: number, massRatio: number) {
+  return radius * Math.pow(2 / massRatio, 1 / 3);
+}
+
+export function tidalAcceleration(mHole: number, radius: number, d: number) {
+  const dd = Math.max(d, 0.0001);
+  return (2 * mHole * radius) / (dd * dd * dd);
+}
+
+export function planetSurfaceGravity(mHole: number, massRatio: number, radius: number) {
+  return (mHole * massRatio) / (radius * radius);
+}
+
+export function tidalRatio(mHole: number, massRatio: number, radius: number, d: number) {
+  return tidalAcceleration(mHole, radius, d) / planetSurfaceGravity(mHole, massRatio, radius);
+}
+
+export function debrisKick(mHole: number, radius: number, d: number) {
+  const dd = Math.max(d, 0.0001);
+  return radius * Math.sqrt(mHole / (dd * dd * dd));
+}
+
+export function circularSpeed(mHole: number, d: number) {
+  return Math.sqrt(mHole / Math.max(d, 0.0001));
+}
+
+export type DebrisParticle = {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  age: number;
+  size: number;
+  tone: number;
+};
+
+export type PlanetSim = {
+  x: number;
+  y: number;
+  state: "intact" | "disrupted" | "gone";
+  eta: number;
+  stretch: number;
+  shedTime: number;
+  shedAcc: number;
+  bodyScale: number;
+  feed: number;
+  spinSense: number;
+  debris: DebrisParticle[];
+  rand: () => number;
+};
+
+export function makePlanet(opts: PlanetDefaults, seed: number): PlanetSim {
+  return {
+    x: opts.x,
+    y: opts.y,
+    state: "intact",
+    eta: 0,
+    stretch: 0,
+    shedTime: 0,
+    shedAcc: 0,
+    bodyScale: 1,
+    feed: 0,
+    spinSense: 1,
+    debris: [],
+    rand: mulberry32(seed),
+  };
+}
+
+function spawnDebris(sim: PlanetSim, hx: number, hy: number, mHole: number, opts: PlanetDefaults) {
+  const dx = hx - sim.x;
+  const dy = hy - sim.y;
+  const d = Math.max(Math.hypot(dx, dy), opts.radius);
+  const ux = dx / d;
+  const uy = dy / d;
+  const tx = -uy;
+  const ty = ux;
+  const side = sim.rand() < 0.5 ? -1 : 1;
+  const along = side * opts.radius * (0.3 + 0.7 * sim.rand());
+  const kick = debrisKick(mHole, opts.radius, d) * (0.5 + sim.rand()) * side;
+  const vc = circularSpeed(mHole, d);
+  sim.debris.push({
+    x: sim.x + ux * along + tx * (sim.rand() - 0.5) * opts.radius * 0.6,
+    y: sim.y + uy * along + ty * (sim.rand() - 0.5) * opts.radius * 0.6,
+    vx: tx * vc * (0.55 + 0.2 * sim.rand()) * sim.spinSense + ux * kick,
+    vy: ty * vc * (0.55 + 0.2 * sim.rand()) * sim.spinSense + uy * kick,
+    age: 0,
+    size: 0.9 + sim.rand() * 1.4,
+    tone: sim.rand(),
+  });
+}
+
+export function isCaptured(x: number, y: number, hx: number, hy: number, rs: number) {
+  return Math.hypot(x - hx, y - hy) < shadowRadius(rs) * 0.92;
+}
+
+export function planetStep(
+  sim: PlanetSim,
+  hx: number,
+  hy: number,
+  dt: number,
+  hole: HoleDefaults,
+  opts: PlanetDefaults,
+) {
+  const mHole = holeMassFromRs(hole.rs);
+  const d = Math.max(Math.hypot(hx - sim.x, hy - sim.y), opts.radius * 0.5);
+  const roche = rocheLimit(opts.radius, opts.massRatio);
+  if (sim.state === "intact") {
+    sim.eta = tidalRatio(mHole, opts.massRatio, opts.radius, d);
+    const target = clamp(sim.eta, 0, 1) * opts.stretchGain;
+    sim.stretch += (target - sim.stretch) * Math.min(1, dt * 8);
+    if (d <= roche) {
+      sim.state = "disrupted";
+      sim.spinSense = sim.rand() < 0.5 ? -1 : 1;
+    }
+  }
+  if (sim.state === "disrupted") {
+    sim.eta = tidalRatio(mHole, opts.massRatio, opts.radius, d);
+    sim.stretch += (opts.stretchGain - sim.stretch) * Math.min(1, dt * 8);
+    sim.shedTime += dt;
+    sim.bodyScale = clamp(1 - sim.shedTime / opts.debrisSpan, 0, 1);
+    sim.shedAcc += (dt * opts.debrisCount) / opts.debrisSpan;
+    while (sim.shedAcc >= 1 && sim.bodyScale > 0) {
+      sim.shedAcc -= 1;
+      spawnDebris(sim, hx, hy, mHole, opts);
+    }
+    if (sim.bodyScale <= 0 && sim.debris.length === 0) sim.state = "gone";
+  }
+  const warp = opts.timeWarp;
+  const tdt = dt * warp;
+  const diskIn = iscoRadius(hole.rs);
+  const keep: DebrisParticle[] = [];
+  for (const p of sim.debris) {
+    p.age += dt;
+    const dx = p.x - hx;
+    const dy = p.y - hy;
+    const r = Math.max(Math.hypot(dx, dy), 1);
+    const a = -mHole / (r * r);
+    p.vx += (dx / r) * a * tdt;
+    p.vy += (dy / r) * a * tdt;
+    if (r > diskIn * 0.95 && r < hole.diskOut * 1.15) {
+      const vc = circularSpeed(mHole, r);
+      const rvx = dx / r;
+      const rvy = dy / r;
+      const vrad = p.vx * rvx + p.vy * rvy;
+      const sense = p.vx * -dy + p.vy * dx >= 0 ? 1 : -1;
+      const k = Math.min(1, opts.dragRate * tdt);
+      p.vx += rvx * (-opts.inspiralRate * vc - vrad) * k;
+      p.vy += rvy * (-opts.inspiralRate * vc - vrad) * k;
+      const vt = p.vx * -rvy + p.vy * rvx;
+      p.vx += (-rvy) * (vc * sense - vt) * k;
+      p.vy += rvx * (vc * sense - vt) * k;
+    }
+    p.x += p.vx * tdt;
+    p.y += p.vy * tdt;
+    if (isCaptured(p.x, p.y, hx, hy, hole.rs)) {
+      sim.feed = clamp(sim.feed + 3 / opts.debrisCount, 0, 1);
+      continue;
+    }
+    if (p.age < opts.debrisLife) keep.push(p);
+  }
+  sim.debris = keep;
+  sim.feed *= Math.exp(-dt / opts.feedDecay);
+  if (sim.state === "disrupted" && sim.bodyScale <= 0 && sim.debris.length === 0) sim.state = "gone";
+}

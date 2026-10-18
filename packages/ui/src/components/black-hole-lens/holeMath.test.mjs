@@ -5,6 +5,8 @@ import {
   einsteinRadius, sourceOffset, imagePositions, imageMagnification, totalMagnification,
   keplerBeta, lorentzGamma, dopplerFactor, gravRedshift, diskTemperature, DISK_TEMP_PEAK,
   diskAngularVelocity, makeDiskNoise, diskEmission, makeStars, holeTarget,
+  PLANET_DEFAULTS, holeMassFromRs, rocheLimit, tidalAcceleration, planetSurfaceGravity,
+  tidalRatio, debrisKick, makePlanet, planetStep, isCaptured,
 } from './holeMath.ts';
 
 const RS = HOLE_DEFAULTS.rs;
@@ -125,4 +127,84 @@ test('the hole stays inside the canvas with its shadow fully visible', () => {
   assert.ok(t.y >= shadowRadius(RS) + 8 && t.y <= CFG.height - shadowRadius(RS) - 8);
   const bad = holeTarget(NaN, NaN, CFG, HOLE_DEFAULTS);
   assert.deepEqual(bad, { x: CFG.width / 2, y: CFG.height / 2 });
+});
+
+test('rigid Roche limit matches R*(2M/m)^(1/3)', () => {
+  const q = PLANET_DEFAULTS.massRatio;
+  assert.ok(Math.abs(rocheLimit(PLANET_DEFAULTS.radius, q) - 11 * Math.pow(2 / 0.03, 1 / 3)) < 1e-12);
+  assert.ok(rocheLimit(10, 0.02) > rocheLimit(10, 0.05));
+  assert.ok(rocheLimit(10, 0.02) === rocheLimit(20, 0.02) / 2);
+});
+
+test('tidal acceleration equals surface gravity exactly at the Roche limit', () => {
+  const m = holeMassFromRs(RS);
+  const q = 0.017;
+  const R = 9;
+  const dR = rocheLimit(R, q);
+  const aTide = tidalAcceleration(m, R, dR);
+  const gSurf = planetSurfaceGravity(m, q, R);
+  assert.ok(Math.abs(aTide / gSurf - 1) < 1e-12);
+});
+
+test('tidal ratio grows as d^-3 and equals (dR/d)^3', () => {
+  const m = holeMassFromRs(RS);
+  const q = 0.03;
+  const R = 11;
+  const dR = rocheLimit(R, q);
+  for (const d of [30, 55, 90, 160]) {
+    assert.ok(Math.abs(tidalRatio(m, q, R, d) - Math.pow(dR / d, 3)) < 1e-9);
+  }
+  assert.ok(Math.abs(tidalRatio(m, q, R, 2 * dR) / tidalRatio(m, q, R, dR) - 1 / 8) < 1e-9);
+});
+
+test('tidal debris kick scales as R*sqrt(M/d^3)', () => {
+  const m = holeMassFromRs(RS);
+  assert.ok(Math.abs(debrisKick(m, 11, 50) / debrisKick(m, 11, 100) - Math.pow(2, 1.5)) < 1e-12);
+  assert.ok(Math.abs(debrisKick(m, 22, 50) / debrisKick(m, 11, 50) - 2) < 1e-12);
+  assert.ok(Math.abs(debrisKick(4 * m, 11, 50) / debrisKick(m, 11, 50) - 2) < 1e-12);
+});
+
+test('planet disrupts inside the Roche limit and never recovers', () => {
+  const sim = makePlanet(PLANET_DEFAULTS, 7);
+  const dR = rocheLimit(PLANET_DEFAULTS.radius, PLANET_DEFAULTS.massRatio);
+  for (let i = 0; i < 240; i++) planetStep(sim, sim.x + dR * 2.5, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+  assert.equal(sim.state, 'intact');
+  assert.ok(sim.stretch < 0.35);
+  for (let i = 0; i < 60; i++) planetStep(sim, sim.x + dR * 0.9, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+  assert.equal(sim.state, 'disrupted');
+  for (let i = 0; i < 600; i++) planetStep(sim, sim.x + dR * 3, sim.y, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+  assert.notEqual(sim.state, 'intact');
+  assert.ok(sim.bodyScale === 0);
+});
+
+test('released debris falls inward and speeds up under 1/r^2 gravity', () => {
+  const sim = makePlanet(PLANET_DEFAULTS, 11);
+  const hx = 170, hy = 168;
+  sim.state = 'disrupted';
+  sim.shedAcc = 0;
+  sim.shedTime = 0;
+  sim.bodyScale = 1;
+  const before = Math.hypot(sim.x - hx, sim.y - hy);
+  for (let i = 0; i < 90; i++) planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+  assert.ok(sim.debris.length > 5);
+  const inward = sim.debris.filter((p) => Math.hypot(p.x - hx, p.y - hy) < before);
+  assert.ok(inward.length >= sim.debris.length * 0.6);
+  const fast = sim.debris.filter((p) => Math.hypot(p.vx, p.vy) > 0.05);
+  assert.ok(fast.length === sim.debris.length);
+});
+
+test('a plunging particle is captured inside the shadow and feeds the disk', () => {
+  const sim = makePlanet(PLANET_DEFAULTS, 3);
+  const hx = 170, hy = 168;
+  sim.state = 'disrupted';
+  sim.debris.push({ x: hx + 30, y: hy, vx: 0, vy: 0, age: 0, size: 1, tone: 0.5 });
+  let fed = 0;
+  for (let i = 0; i < 600 && sim.debris.length; i++) {
+    planetStep(sim, hx, hy, 1 / 60, HOLE_DEFAULTS, PLANET_DEFAULTS);
+    fed = Math.max(fed, sim.feed);
+  }
+  assert.equal(sim.debris.length, 0);
+  assert.ok(fed > 0);
+  assert.ok(isCaptured(hx + 5, hy, hx, hy, RS));
+  assert.ok(!isCaptured(hx + 40, hy, hx, hy, RS));
 });

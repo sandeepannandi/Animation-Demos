@@ -67,6 +67,7 @@ function drawSpace() {
 export default function Example({ onFeedback }: { onFeedback?: (event: "grab" | "release") => void }) {
   const [slow, setSlow] = useState(false);
   const [reduce, setReduce] = useState(false);
+  const [planet, setPlanet] = useState(false);
   const space = useMemo(() => drawSpace(), []);
   useEffect(() => () => space.dispose(), [space]);
   const chip = (on: boolean) => ({
@@ -79,7 +80,7 @@ export default function Example({ onFeedback }: { onFeedback?: (event: "grab" | 
   });
   return (
     <View style={{ alignItems: "center", gap: 10, paddingVertical: 14 }}>
-      <BlackHoleLens background={space} slowMotion={slow} reducedMotion={reduce} onFeedback={onFeedback} />
+      <BlackHoleLens background={space} slowMotion={slow} reducedMotion={reduce} planet={planet} onFeedback={onFeedback} />
       <View style={{ flexDirection: "row", gap: 8 }}>
         <Pressable accessibilityRole="switch" accessibilityState={{ checked: slow }} onPress={() => setSlow((v) => !v)} style={chip(slow)}>
           <Text style={{ fontSize: 12, color: slow ? "#fff" : "#315843", fontFamily: "Geist-Regular" }}>Slow motion: {slow ? "on" : "off"}</Text>
@@ -87,9 +88,12 @@ export default function Example({ onFeedback }: { onFeedback?: (event: "grab" | 
         <Pressable accessibilityRole="switch" accessibilityState={{ checked: reduce }} onPress={() => setReduce((v) => !v)} style={chip(reduce)}>
           <Text style={{ fontSize: 12, color: reduce ? "#fff" : "#315843", fontFamily: "Geist-Regular" }}>Reduce motion: {reduce ? "on" : "off"}</Text>
         </Pressable>
+        <Pressable accessibilityRole="switch" accessibilityState={{ checked: planet }} onPress={() => setPlanet((v) => !v)} style={chip(planet)}>
+          <Text style={{ fontSize: 12, color: planet ? "#fff" : "#315843", fontFamily: "Geist-Regular" }}>Planet: {planet ? "on" : "off"}</Text>
+        </Pressable>
       </View>
       <Text style={{ fontSize: 12, color: "#63705f", fontFamily: "Geist-Regular", textAlign: "center", paddingHorizontal: 16 }}>
-        Drag the black hole across the starfield. The disk spins with real relativistic beaming.
+        Drag the black hole across the starfield. Turn the planet on and drag the hole right up to it: tides stretch it at the Roche limit, then it shreds into a stream that spirals into the disk.
       </Text>
     </View>
   );
