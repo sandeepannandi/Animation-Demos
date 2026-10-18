@@ -253,3 +253,7 @@
 .miniPendulum i { left: 64px; top: 16px; transform: rotate(-40deg); }
 .miniPendulum b { left: 88px; top: 45px; transform: rotate(35deg); }
 .miniPendulum u { position: absolute; left: 62px; top: 71px; width: 10px; height: 10px; border-radius: 50%; background: #f6f1e4; box-shadow: 0 0 12px 5px rgba(255, 210, 122, 0.55), 16px -14px 0 -1px rgba(255, 150, 120, 0.45), 30px -28px 0 -3px rgba(255, 79, 139, 0.35), 40px -46px 0 -4px rgba(255, 79, 139, 0.2); }
+.miniBlackHole { position: relative; width: 130px; height: 110px; border-radius: 12px; background: #04060d; overflow: hidden; }
+.miniBlackHole i { position: absolute; left: 45px; top: 33px; width: 40px; height: 40px; border-radius: 50%; background: #000; box-shadow: 0 0 0 2px rgba(191, 216, 255, 0.5), 0 0 18px 6px rgba(140, 170, 255, 0.28); }
+.miniBlackHole b { position: absolute; left: 27px; top: 48px; width: 76px; height: 13px; border-radius: 50%; background: linear-gradient(90deg, #ffd9a0 0%, #ffb066 45%, #ff7a45 100%); box-shadow: 0 0 10px 2px rgba(255, 170, 90, 0.4); }
+.miniBlackHole u { position: absolute; left: 39px; top: 27px; width: 52px; height: 15px; border-radius: 50%; background: linear-gradient(90deg, #ffe4b8 0%, #ff9a5c 100%); opacity: 0.85; filter: blur(1px); }
