@@ -8,12 +8,16 @@ import {
 import {
   AlphaType,
   Canvas,
+  ClipOp,
   ColorType,
   FilterMode,
   MipmapMode,
+  PaintStyle,
   Rect,
   Skia,
   TileMode,
+  vec,
+  type SkCanvas,
   type SkImage,
   type SkPaint,
   type SkRuntimeEffect,
@@ -21,14 +25,19 @@ import {
 } from "@shopify/react-native-skia";
 import {
   HOLE_DEFAULTS,
+  PLANET_DEFAULTS,
+  clamp,
   holeTarget,
   iscoRadius,
   makeDiskNoise,
+  makePlanet,
+  planetStep,
   shadowRadius,
   springStep,
   type HoleConfig,
+  type PlanetSim,
 } from "./holeMath";
-import { HOLE_H, HOLE_W, HALO_BOTTOM, HALO_TOP, RING_STRENGTH, SPACE_BACKGROUND } from "./holeDesign";
+import { HOLE_H, HOLE_W, HALO_BOTTOM, HALO_TOP, PLANET_PALETTE, RING_STRENGTH, SPACE_BACKGROUND } from "./holeDesign";
 
 export type BlackHoleLensProps = {
   background: SkImage;
@@ -36,6 +45,7 @@ export type BlackHoleLensProps = {
   height?: number;
   slowMotion?: boolean;
   reducedMotion?: boolean;
+  planet?: boolean;
   onFeedback?: (event: "grab" | "release") => void;
   label?: string;
   style?: ViewStyle;
@@ -61,6 +71,7 @@ uniform float haloTopA;
 uniform float haloBottomH;
 uniform float haloBottomA;
 uniform float ringStrength;
+uniform float feed;
 
 half3 diskEmission(float rr, float ang, float atten) {
   float beta = sqrt(diskIn / (6.0 * rr));
@@ -81,7 +92,7 @@ half3 diskEmission(float rr, float ang, float atten) {
   half3 tint = temp > 0.55
     ? mix(half3(1.0, 0.85, 0.62), half3(0.82, 0.88, 1.0), half((temp - 0.55) / 0.45))
     : mix(half3(1.0, 0.42, 0.22), half3(1.0, 0.85, 0.62), half(temp / 0.55));
-  return tint * half(beam * tex * (0.2 + 0.9 * temp) * atten);
+  return tint * half(beam * tex * (0.2 + 0.9 * temp) * atten) * half(1.0 + 1.4 * feed);
 }
 
 half4 main(float2 p) {
@@ -143,12 +154,74 @@ function makeNoiseShader(): SkShader | null {
   return shader;
 }
 
+function drawPlanetSkia(canvas: SkCanvas, sim: PlanetSim, hx: number, hy: number, scale: number) {
+  const paint = Skia.Paint();
+  paint.setAntiAlias(true);
+  const px = sim.x * scale;
+  const py = sim.y * scale;
+  const ang = (Math.atan2(hy - sim.y, hx - sim.x) * 180) / Math.PI;
+  if (sim.bodyScale > 0.001) {
+    const r = PLANET_DEFAULTS.radius * scale * sim.bodyScale;
+    const sx = 1 + sim.stretch * sim.bodyScale;
+    const sy = 1 / (1 + sim.stretch * 0.7 * sim.bodyScale);
+    const [lr, lg, lb] = PLANET_PALETTE.light;
+    const [mr, mg, mb] = PLANET_PALETTE.mid;
+    const [dr, dg, db] = PLANET_PALETTE.dark;
+    const [br, bg, bb] = PLANET_PALETTE.band;
+    const [gr, gg, gb] = PLANET_PALETTE.glow;
+    canvas.save();
+    canvas.translate(px, py);
+    canvas.rotate(ang, 0, 0);
+    canvas.scale(sx, sy);
+    paint.setShader(
+      Skia.Shader.MakeRadialGradient(
+        vec(-r * 0.35, -r * 0.35),
+        r * 1.6,
+        [Skia.Color(`rgb(${lr},${lg},${lb})`), Skia.Color(`rgb(${mr},${mg},${mb})`), Skia.Color(`rgb(${dr},${dg},${db})`)],
+        [0, 0.55, 1],
+        TileMode.Clamp,
+      ),
+    );
+    canvas.drawCircle(0, 0, r, paint);
+    paint.setShader(null);
+    canvas.save();
+    const clip = Skia.Path.Make();
+    clip.addCircle(0, 0, r);
+    canvas.clipPath(clip, ClipOp.Intersect, true);
+    paint.setColor(Skia.Color(`rgba(${br},${bg},${bb},0.55)`));
+    canvas.drawOval(Skia.XYWHRect(-r * 1.2, -r * 0.44, r * 2.4, r * 0.32), paint);
+    canvas.drawOval(Skia.XYWHRect(-r * 1.2, r * 0.04, r * 2.4, r * 0.4), paint);
+    canvas.restore();
+    if (r > 1.4) {
+      paint.setStyle(PaintStyle.Stroke);
+      paint.setStrokeWidth(1.2);
+      paint.setColor(Skia.Color(`rgba(${gr},${gg},${gb},0.4)`));
+      canvas.drawCircle(0, 0, r - 0.6, paint);
+      paint.setStyle(PaintStyle.Fill);
+    }
+    canvas.restore();
+  }
+  const [lr, lg, lb] = PLANET_PALETTE.light;
+  const [mr, mg, mb] = PLANET_PALETTE.mid;
+  for (const d of sim.debris) {
+    const fade = clamp(1 - d.age / PLANET_DEFAULTS.debrisLife, 0, 1);
+    if (fade <= 0) continue;
+    const rr = Math.round(mr + (lr - mr) * d.tone);
+    const gg = Math.round(mg + (lg - mg) * d.tone);
+    const bb = Math.round(mb + (lb - mb) * d.tone);
+    paint.setColor(Skia.Color(`rgba(${rr},${gg},${bb},${(fade * 0.95).toFixed(3)})`));
+    canvas.drawCircle(d.x * scale, d.y * scale, Math.max(0.5, d.size * scale), paint);
+  }
+  paint.dispose();
+}
+
 export function BlackHoleLens({
   background,
   width = HOLE_W,
   height = HOLE_H,
   slowMotion = false,
   reducedMotion,
+  planet = false,
   onFeedback,
   label = "Black hole lens",
   style,
@@ -183,8 +256,12 @@ export function BlackHoleLens({
   );
 
   const [paint, setPaint] = useState<SkPaint | null>(null);
-  const latest = useRef({ slowMotion, reduce, onFeedback });
-  latest.current = { slowMotion, reduce, onFeedback };
+  const latest = useRef({ slowMotion, reduce, planet, onFeedback });
+  latest.current = { slowMotion, reduce, planet, onFeedback };
+  const planetSim = useRef<PlanetSim | null>(null);
+  const scene = useRef<{ img: SkImage | null; shader: SkShader | null }>({ img: null, shader: null });
+  const sceneSig = useRef("");
+  const sceneDirty = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -260,6 +337,48 @@ export function BlackHoleLens({
         s.vy = b.vel;
         s.time += dt * (latest.current.slowMotion ? 0.25 : 1);
       }
+      let feed = 0;
+      let srcShader = bgShader;
+      if (latest.current.planet) {
+        if (!planetSim.current) {
+          planetSim.current = makePlanet(PLANET_DEFAULTS, HOLE_DEFAULTS.seed ^ 61);
+          sceneDirty.current = true;
+        }
+        const ps = planetSim.current;
+        planetStep(ps, s.cx, s.cy, dt, HOLE_DEFAULTS, PLANET_DEFAULTS);
+        feed = ps.feed;
+        const sig = `${ps.state}|${ps.bodyScale.toFixed(3)}|${ps.stretch.toFixed(3)}|${ps.debris.length}`;
+        if (ps.debris.length > 0 || sig !== sceneSig.current) sceneDirty.current = true;
+        sceneSig.current = sig;
+        if (sceneDirty.current) {
+          sceneDirty.current = false;
+          const scale = background.width() / cfg.width;
+          const surface = Skia.Surface.MakeOffscreen(background.width(), background.height());
+          if (surface) {
+            const c = surface.getCanvas();
+            c.drawImage(background, 0, 0);
+            drawPlanetSkia(c, ps, s.cx, s.cy, scale);
+            surface.flush();
+            const snap = surface.makeImageSnapshot();
+            const copy = snap.makeNonTextureImage();
+            snap.dispose();
+            surface.dispose();
+            if (copy) {
+              const sh = copy.makeShaderOptions(TileMode.Clamp, TileMode.Clamp, FilterMode.Linear, MipmapMode.None);
+              scene.current.shader?.dispose();
+              scene.current.img?.dispose();
+              scene.current = { img: copy, shader: sh };
+            }
+          }
+        }
+        srcShader = scene.current.shader ?? bgShader;
+      } else if (planetSim.current) {
+        planetSim.current = null;
+        sceneSig.current = "";
+        scene.current.shader?.dispose();
+        scene.current.img?.dispose();
+        scene.current = { img: null, shader: null };
+      }
       const diskIn = iscoRadius(cfg.rs);
       const shader = effect.makeShaderWithChildren(
         [
@@ -283,8 +402,9 @@ export function BlackHoleLens({
           HALO_BOTTOM.height,
           HALO_BOTTOM.atten,
           RING_STRENGTH,
+          feed,
         ],
-        [bgShader, noiseShader],
+        [srcShader, noiseShader],
       );
       const next = Skia.Paint();
       next.setShader(shader);
@@ -301,6 +421,11 @@ export function BlackHoleLens({
       cancelAnimationFrame(raf);
       prevPaint?.dispose();
       prevShader?.dispose();
+      planetSim.current = null;
+      sceneSig.current = "";
+      scene.current.shader?.dispose();
+      scene.current.img?.dispose();
+      scene.current = { img: null, shader: null };
     };
   }, [effect, bgShader, noiseShader, cfg, background]);
 
