@@ -13,7 +13,7 @@ import {
   type RevealBrush,
   type RevealPointer,
 } from "./revealMath";
-import { REVEAL_BACKGROUND, REVEAL_H, REVEAL_W } from "./revealDesign";
+import { REVEAL_BACKGROUND, REVEAL_H, REVEAL_STAMPS, REVEAL_W } from "./revealDesign";
 import { REVEAL_SHADER } from "./revealShader";
 
 export type CodeRevealProps = {
@@ -152,11 +152,10 @@ export function CodeReveal({
 
   const uniforms = useDerivedValue(() => {
     frame.value;
-    return {
-      size: [REVEAL_W, REVEAL_H],
-      mode: colorM.value ? 1 : 0,
-      stamps: brush.value.data,
-    };
+    const d = brush.value.data;
+    const u: Record<string, number | number[]> = { size: [REVEAL_W, REVEAL_H], mode: colorM.value ? 1 : 0 };
+    for (let i = 0; i < REVEAL_STAMPS; i++) u["s" + i] = [d[i * 4], d[i * 4 + 1], d[i * 4 + 2], d[i * 4 + 3]];
+    return u;
   });
 
   return (

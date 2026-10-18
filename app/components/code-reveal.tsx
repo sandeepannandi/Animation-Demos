@@ -74,8 +74,7 @@ export function CodeRevealPreview() {
     gl.uniform1f(u("uHeight"), canvas.height);
     gl.uniform2f(u("size"), REVEAL_W, REVEAL_H);
     const uMode = u("mode");
-    const uStamps = u("stamps");
-    const buf = new Float32Array(REVEAL_STAMPS * 4);
+    const uStamps = Array.from({ length: REVEAL_STAMPS }, (_, i) => u("s" + i));
 
     const brush = createBrush(REVEAL_DEFAULTS);
     let wasReduced = false;
@@ -85,9 +84,10 @@ export function CodeRevealPreview() {
     let lastColor = latest.current.color;
 
     const draw = () => {
-      for (let i = 0; i < buf.length; i++) buf[i] = brush.data[i];
       gl.uniform1f(uMode, latest.current.color ? 1 : 0);
-      gl.uniform4fv(uStamps, buf);
+      for (let i = 0; i < REVEAL_STAMPS; i++) {
+        gl.uniform4f(uStamps[i], brush.data[i * 4], brush.data[i * 4 + 1], brush.data[i * 4 + 2], brush.data[i * 4 + 3]);
+      }
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     };
     const tick = (now: number) => {
