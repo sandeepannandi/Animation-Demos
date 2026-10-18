@@ -140,6 +140,7 @@ export function ClothBanner({
     [width, height, cols, rows],
   );
 
+  const opts = useMemo(() => CLOTH_DEFAULTS, []);
   const sim = useSharedValue<ClothState>(createCloth(cfg));
   const pointer = useSharedValue<ClothPointer>({ x: 0, y: 0, active: 0 });
   const slowM = useSharedValue(false);
@@ -202,12 +203,12 @@ export function ClothBanner({
     const s = sim.value;
     if (reduceM.value) return;
     if (pointer.value.active && s.grabbed < 0) {
-      s.grabbed = pickParticle(s, cfg, pointer.value.x, pointer.value.y, CLOTH_DEFAULTS.grabRadius + 14);
+      s.grabbed = pickParticle(s, cfg, pointer.value.x, pointer.value.y, opts.grabRadius + 14);
       if (s.grabbed >= 0) s.grabZ = s.pos[s.grabbed * 3 + 2];
     }
     if (!pointer.value.active && s.grabbed >= 0) s.grabbed = -1;
     const dt = Math.min(48, info.timeSincePreviousFrame ?? 16.7) / 1000;
-    stepClothFixed(s, cfg, dt * (slowM.value ? 0.25 : 1), pointer.value);
+    stepClothFixed(s, cfg, dt * (slowM.value ? 0.25 : 1), pointer.value, opts);
   });
 
   const indices = useMemo(() => clothIndices(cfg), [cfg]);
@@ -216,7 +217,7 @@ export function ClothBanner({
   const mesh = useDerivedValue(() => {
     const xy: { x: number; y: number }[] = [];
     const shade: number[] = [];
-    computeMesh(sim.value, cfg, xy, shade);
+    computeMesh(sim.value, cfg, xy, shade, opts);
     return { xy, shade };
   });
   const vertices = useDerivedValue(() => mesh.value.xy);

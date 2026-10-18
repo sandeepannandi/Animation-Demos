@@ -139,7 +139,7 @@ export function ClothBannerPreview() {
     const draw = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, CANVAS_W, CANVAS_H);
-      computeMesh(sim, CFG, xy, shade);
+      computeMesh(sim, CFG, xy, shade, CLOTH_DEFAULTS);
       for (let t = 0; t < indices.length; t += 3) drawTri(indices[t], indices[t + 1], indices[t + 2]);
       // The two pins the banner hangs from.
       for (const px of [CFG.originX, CFG.originX + BANNER_W]) {
@@ -165,7 +165,7 @@ export function ClothBannerPreview() {
           if (sim.grabbed >= 0) sim.grabZ = sim.pos[sim.grabbed * 3 + 2];
         }
         if (!pointer.active && sim.grabbed >= 0) sim.grabbed = -1;
-        stepClothFixed(sim, CFG, dt * (latest.current.slow ? 0.25 : 1), pointer);
+        stepClothFixed(sim, CFG, dt * (latest.current.slow ? 0.25 : 1), pointer, CLOTH_DEFAULTS);
       }
       draw();
       raf = requestAnimationFrame(tick);

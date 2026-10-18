@@ -108,7 +108,7 @@ test('a released cloth settles under quiet air', () => {
 test('computeMesh shades a flat cloth fully lit and keeps sizes', () => {
   const s = createCloth(CFG);
   const xy = [], shade = [];
-  computeMesh(s, CFG, xy, shade);
+  computeMesh(s, CFG, xy, shade, CLOTH_DEFAULTS);
   const n = particleCount(CFG);
   assert.equal(xy.length, n);
   assert.equal(shade.length, n);
@@ -121,7 +121,7 @@ test('computeMesh shades a flat cloth fully lit and keeps sizes', () => {
   }
   // After wind, folds change the shade field.
   for (let i = 0; i < 180; i++) stepClothFixed(s, CFG, 1 / 60, NO_POINTER, CLOTH_DEFAULTS);
-  computeMesh(s, CFG, xy, shade);
+  computeMesh(s, CFG, xy, shade, CLOTH_DEFAULTS);
   let min = 1, max = 0;
   for (const v of shade) { min = Math.min(min, v); max = Math.max(max, v); }
   assert.ok(max - min > 0.02, `fold shade spread ${max - min}`);

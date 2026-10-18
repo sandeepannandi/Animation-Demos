@@ -57,6 +57,9 @@ export const CLOTH_DEFAULTS = {
 
 export type ClothOptions = typeof CLOTH_DEFAULTS;
 
+// Worklets pass `opts` explicitly: a default parameter that references a module
+// const is not captured into the UI runtime and crashes there.
+
 export function particleCount(cfg: ClothConfig): number {
   'worklet';
   return cfg.cols * cfg.rows;
@@ -138,7 +141,7 @@ export function stepCloth(
   cfg: ClothConfig,
   dt: number,
   pointer: ClothPointer,
-  opts: ClothOptions = CLOTH_DEFAULTS,
+  opts: ClothOptions,
 ): void {
   'worklet';
   state.time += dt;
@@ -197,7 +200,7 @@ export function stepClothFixed(
   cfg: ClothConfig,
   frameDt: number,
   pointer: ClothPointer,
-  opts: ClothOptions = CLOTH_DEFAULTS,
+  opts: ClothOptions,
 ): void {
   'worklet';
   state.acc += Math.min(frameDt, 0.1); // clamp huge gaps (tab was hidden)
@@ -249,7 +252,7 @@ export function computeMesh(
   cfg: ClothConfig,
   outXY: { x: number; y: number }[],
   outShade: number[],
-  opts: ClothOptions = CLOTH_DEFAULTS,
+  opts: ClothOptions,
 ): void {
   'worklet';
   const { pos } = state;
