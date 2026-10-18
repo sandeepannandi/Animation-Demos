@@ -62,6 +62,7 @@ jobs:
             bash scripts/android-pendulum.sh
             bash scripts/android-blackhole.sh
             bash scripts/android-coin.sh
+            bash scripts/android-reveal.sh
             bash scripts/android-gestures.sh
             bash scripts/android-core.sh
             bash scripts/android-slowmotion.sh
