@@ -23,9 +23,10 @@ and the patch fades back into the picture.
   scales with how strongly it is revealed, so the edge thins out into sparse
   dots. While the finger is held, the patch under it stays on.
 - Decay is exponential per stamp with a time constant of 0.7 s, applied with
-  the real frame time, so it looks the same at any frame rate. The unit tests
-  check the decay rate, that splitting time into steps gives the same result,
-  the radius bounds and the ring limits.
+  the frame time capped at 48 ms per frame. It is independent of frame rate
+  down to about 20 fps and slows below that, as on a software-rendered
+  emulator. The unit tests check the decay rate, that splitting time into
+  steps gives the same result, the radius bounds and the ring limits.
 - Color glyphs mode tints each glyph with the picture's color under it.
   Slow motion makes the fade four times slower.
 - Reduce Motion shows the picture with one fixed patch revealed and no
@@ -52,4 +53,4 @@ together and keep the LICENSE file. `Example.tsx` is optional.
 | `onFeedback` | - | `'touch'` / `'release'`. |
 | `label` | accessibility label | |
 
-Not yet checked on a physical device.
+Checked on an Android emulator only. Color glyphs, slow motion and a physical device are untested.
