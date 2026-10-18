@@ -1,0 +1,25 @@
+{
+  "slug": "expanding-card",
+  "title": "Expanding Card",
+  "category": "interaction",
+  "files": [
+    "ExpandingCard.tsx",
+    "expandingLogic.ts",
+    "Example.tsx",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": [
+    "react",
+    "react-native"
+  ],
+  "optionalDependencies": [
+    "expo-haptics (demo adapter only)"
+  ],
+  "tested": {
+    "expo": "57.0.27",
+    "reactNative": "0.86.3",
+    "web": "0.21.2"
+  },
+  "nativeDeviceVerified": true
+}

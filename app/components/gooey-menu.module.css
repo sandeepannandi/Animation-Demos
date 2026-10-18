@@ -1,0 +1,14 @@
+.root { padding: 20px 0 24px; background: #f4f6ef; overflow: hidden; border-top: 1px solid #dde5d7; display: flex; flex-direction: column; align-items: center; }
+.status { font-size: 13px; color: #31513b; margin-bottom: 12px; min-height: 18px; }
+.stage { position: relative; outline-offset: 4px; }
+.svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+.item, .main { position: absolute; display: grid; place-items: center; border-radius: 50%; color: #f4f6ef; cursor: pointer; background: transparent; }
+.item { font-size: 22px; }
+.item:disabled { cursor: default; }
+.item:focus-visible, .main:focus-visible { outline: 2px solid #204835; outline-offset: 3px; }
+.plus { position: relative; width: 22px; height: 22px; display: block; }
+.plus::before, .plus::after { content: ""; position: absolute; left: 50%; top: 50%; background: #f4f6ef; border-radius: 2px; }
+.plus::before { width: 22px; height: 2.5px; margin: -1.25px 0 0 -11px; }
+.plus::after { width: 2.5px; height: 22px; margin: -11px 0 0 -1.25px; }
+.note { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; align-items: center; margin: 14px 16px 0; font-size: 11px; color: #526b58; }
+.note button { padding: 12px; min-height: 44px; border-radius: 14px; background: #e6edde; }

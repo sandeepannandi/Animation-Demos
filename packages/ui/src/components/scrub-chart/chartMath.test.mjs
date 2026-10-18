@@ -1,0 +1,32 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import ts from 'typescript';
+const js = ts.transpileModule(readFileSync(new URL('./chartMath.ts', import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } }).outputText;
+const m = await import('data:text/javascript;base64,' + Buffer.from(js).toString('base64'));
+const g = m.chartGeometry(m.DEMO_DATA, 300, 220);
+test('empty and invalid readings do not create a path', () => { const a = m.chartGeometry([{ label: 'bad', value: NaN }], 300, 220); assert.equal(a.line, ''); assert.equal(a.area, ''); assert.equal(m.nearestIndex(0, a.points), -1); });
+test('one reading has a centred point and no fake area', () => { const a = m.chartGeometry([{ label: 'only', value: 5 }], 300, 220); assert.equal(a.points[0].x, 150); assert.equal(a.area, ''); assert.equal(m.curveY(500, a.points, a.segments), a.points[0].y); });
+test('constant and negative data have finite geometry', () => { for (const v of [0, -20, 20]) { const a = m.chartGeometry([{label:'a',value:v},{label:'b',value:v}], 300, 220); assert.equal(a.points[0].y, a.points[1].y); assert.ok(!/NaN|Infinity/.test(a.line)); } });
+test('categorical spacing and bounds are exact', () => { assert.equal(g.points[0].x, 18); assert.equal(g.points.at(-1).x, 282); for (const p of g.points) assert.ok(p.y >= g.top && p.y <= g.bottom); });
+test('curve hits every reading exactly', () => { for (const p of g.points) assert.ok(Math.abs(m.curveY(p.x, g.points, g.segments) - p.y) < 1e-8); });
+test('curve never overshoots segment values', () => { for (const s of g.segments) for (let i=0;i<=100;i++) { const y=m.curveY(s.a.x+(s.b.x-s.a.x)*i/100,g.points,g.segments); assert.ok(y>=Math.min(s.a.y,s.b.y)-1e-8 && y<=Math.max(s.a.y,s.b.y)+1e-8); } });
+test('nearest sample snaps and clamps at both ends', () => { assert.equal(m.nearestIndex(-50,g.points),0); assert.equal(m.nearestIndex(400,g.points),6); assert.equal(m.nearestIndex(g.points[3].x+4,g.points),3); });
+test('curve clamps x outside the plot', () => { assert.equal(m.curveY(-100,g.points,g.segments),g.points[0].y); assert.equal(m.curveY(500,g.points,g.segments),g.points.at(-1).y); });
+test('bubble never overflows the chart', () => { assert.equal(m.bubbleLeft(18,300),0); assert.equal(m.bubbleLeft(282,300),204); assert.equal(m.bubbleLeft(150,300),102); });
+test('area closes only down to the plot baseline', () => { assert.ok(g.area.endsWith(`L 282 190 L 18 190 Z`)); assert.ok(g.line.includes(' C ')); });
+
+test('reveal phase is bounded, finite and complete at either end', () => {
+  for (const [start,end] of [[0,.72],[.16,.86],[.62,1]]) {
+    assert.equal(m.revealPhase(-1,start,end),0); assert.equal(m.revealPhase(2,start,end),1);
+    assert.equal(m.revealPhase(start,start,end),0); assert.equal(m.revealPhase(end,start,end),1);
+    assert.equal(m.revealPhase(NaN,start,end),0);
+    let prev=0; for(let i=0;i<=100;i++){const n=m.revealPhase(i/100,start,end);assert.ok(n>=prev&&n<=1);prev=n;}
+  }
+});
+test('staged reveal leaves line ahead of area and cursor', () => {
+  for(let i=0;i<=100;i++){const t=i/100;assert.ok(m.revealPhase(t,0,.72)>=m.revealPhase(t,.16,.86));assert.ok(m.revealPhase(t,.16,.86)>=m.revealPhase(t,.62,1));}
+});
+test('spring overshoot cannot move the displayed point or bubble outside bounds', () => {
+  for(const x of [-1000,0,18,150,282,300,1000]){const cx=m.clamp(x,g.left,g.right);assert.ok(cx>=g.left&&cx<=g.right);assert.ok(Number.isFinite(m.curveY(cx,g.points,g.segments)));assert.ok(m.bubbleLeft(cx,300)>=0&&m.bubbleLeft(cx,300)<=204);}
+});

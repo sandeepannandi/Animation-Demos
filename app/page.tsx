@@ -2,16 +2,74 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
+const components = {
+  banner: { dir: "packages/ui/src/components/cloth-banner", files: ["ClothBanner.tsx", "clothMath.ts", "bannerDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
+  flap: { dir: "packages/ui/src/components/split-flap-board", files: ["SplitFlapBoard.tsx", "splitFlapMath.ts", "flapWords.ts", "Example.tsx", "README.md", "LICENSE"] },
+  mosaic: { dir: "packages/ui/src/components/mosaic-gallery", files: ["MosaicGallery.tsx", "mosaicMath.ts", "mosaic-data.ts", "Example.tsx", "README.md", "LICENSE"] },
+  bubbles: { dir: "packages/ui/src/components/bubble-picker", files: ["BubblePicker.tsx", "physicsMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  transitions: { dir: "packages/ui/src/components/gl-transitions", files: ["GLTransitionPager.tsx", "transitionMath.ts", "transitionShaders.ts", "scenes.ts", "Example.tsx", "README.md", "LICENSE"] },
+  fold: { dir: "packages/ui/src/components/folded-pass", files: ["FoldedPass.tsx", "foldMath.ts", "passDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
+  genie: { dir: "packages/ui/src/components/genie-dismiss", files: ["GenieDismiss.tsx", "genieMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  blossom: { dir: "packages/ui/src/components/blossom-qr", files: ["BlossomQR.tsx", "blossomMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  morph: { dir: "packages/ui/src/components/text-morph", files: ["TextMorph.tsx", "textMorphMath.ts", "scene.ts", "lighthouseText.ts", "Example.tsx", "README.md", "LICENSE"] },
+  light: { dir: "packages/ui/src/components/light-painting", files: ["LightPainting.tsx", "lightMath.ts", "paintings.ts", "Example.tsx", "README.md", "LICENSE"] },
+  orbit: { dir: "packages/ui/src/components/orbit-qr", files: ["OrbitQR.tsx", "orbitMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  curl: { dir: "packages/ui/src/components/page-curl", files: ["PageCurl.tsx", "curlMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  pinch: { dir: "packages/ui/src/components/pinch-gallery", files: ["PinchGallery.tsx", "pinchLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
+  chart: { dir: "packages/ui/src/components/scrub-chart", files: ["ScrubChart.tsx", "chartMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  lens: { dir: "packages/ui/src/components/glass-lens", files: ["GlassLens.tsx", "lensMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  ripple: { dir: "packages/ui/src/components/ripple-reveal", files: ["RippleReveal.tsx", "rippleMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  gooey: { dir: "packages/ui/src/components/gooey-menu", files: ["GooeyMenu.tsx", "gooeyMath.ts", "Example.tsx", "README.md", "LICENSE"] },
+  carousel: { dir: "packages/ui/src/components/stacked-carousel", files: ["StackedCarousel.tsx", "carouselLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
+  sort: { dir: "packages/ui/src/components/drag-to-sort", files: ["DragToSort.tsx", "sortLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
+  glass: { dir: "packages/ui/src/components/liquid-tabs", files: ["LiquidTabs.tsx", "README.md", "LICENSE"] },
+  expand: { dir: "packages/ui/src/components/expanding-card", files: ["ExpandingCard.tsx", "expandingLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
+  swipe: { dir: "packages/ui/src/components/swipe-row", files: ["SwipeRow.tsx", "swipeLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
+  toast: { dir: "packages/ui/src/components/toast-stack", files: ["ToastStack.tsx", "toastLogic.ts", "Example.tsx", "README.md", "LICENSE"] },
+  rail: {
+    dir: "packages/ui/src/components/preview-rail",
+    files: ["PreviewRail.tsx", "selection.ts", "Example.tsx", "README.md", "LICENSE"],
+  },
+  capsule: {
+    dir: "packages/ui/src/components/morph-capsule",
+    files: ["MorphCapsule.tsx", "morphMath.ts", "Example.tsx", "README.md", "LICENSE"],
+  },
+} as const;
+
+function read(dir: string, files: readonly string[]) {
+  return files.map((file) => {
+    const name = `${dir}/${file}`;
+    return { name, code: readFileSync(join(process.cwd(), name), "utf8") };
+  });
+}
+
 export default function Home() {
-  const names = [
-    "app/components/preview-rail.tsx",
-    "lib/ease.ts",
-    "lib/hooks/use-hover-capable.ts",
-    "lib/utils.ts",
-  ];
-  const sources = names.map((name) => ({
-    name,
-    code: readFileSync(join(process.cwd(), name), "utf8"),
-  }));
+  const sources = {
+    banner: read(components.banner.dir, components.banner.files),
+    flap: read(components.flap.dir, components.flap.files),
+    mosaic: read(components.mosaic.dir, components.mosaic.files),
+    bubbles: read(components.bubbles.dir, components.bubbles.files),
+    transitions: read(components.transitions.dir, components.transitions.files),
+    fold: read(components.fold.dir, components.fold.files),
+    genie: read(components.genie.dir, components.genie.files),
+    orbit: read(components.orbit.dir, components.orbit.files),
+    blossom: read(components.blossom.dir, components.blossom.files),
+    morph: read(components.morph.dir, components.morph.files),
+    light: read(components.light.dir, components.light.files),
+    curl: read(components.curl.dir, components.curl.files),
+    pinch: read(components.pinch.dir, components.pinch.files),
+    chart: read(components.chart.dir, components.chart.files),
+    lens: read(components.lens.dir, components.lens.files),
+    ripple: read(components.ripple.dir, components.ripple.files),
+    gooey: read(components.gooey.dir, components.gooey.files),
+    carousel: read(components.carousel.dir, components.carousel.files),
+    sort: read(components.sort.dir, components.sort.files),
+    glass: read(components.glass.dir, components.glass.files),
+    expand: read(components.expand.dir, components.expand.files),
+    swipe: read(components.swipe.dir, components.swipe.files),
+    toast: read(components.toast.dir, components.toast.files),
+    rail: read(components.rail.dir, components.rail.files),
+    capsule: read(components.capsule.dir, components.capsule.files),
+  };
   return <NativeletSite sources={sources} />;
 }

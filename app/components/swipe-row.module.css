@@ -1,0 +1,25 @@
+.stage { margin: 14px 28px 0; }
+.hint { color: #61705a; font-size: 12px; line-height: 1.7; margin: 14px 0; }
+.list { border-radius: 22px; border: 1px solid #d5e1d2; background: #fff; overflow: hidden; min-height: 120px; }
+.row { position: relative; overflow: hidden; border-bottom: 1px solid #e3ebdf; }
+.row:last-child { border-bottom: 0; }
+.content { position: relative; background: #fff; touch-action: pan-y; cursor: grab; user-select: none; -webkit-user-select: none; outline-offset: -3px; }
+.content.dragging { cursor: grabbing; }
+.layer { position: absolute; top: 0; bottom: 0; display: flex; overflow: hidden; }
+.leading { left: 0; }
+.trailing { right: 0; }
+.action { flex: 1 1 0; min-width: 0; min-height: 44px; border: 0; color: #fff; font-size: 12px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 0 4px; white-space: nowrap; overflow: hidden; }
+.action span:first-child { font-size: 20px; line-height: 1; }
+.strip { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; color: #fff; font-size: 14px; font-weight: 600; }
+.strip button { min-height: 44px; min-width: 44px; background: transparent; border: 0; color: #fff; font-size: 14px; font-weight: 700; text-decoration: underline; }
+.body { padding: 14px 20px; display: flex; flex-direction: column; gap: 3px; }
+.head { display: flex; justify-content: space-between; }
+.head strong { font-size: 15px; color: #193f30; }
+.head span { font-size: 12px; color: #6b7c68; }
+.subject { font-size: 14px; color: #2c4a3a; }
+.preview { font-size: 13px; color: #61705a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.empty { padding: 28px; text-align: center; color: #61705a; font-size: 13px; }
+.log { font-size: 12px; color: #486045; margin: 12px 0; min-height: 18px; }
+.toolbar { display: flex; gap: 8px; }
+.toolbar button { background: #e6edde; border: 1px solid #d5e1d2; color: #245541; border-radius: 14px; padding: 10px 13px; min-height: 44px; font-size: 12px; }
+@media (max-width: 760px) { .stage { margin: 12px 14px 0; } }

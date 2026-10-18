@@ -1,0 +1,25 @@
+{
+  "slug": "swipe-row",
+  "title": "Swipe Row",
+  "category": "interaction",
+  "files": [
+    "SwipeRow.tsx",
+    "swipeLogic.ts",
+    "Example.tsx",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": [
+    "react",
+    "react-native"
+  ],
+  "optionalDependencies": [
+    "expo-haptics (demo adapter only)"
+  ],
+  "tested": {
+    "expo": "57.0.27",
+    "reactNative": "0.86.3",
+    "web": "0.21.2"
+  },
+  "nativeDeviceVerified": true
+}

@@ -151,9 +151,6 @@
 }
 .heroVisual {
   height: 552px;
-  background: #eaf0df;
-  border: 1px solid #dbe4cf;
-  border-radius: 28px;
   position: relative;
   display: flex;
   justify-content: center;
@@ -194,59 +191,11 @@
   letter-spacing: 1.2px;
   color: #677758;
 }
-.floatingNote {
-  position: absolute;
-  right: 17px;
-  top: 78px;
-  z-index: 2;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  background: #ffffffeb;
-  border: 1px solid #e0e6d7;
-  padding: 10px;
-  border-radius: 10px;
-  font-size: 10px;
-  box-shadow: 0 8px 20px #30411c0a;
-}
-.phone {
-  width: 258px;
-  border: 5px solid #25382c;
-  background: #fcfdf8;
-  border-radius: 38px;
-  box-shadow: 0 28px 55px #25382c26;
-  position: relative;
-  transform: rotate(-4deg);
-  padding: 10px 0 12px;
-}
-.phoneTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 0 20px;
-  font-size: 10px;
-  font-weight: 650;
-  height: 17px;
-}
 .island {
   background: #25382c;
   width: 64px;
   height: 18px;
   border-radius: 12px;
-}
-.phoneContent {
-  padding: 24px 17px 8px;
-}
-.phoneTitle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 19px;
-  line-height: 1.3;
-  letter-spacing: -0.5px;
-}
-.phoneTitle strong {
-  font-weight: 550;
 }
 .avatar {
   width: 31px;
@@ -257,26 +206,6 @@
   place-items: center;
   font-size: 17px;
   font-weight: 550;
-}
-.phoneTabs {
-  display: flex;
-  background: #eff2e9;
-  padding: 4px;
-  border-radius: 10px;
-  margin: 20px 0 14px;
-}
-.phoneTabs button {
-  position: relative;
-  flex: 1;
-  min-height: 32px;
-  border: 0;
-  background: none;
-  font-size: 10px;
-  border-radius: 7px;
-}
-.phoneTabs button > span:last-child {
-  position: relative;
-  z-index: 1;
 }
 .tabPill {
   position: absolute;
@@ -330,20 +259,11 @@
   transform: rotate(270deg);
   background: #4d7937;
 }
-.phoneCard {
-  padding: 16px 0 12px;
-}
 .smallLabel {
   font-size: 8px;
   letter-spacing: 1px;
   font-weight: 600;
   color: #63725a;
-}
-.phoneCard h3 {
-  font-size: 15px;
-  font-weight: 550;
-  margin: 6px 0 12px;
-  letter-spacing: -0.4px;
 }
 .track {
   display: flex;
@@ -374,22 +294,6 @@
   background: #789e49;
   height: 100%;
   border-radius: 3px;
-}
-.phoneBottom {
-  border-top: 1px solid #e6eadd;
-  padding-top: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 11px;
-  line-height: 1.8;
-}
-.homeIndicator {
-  width: 70px;
-  height: 3px;
-  background: #263b2a;
-  border-radius: 3px;
-  margin: 4px auto;
 }
 .visualCaption {
   position: absolute;
@@ -443,8 +347,7 @@
 .sectionHeading .eyebrow {
   margin-bottom: 15px;
 }
-.sectionHeading h2,
-.direction h2 {
+.sectionHeading h2{
   font-size: 39px;
   line-height: 1.14;
   font-weight: 500;
@@ -506,9 +409,24 @@
   align-items: center;
   min-height: 38px;
 }
+.viewTabs button {
+  position: relative;
+}
 .viewTabs button[aria-pressed="true"] {
-  background: #163e32;
   color: white;
+}
+.viewPill {
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  background: #163e32;
+}
+.toggleLabel {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
 }
 .demo {
   display: grid;
@@ -563,9 +481,17 @@
   font-size: 11px;
   min-height: 38px;
 }
+.demoButtons button {
+  position: relative;
+}
 .demoButtons button[aria-pressed="true"] {
-  background: #e0efca;
   border-color: #b8d299;
+}
+.detailPill {
+  position: absolute;
+  inset: -1px;
+  border-radius: 20px;
+  background: #e0efca;
 }
 .detailCard {
   display: flex;
@@ -647,6 +573,16 @@
   align-items: center;
   gap: 5px;
 }
+/* Keep code scrollable without drawing nested scrollbar chrome. */
+.quickstart pre,
+.sourcePanel pre {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.quickstart pre::-webkit-scrollbar,
+.sourcePanel pre::-webkit-scrollbar {
+  display: none;
+}
 .sourcePanel {
   padding: 20px 28px;
 }
@@ -692,73 +628,6 @@
   font-size: 11px;
   line-height: 1.7;
 }
-.direction {
-  margin: 0 5.5%;
-  background: #edf2e5;
-  border: 1px solid #dce5d1;
-  border-radius: 20px;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 48px;
-  padding: 44px;
-}
-.direction h2 {
-  font-size: 34px;
-}
-.direction h2 em {
-  font-style: normal;
-  color: #55754c;
-}
-.direction p:not(.eyebrow) {
-  font-size: 13px;
-  line-height: 1.8;
-  color: #52634c;
-  max-width: 360px;
-  margin: 20px 0 25px;
-}
-.roadmap {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.roadmap > div {
-  display: flex;
-  gap: 13px;
-  align-items: center;
-  padding: 21px 0;
-  border-bottom: 1px solid #dce5d2;
-}
-.roadmap > div:last-child {
-  border: 0;
-}
-.roadmapIcon {
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 39px;
-  height: 39px;
-  border-radius: 11px;
-  background: #e1e9d6;
-  color: #5c7951;
-}
-.roadmap strong {
-  font-size: 13px;
-  font-weight: 550;
-  display: block;
-}
-.roadmap small {
-  font-size: 10px;
-  color: #59694f;
-  display: block;
-  margin-top: 6px;
-}
-.now {
-  font-size: 8px;
-  background: #d4e7b9;
-  border-radius: 4px;
-  padding: 4px 6px;
-  margin-left: auto;
-}
 .endnote {
   text-align: center;
   padding: 90px 20px;
@@ -782,42 +651,12 @@
   border-bottom: 1px solid #a0b18d;
   padding-bottom: 6px;
 }
-.footer {
-  margin: 0 5.5%;
-  border-top: 1px solid #dce4d6;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 28px 0;
-}
-.footer .wordmark {
-  font-size: 19px;
-}
-.footer .mark {
-  width: 29px;
-  height: 29px;
-  font-size: 22px;
-}
-.footer p {
-  font-size: 10px;
-  color: #5b6a53;
-  margin-right: auto;
-}
-.footer > a:not(.wordmark) {
-  font-size: 10px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
 @media (min-width: 1450px) {
   .hero {
     gap: 80px;
   }
   .heroVisual {
     height: 590px;
-  }
-  .phone {
-    transform: rotate(-4deg) scale(1.07);
   }
 }
 @media (max-width: 1000px) {
@@ -832,19 +671,11 @@
   .heroVisual {
     height: 530px;
   }
-  .floatingNote {
-    top: 64px;
-    font-size: 9px;
-  }
   .actions {
     gap: 12px;
   }
   .sectionHeading h2 {
     font-size: 34px;
-  }
-  .direction {
-    gap: 30px;
-    padding: 32px;
   }
   .demo {
     gap: 22px;
@@ -856,9 +687,6 @@
   }
   .detailCard h4 {
     font-size: 20px;
-  }
-  .footer {
-    gap: 15px;
   }
 }
 @media (max-width: 760px) {
@@ -876,14 +704,12 @@
     gap: 15px;
     font-size: 11px;
   }
-  .header nav > a:nth-child(2) {
-    display: none;
-  }
   .github {
     border: 0;
     padding: 10px 0;
+    gap: 5px;
   }
-  .github span,
+  .github > span:nth-of-type(1),
   .github svg:last-child {
     display: none;
   }
@@ -938,12 +764,6 @@
     width: 285px;
     height: 285px;
   }
-  .floatingNote {
-    right: 13px;
-    top: 57px;
-    font-size: 8px;
-    padding: 9px;
-  }
   .visualLabel {
     font-size: 8px;
     left: 16px;
@@ -953,9 +773,6 @@
     left: 15px;
     font-size: 8px;
     gap: 7px;
-  }
-  .phone {
-    width: 250px;
   }
   .strip {
     margin: 0 6%;
@@ -1063,30 +880,6 @@
   .sourceToolbar button {
     min-height: 44px;
   }
-  .direction {
-    margin: 0 6%;
-    grid-template-columns: 1fr;
-    padding: 27px 23px;
-    gap: 20px;
-    border-radius: 15px;
-  }
-  .direction h2 {
-    font-size: 29px;
-    letter-spacing: -1px;
-  }
-  .direction p:not(.eyebrow) {
-    font-size: 12px;
-    margin: 17px 0 22px;
-  }
-  .roadmap > div {
-    padding: 19px 0;
-  }
-  .roadmap strong {
-    font-size: 12px;
-  }
-  .roadmap small {
-    font-size: 9px;
-  }
   .endnote {
     padding: 62px 20px;
   }
@@ -1098,24 +891,6 @@
     font-size: 11px;
     min-height: 44px;
   }
-  .footer {
-    margin: 0 6%;
-    flex-wrap: wrap;
-    gap: 20px;
-    padding: 25px 0;
-  }
-  .footer p {
-    flex-basis: 100%;
-    order: 4;
-    margin: 0;
-    font-size: 9px;
-  }
-  .footer .wordmark {
-    margin-right: auto;
-  }
-  .footer > a:not(.wordmark) {
-    min-height: 44px;
-  }
 }
 /* Reserve a separate caption row so the study never obscures its status. */
 .heroVisual {
@@ -1123,20 +898,14 @@
   padding-bottom: 40px;
 }
 .visualCaption {
-  background: #eaf0df;
+  background: #f9faf6;
   padding-top: 7px;
   z-index: 3;
   bottom: 12px;
 }
-.phone {
-  transform: rotate(-4deg) scale(0.97);
-}
 @media (min-width: 1450px) {
   .heroVisual {
     height: 620px;
-  }
-  .phone {
-    transform: rotate(-4deg);
   }
 }
 @media (max-width: 760px) {
@@ -1148,16 +917,10 @@
     left: 13px;
     right: 13px;
   }
-  .phone {
-    transform: rotate(-4deg) scale(0.93);
-  }
 }
 
 .visualCaption {
   font-size: 10px;
-}
-.roadmap small {
-  font-size: 11px;
 }
 .status {
   font-size: 12px;
@@ -1178,16 +941,158 @@
   .status {
     font-size: 11px;
   }
-  .roadmap small {
-    font-size: 11px;
-  }
   .demoFooter {
     font-size: 10px;
   }
   .demoNavigation > p {
     font-size: 11px;
   }
-  .footer p {
-    font-size: 11px;
+}
+
+.footer {
+  margin: 0 5.5%;
+  border-top: 1px solid #dce4d6;
+  padding: 44px 0 0;
+  overflow: hidden;
+}
+.footerTop {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr 1fr;
+  gap: 32px;
+}
+.footerBrand p {
+  font-size: 12px;
+  color: #5b6a53;
+  margin: 14px 0 0;
+  max-width: 260px;
+  line-height: 1.5;
+}
+.footer .wordmark {
+  font-size: 19px;
+}
+.footer .mark {
+  width: 29px;
+  height: 29px;
+  font-size: 22px;
+}
+.footerCol {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+}
+.footerCol h3 {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #668c45;
+  margin: 0 0 4px;
+}
+.footerCol a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #26301f;
+  padding-bottom: 2px;
+}
+.footerCol a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: #668c45;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.footerCol a svg:last-child {
+  transition: transform 0.25s ease;
+}
+.footerCol a:hover::after,
+.footerCol a:focus-visible::after {
+  transform: scaleX(1);
+}
+.footerCol a:hover svg:last-child,
+.footerCol a:focus-visible svg:last-child {
+  transform: translate(2px, -2px);
+}
+.footerWord {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+  font-size: clamp(56px, 17.5vw, 250px);
+  line-height: 0.95;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  color: #dce4d6;
+  user-select: none;
+}
+.footerMask {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+.footerMask > span {
+  display: inline-block;
+}
+.footerMask:nth-child(odd) > span {
+  color: #cdd9c3;
+}
+@media (max-width: 760px) {
+  .footerTop {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footerBrand {
+    grid-column: 1 / -1;
+  }
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #eef3e8;
+  color: #3f5a2a;
+}
+.stars svg {
+  fill: #668c45;
+  stroke: #668c45;
+}
+
+/* Hero showcase: label above and caption below the columns, never overlapping them. */
+.heroVisual {
+  padding: 40px 0 62px;
+  box-sizing: border-box;
+}
+.visualLabel {
+  top: 8px;
+  left: 22px;
+}
+.visualCaption {
+  bottom: 14px;
+  left: 22px;
+  right: 22px;
+  padding-top: 0;
+  background: transparent;
+  font-size: 11px;
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .visualLabel {
+    left: 14px;
+  }
+  .visualCaption {
+    left: 14px;
+    right: 14px;
+    font-size: 10px;
   }
 }

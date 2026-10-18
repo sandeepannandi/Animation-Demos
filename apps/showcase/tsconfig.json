@@ -1,0 +1,41 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "react": [
+        "./node_modules/@types/react"
+      ],
+      "react-native": [
+        "./node_modules/react-native"
+      ],
+      "react/*": [
+        "./node_modules/@types/react/*"
+      ],
+      "expo-glass-effect": [
+        "./node_modules/expo-glass-effect"
+      ],
+      "expo-blur": [
+        "./node_modules/expo-blur"
+      ],
+      "@shopify/react-native-skia": [
+        "./node_modules/@shopify/react-native-skia"
+      ],
+      "react-native-reanimated": [
+        "./node_modules/react-native-reanimated"
+      ],
+      "qrcode-generator": [
+        "./node_modules/qrcode-generator"
+      ]
+    },
+    "typeRoots": [
+      "./node_modules/@types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/ui/src/**/*.ts",
+    "../../packages/ui/src/**/*.tsx"
+  ]
+}

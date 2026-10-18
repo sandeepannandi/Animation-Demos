@@ -1,0 +1,26 @@
+.wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 26px 16px 20px; }
+.header { display: flex; align-items: baseline; gap: 14px; }
+.kicker { font-size: 10px; letter-spacing: 3px; color: #4d705a; }
+.state { font-size: 12px; color: #7c6a4f; font-style: italic; }
+.canvas { width: min(100%, 420px); aspect-ratio: 4 / 5; border-radius: 18px; touch-action: pan-y; cursor: pointer; display: block; }
+.hint { margin: 0; font-size: 12px; color: #61705a; }
+.button { border: 0; background: #1c1b19; color: #f6f3ec; font-weight: 600; font-size: 14px; padding: 12px 22px; border-radius: 999px; cursor: pointer; }
+@media (max-width: 760px) { .wrap { padding: 26px 8px 20px; } }
+
+.choices { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; }
+.choice { border: 1px solid #c7c2b6; border-radius: 999px; background: #f6f3ec; color: #4c5147; padding: 8px 12px; font-size: 12px; cursor: pointer; }
+.choice[aria-pressed="true"] { background: #345441; color: #fff; border-color: #345441; }
+.choice:focus-visible, .button:focus-visible { outline: 3px solid #bd923d; outline-offset: 3px; }
+@media (max-width: 760px) {
+  .wrap { padding: 10px 8px 6px; gap: 10px; }
+  .canvas { width: min(100%, 304px); }
+}
+
+.motion { border: 1px solid #c7c2b6; border-radius: 999px; background: #f6f3ec; color: #4c5147; padding: 7px 14px; font-size: 12px; cursor: pointer; }
+.motion[aria-pressed="true"] { background: #345441; color: #fff; border-color: #345441; }
+.motion:focus-visible { outline: 3px solid #bd923d; outline-offset: 3px; }
+@media (max-width: 760px) {
+  .wrap { gap: 8px; }
+  .canvas { width: min(100%, 276px); }
+  .motion { padding: 6px 12px; }
+}

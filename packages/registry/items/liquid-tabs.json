@@ -1,0 +1,9 @@
+{
+  "slug": "liquid-tabs",
+  "title": "Liquid Tabs",
+  "category": "navigation",
+  "files": ["LiquidTabs.tsx", "README.md", "LICENSE"],
+  "dependencies": ["react", "react-native", "expo-glass-effect", "expo-blur"],
+  "nativeDeviceVerified": true,
+  "verification": "Expo SDK 57 TypeScript and web export; no device test"
+}
