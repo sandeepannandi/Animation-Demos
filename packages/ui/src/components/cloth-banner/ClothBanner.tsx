@@ -8,8 +8,10 @@ import {
 import {
   Canvas,
   Circle,
+  FilterMode,
   Group,
   ImageShader,
+  MipmapMode,
   Skia,
   Vertices,
   type SkImage,
@@ -110,8 +112,8 @@ export function ClothBanner({
   image,
   width = 300,
   height = 200,
-  cols = 17,
-  rows = 12,
+  cols = 25,
+  rows = 17,
   slowMotion = false,
   reducedMotion,
   onFeedback,
@@ -232,10 +234,10 @@ export function ClothBanner({
       {!reduce ? <CanvasKeepAlive /> : null}
       <Canvas pointerEvents="none" style={{ width: canvasW, height: canvasH }}>
         <Vertices vertices={vertices} textures={uv} indices={indices} mode="triangles">
-          <ImageShader image={image} tx="clamp" ty="clamp" />
+          <ImageShader image={image} tx="clamp" ty="clamp" sampling={{ filter: FilterMode.Linear, mipmap: MipmapMode.Linear }} />
         </Vertices>
         <Vertices vertices={vertices} textures={shadeTextures} indices={indices} mode="triangles">
-          <ImageShader image={ramp} tx="clamp" ty="clamp" />
+          <ImageShader image={ramp} tx="clamp" ty="clamp" sampling={{ filter: FilterMode.Linear, mipmap: MipmapMode.None }} />
         </Vertices>
         <Group>
           <Circle cx={cfg.originX} cy={cfg.originY} r={7} color="#2c4a37" />

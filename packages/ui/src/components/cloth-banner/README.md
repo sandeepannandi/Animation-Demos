@@ -38,7 +38,7 @@ file. `bannerDesign.ts` is only needed if you want the Example's artwork.
 | --- | --- | --- |
 | `image` | required | Prepared SkImage, painted on both sides (mirrored on the back). |
 | `width` / `height` | `300` / `200` | Banner size at rest; the canvas pads itself for the swing. |
-| `cols` / `rows` | `17` / `12` | Cloth resolution. Keep the product modest for low-end phones. |
+| `cols` / `rows` | `25` / `17` | Cloth resolution. Denser meshes look smoother; keep the product modest for low-end phones. |
 | `slowMotion` | `false` | ~4x slower cloth clock for demos. |
 | `reducedMotion` | system | Flat, still banner. |
 | `onFeedback` | - | `'grab'` / `'release'` as the cloth is tugged. |
