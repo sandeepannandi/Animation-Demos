@@ -32,7 +32,7 @@ npx expo start
 ## Notes
 
 - The website previews are web stand-ins for the native render, not screenshots of it.
-- Components are exercised on an Android emulator CI workflow. iOS and physical devices are not covered yet.
+- Android is exercised on an emulator in CI. iOS was tested manually by the author. Physical Android devices are not covered.
 
 ## License
 
