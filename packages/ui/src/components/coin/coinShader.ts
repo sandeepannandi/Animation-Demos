@@ -62,11 +62,13 @@ float3 calcNormal(float3 p) {
 
 float3 env(float3 d) {
   float up = d.y * 0.5 + 0.5;
-  float3 col = mix(float3(0.03, 0.035, 0.05), float3(0.52, 0.57, 0.66), smoothstep(0.0, 1.0, up));
+  float3 col = mix(float3(0.2, 0.21, 0.24), float3(0.6, 0.65, 0.74), smoothstep(0.0, 1.0, up));
   float3 key = normalize(float3(-0.55, 0.75, 0.55));
   col += float3(1.7, 1.62, 1.5) * smoothstep(0.8, 0.95, dot(d, key));
   float3 strip = normalize(float3(0.9, 0.15, 0.3));
   col += float3(0.45, 0.6, 0.9) * smoothstep(0.7, 0.96, dot(d, strip));
+  float3 front = normalize(float3(0.15, 0.3, 1.0));
+  col += float3(0.5, 0.52, 0.58) * smoothstep(0.7, 0.99, dot(d, front));
   float3 fill = normalize(float3(0.1, -0.8, 0.4));
   col += float3(0.5, 0.32, 0.18) * 0.25 * smoothstep(0.6, 0.95, dot(d, fill));
   col += float3(0.12, 0.12, 0.13) * exp(-abs(d.y) * 14.0);
