@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  coin: { dir: "packages/ui/src/components/coin", files: ["Coin.tsx", "coinMath.ts", "coinShader.ts", "coinDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   blackhole: { dir: "packages/ui/src/components/black-hole-lens", files: ["BlackHoleLens.tsx", "holeMath.ts", "holeDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   pendulum: { dir: "packages/ui/src/components/chaos-pendulum", files: ["ChaosPendulum.tsx", "pendulumMath.ts", "pendulumDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   fog: { dir: "packages/ui/src/components/fogged-glass", files: ["FoggedGlass.tsx", "fogMath.ts", "sceneDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -48,6 +49,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    coin: read(components.coin.dir, components.coin.files),
     blackhole: read(components.blackhole.dir, components.blackhole.files),
     pendulum: read(components.pendulum.dir, components.pendulum.files),
     fog: read(components.fog.dir, components.fog.files),

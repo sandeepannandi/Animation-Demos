@@ -1,0 +1,10 @@
+export const COIN_W = 320;
+export const COIN_H = 340;
+export const COIN_CENTER_X = 160;
+export const COIN_CENTER_Y = 170;
+export const COIN_PX_PER_UNIT = 104;
+export const COIN_CAMERA = 6;
+export const COIN_METAL: [number, number, number] = [0.95, 0.94, 0.9];
+export const COIN_BACKDROP_TOP: [number, number, number] = [0.043, 0.059, 0.1];
+export const COIN_BACKDROP_BOTTOM: [number, number, number] = [0.02, 0.027, 0.05];
+export const COIN_BACKGROUND = "#0b0f1a";
