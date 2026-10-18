@@ -21,34 +21,44 @@ accretion disk spins with one side Doppler-brightened.
   ISCO). The disk winds differentially with the Keplerian r^-3/2
   profile. The unit tests check all of these against their analytic
   values.
-- Optional planet toggle. A small gas giant sits in the source plane, so
-  the lens map bends its image for free: drag the hole close and the
-  planet smears into arcs with a secondary image inside the Einstein
-  radius. The planet feels the exact leading-order tide: its stretch
-  follows the ratio eta = (d_R/d)^3, where d_R = R(2M/m)^(1/3) is the
-  rigid-body Roche limit built from the Schwarzschild mass M = rs/2.
-  Cross the limit and the planet sheds a debris stream with the tidal
-  velocity dispersion R*sqrt(GM/d^3); the debris integrates Newtonian
-  point-mass gravity at a 48x time warp, with a stylized drag inside the
-  disk that pulls each grain toward the local Keplerian speed and lets
-  it spiral in. Grains that cross the shadow feed the disk, which
-  burns brighter for a few seconds. Dragging the hole back out recovers
-  the planet only if it has not crossed the Roche limit yet; a
-  disrupted planet never comes back. The unit tests check the Roche
-  limit, the tide-versus-self-gravity invariant at the limit, the
-  d^-3 scaling, the kick scaling, irreversibility, and capture.
+- Optional planet toggle. A gas giant sits in the source plane, so the
+  lens map bends its image for free: drag the hole close and the planet
+  smears into arcs with a secondary image inside the Einstein radius.
+  Once the hole is within three Roche radii the planet itself falls
+  toward it under a Paczynski-Wiita pseudo-Newtonian potential
+  phi = -GM/(r - rs), whose circular-orbit angular momentum bottoms out
+  at exactly the Schwarzschild ISCO (3rs) - the tests check that. The
+  body deforms with the real tidal tensor: stretched along the hole
+  direction at +2GM R/d^3 and squeezed across it at -GM R/d^3, so it
+  visibly spaghettifies into a strand. At the fluid-body Roche limit
+  2.44 R (M/m)^(1/3) it starts shedding from both tips; the debris
+  inherits the planet's velocity plus the differential orbital speed
+  across its diameter, and every grain then free-flies on its own
+  Paczynski-Wiita orbit - angular momentum and energy are conserved by
+  the integrator (tested to 1e-3 and 2%), so the inner edge of the tail
+  genuinely pulls ahead of the outer edge and the stream wraps the hole
+  (also tested). Grains that cross the shadow feed the disk, which
+  burns brighter for a few seconds; the rest fade after a few orbits.
+  A grazing pass strips outer layers and the planet survives smaller -
+  mass it loses never grows back; a deep dive fully disrupts. Backing
+  off before the limit lets it relax back to a sphere.
 - Approximations, honestly: the deflection law is the weak-field form
   2rs/b applied across the whole screen; surface brightness of the
   lensed background is not boosted by magnification; and the disk's
   far-side image (the halo bent over the top and under the bottom of the
   shadow) is a mirrored, attenuated copy of the disk rather than a
   geodesic trace. The disk itself is emissive and is not bent by the
-  background lensing map. For the planet: the Roche limit is the
-  rigid-body form (a fluid body disrupts about 2.44x farther out), the
-  planet's mass ratio is chosen for scene scale, the planet is held at a
-  fixed point rather than orbiting, and the debris uses Newtonian
-  gravity with a time warp and a phenomenological disk-capture drag, not
-  a geodesic integrator.
+  background lensing map. For the planet: the Paczynski-Wiita potential
+  mimics Schwarzschild orbits but is not a geodesic integrator; the
+  planet's mass ratio is chosen for scene scale; the planet is a test
+  particle (it does not pull back on the hole, and the hole's own
+  motion is kinematic, so fictitious forces from its acceleration are
+  not modeled); the planet is treated as gravity-free beyond three
+  Roche radii; shedding converts mass to debris on a fixed budget
+  rather than a hydrodynamic model; debris grains do not collide or
+  shock, so real stream circularization is replaced by a slow fade;
+  and the grain heating tint near the hole is a visual cue, not a
+  temperature solver.
 - Slow motion runs the spin clock about four times slower. Reduce Motion
   freezes the disk and moves the hole without springs.
 

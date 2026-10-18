@@ -16,13 +16,16 @@
     "@shopify/react-native-skia",
     "react-native-reanimated"
   ],
-  "optionalDependencies": ["expo-haptics (demo adapter only)"],
+  "optionalDependencies": [
+    "expo-haptics (demo adapter only)"
+  ],
   "tested": {
     "expo": "57.0.27",
     "reactNative": "0.86.3",
     "web": "0.21.2",
     "skia": "2.6.2",
-    "reanimated": "4.5.1"
+    "reanimated": "4.5.1",
+    "nativeDeviceVerified": false
   },
   "nativeDeviceVerified": false
 }

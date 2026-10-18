@@ -219,19 +219,22 @@ export function photonRingGlow(r: number, rs: number) {
 }
 
 export const PLANET_DEFAULTS = {
-  x: 84,
-  y: 268,
-  radius: 11,
-  massRatio: 0.03,
-  stretchGain: 0.55,
-  debrisCount: 26,
-  debrisSpan: 1.15,
-  debrisLife: 8.5,
+  x: 60,
+  y: 300,
+  radius: 16,
+  massRatio: 0.08,
+  rocheFluid: 2.44,
+  deformGain: 0.55,
+  maxStretch: 2.4,
+  maxSqueeze: 0.45,
+  debrisCount: 64,
+  debrisSpan: 3.0,
+  debrisLife: 12,
   timeWarp: 48,
   feedBoost: 1.4,
   feedDecay: 2.6,
-  dragRate: 2.2,
-  inspiralRate: 0.55,
+  diskDragRate: 0.05,
+  diskInspiralRate: 0.08,
 } as const;
 
 export type PlanetDefaults = typeof PLANET_DEFAULTS;
@@ -244,9 +247,18 @@ export function rocheLimit(radius: number, massRatio: number) {
   return radius * Math.pow(2 / massRatio, 1 / 3);
 }
 
+export function fluidRocheLimit(radius: number, massRatio: number) {
+  return PLANET_DEFAULTS.rocheFluid * radius * Math.pow(1 / massRatio, 1 / 3);
+}
+
 export function tidalAcceleration(mHole: number, radius: number, d: number) {
   const dd = Math.max(d, 0.0001);
   return (2 * mHole * radius) / (dd * dd * dd);
+}
+
+export function tidalTensor(mHole: number, radius: number, d: number) {
+  const radial = tidalAcceleration(mHole, radius, d);
+  return { radial, transverse: -radial / 2 };
 }
 
 export function planetSurfaceGravity(mHole: number, massRatio: number, radius: number) {
@@ -257,13 +269,34 @@ export function tidalRatio(mHole: number, massRatio: number, radius: number, d: 
   return tidalAcceleration(mHole, radius, d) / planetSurfaceGravity(mHole, massRatio, radius);
 }
 
-export function debrisKick(mHole: number, radius: number, d: number) {
-  const dd = Math.max(d, 0.0001);
-  return radius * Math.sqrt(mHole / (dd * dd * dd));
+export function pwAcceleration(mHole: number, r: number, rs: number) {
+  return mHole / Math.pow(Math.max(r - rs, 0.6), 2);
 }
 
-export function circularSpeed(mHole: number, d: number) {
-  return Math.sqrt(mHole / Math.max(d, 0.0001));
+export function pwPotential(mHole: number, r: number, rs: number) {
+  return -mHole / Math.max(r - rs, 0.6);
+}
+
+export function pwCircularL2(mHole: number, r: number, rs: number) {
+  const rr = Math.max(r - rs, 0.6);
+  return (mHole * r * r * r) / (rr * rr);
+}
+
+export function pwCircularSpeed(mHole: number, r: number, rs: number) {
+  const rr = Math.max(r - rs, 0.6);
+  return Math.sqrt((mHole * r) / (rr * rr));
+}
+
+export function debrisKick(mHole: number, radius: number, d: number, rs: number) {
+  const dd = Math.max(d, 0.0001);
+  return radius * (pwCircularSpeed(mHole, dd, rs) / dd);
+}
+
+export function debrisHeat(x: number, y: number, hx: number, hy: number, hole: HoleDefaults) {
+  const r = Math.hypot(x - hx, y - hy);
+  const cold = hole.diskOut * 0.95;
+  const hot = shadowRadius(hole.rs) * 1.1;
+  return clamp((cold - r) / Math.max(cold - hot, 1), 0, 1);
 }
 
 export type DebrisParticle = {
@@ -279,14 +312,16 @@ export type DebrisParticle = {
 export type PlanetSim = {
   x: number;
   y: number;
+  vx: number;
+  vy: number;
   state: "intact" | "disrupted" | "gone";
   eta: number;
   stretch: number;
+  squeeze: number;
   shedTime: number;
   shedAcc: number;
   bodyScale: number;
   feed: number;
-  spinSense: number;
   debris: DebrisParticle[];
   rand: () => number;
 };
@@ -295,20 +330,41 @@ export function makePlanet(opts: PlanetDefaults, seed: number): PlanetSim {
   return {
     x: opts.x,
     y: opts.y,
+    vx: 0,
+    vy: 0,
     state: "intact",
     eta: 0,
     stretch: 0,
+    squeeze: 0,
     shedTime: 0,
     shedAcc: 0,
     bodyScale: 1,
     feed: 0,
-    spinSense: 1,
     debris: [],
     rand: mulberry32(seed),
   };
 }
 
-function spawnDebris(sim: PlanetSim, hx: number, hy: number, mHole: number, opts: PlanetDefaults) {
+type Body = { x: number; y: number; vx: number; vy: number };
+
+function integratePW(b: Body, hx: number, hy: number, mHole: number, rs: number, tdt: number) {
+  const r0 = Math.hypot(b.x - hx, b.y - hy);
+  const tDyn = Math.sqrt(Math.pow(Math.max(r0, rs * 2.2), 3) / mHole);
+  const n = Math.max(1, Math.min(16, Math.ceil((tdt / tDyn) * 8)));
+  const h = tdt / n;
+  for (let i = 0; i < n; i++) {
+    const dx = b.x - hx;
+    const dy = b.y - hy;
+    const r = Math.max(Math.hypot(dx, dy), 0.6);
+    const a = -mHole / Math.pow(Math.max(r - rs, 0.6), 2);
+    b.vx += (dx / r) * a * h;
+    b.vy += (dy / r) * a * h;
+    b.x += b.vx * h;
+    b.y += b.vy * h;
+  }
+}
+
+function spawnDebris(sim: PlanetSim, hx: number, hy: number, mHole: number, rs: number, opts: PlanetDefaults) {
   const dx = hx - sim.x;
   const dy = hy - sim.y;
   const d = Math.max(Math.hypot(dx, dy), opts.radius);
@@ -317,16 +373,19 @@ function spawnDebris(sim: PlanetSim, hx: number, hy: number, mHole: number, opts
   const tx = -uy;
   const ty = ux;
   const side = sim.rand() < 0.5 ? -1 : 1;
-  const along = side * opts.radius * (0.3 + 0.7 * sim.rand());
-  const kick = debrisKick(mHole, opts.radius, d) * (0.5 + sim.rand()) * side;
-  const vc = circularSpeed(mHole, d);
+  const reach = opts.radius * (1 + sim.stretch) * Math.max(sim.bodyScale, 0.25);
+  const along = side * reach * (0.55 + 0.45 * sim.rand());
+  const omega = pwCircularSpeed(mHole, d, rs) / d;
+  const kick = omega * along + debrisKick(mHole, opts.radius, d, rs) * 0.4 * sim.rand() * side;
+  const jitter = debrisKick(mHole, opts.radius, d, rs) * 0.25;
+  const width = opts.radius * 0.45 * Math.max(sim.bodyScale, 0.3);
   sim.debris.push({
-    x: sim.x + ux * along + tx * (sim.rand() - 0.5) * opts.radius * 0.6,
-    y: sim.y + uy * along + ty * (sim.rand() - 0.5) * opts.radius * 0.6,
-    vx: tx * vc * (0.55 + 0.2 * sim.rand()) * sim.spinSense + ux * kick,
-    vy: ty * vc * (0.55 + 0.2 * sim.rand()) * sim.spinSense + uy * kick,
+    x: sim.x + ux * along + tx * (sim.rand() - 0.5) * width,
+    y: sim.y + uy * along + ty * (sim.rand() - 0.5) * width,
+    vx: sim.vx + ux * kick + tx * jitter * (sim.rand() - 0.5),
+    vy: sim.vy + uy * kick + ty * jitter * (sim.rand() - 0.5),
     age: 0,
-    size: 0.9 + sim.rand() * 1.4,
+    size: 0.7 + sim.rand() * 1.0,
     tone: sim.rand(),
   });
 }
@@ -342,65 +401,67 @@ export function planetStep(
   dt: number,
   hole: HoleDefaults,
   opts: PlanetDefaults,
+  bounds: { width: number; height: number },
 ) {
   const mHole = holeMassFromRs(hole.rs);
+  const warp = opts.timeWarp;
+  const tdt = dt * warp;
   const d = Math.max(Math.hypot(hx - sim.x, hy - sim.y), opts.radius * 0.5);
-  const roche = rocheLimit(opts.radius, opts.massRatio);
-  if (sim.state === "intact") {
-    sim.eta = tidalRatio(mHole, opts.massRatio, opts.radius, d);
-    const target = clamp(sim.eta, 0, 1) * opts.stretchGain;
-    sim.stretch += (target - sim.stretch) * Math.min(1, dt * 8);
-    if (d <= roche) {
-      sim.state = "disrupted";
-      sim.spinSense = sim.rand() < 0.5 ? -1 : 1;
-    }
+  const roche = fluidRocheLimit(opts.radius, opts.massRatio);
+  sim.eta = tidalRatio(mHole, opts.massRatio, opts.radius, d);
+  const etaFluid = Math.pow(roche / d, 3);
+  const stretchTarget = opts.deformGain * clamp(sim.eta, 0, opts.maxStretch / opts.deformGain);
+  sim.stretch += (stretchTarget - sim.stretch) * Math.min(1, dt * 7);
+  const squeezeTarget = clamp(sim.stretch / 2, 0, opts.maxSqueeze);
+  sim.squeeze += (squeezeTarget - sim.squeeze) * Math.min(1, dt * 7);
+  if (d < 1.5 * roche) {
+    integratePW(sim, hx, hy, mHole, hole.rs, tdt);
+  } else {
+    const damp = Math.exp(-dt * 2);
+    sim.vx *= damp;
+    sim.vy *= damp;
   }
+  sim.x = clamp(sim.x, 4, bounds.width - 4);
+  sim.y = clamp(sim.y, 4, bounds.height - 4);
+  if (sim.state === "intact" && d <= roche) sim.state = "disrupted";
   if (sim.state === "disrupted") {
-    sim.eta = tidalRatio(mHole, opts.massRatio, opts.radius, d);
-    sim.stretch += (opts.stretchGain - sim.stretch) * Math.min(1, dt * 8);
-    sim.shedTime += dt;
-    sim.bodyScale = clamp(1 - sim.shedTime / opts.debrisSpan, 0, 1);
-    sim.shedAcc += (dt * opts.debrisCount) / opts.debrisSpan;
-    while (sim.shedAcc >= 1 && sim.bodyScale > 0) {
-      sim.shedAcc -= 1;
-      spawnDebris(sim, hx, hy, mHole, opts);
+    const shedSpeed = etaFluid > 1 ? clamp(etaFluid - 1, 0.3, 1.2) : 0;
+    if (shedSpeed > 0 && sim.bodyScale > 0) {
+      sim.shedTime += dt * shedSpeed;
+      sim.bodyScale = clamp(sim.bodyScale - (dt * shedSpeed) / opts.debrisSpan, 0, 1);
+      sim.shedAcc += (dt * shedSpeed * opts.debrisCount) / opts.debrisSpan;
+      while (sim.shedAcc >= 1 && sim.bodyScale > 0) {
+        sim.shedAcc -= 1;
+        spawnDebris(sim, hx, hy, mHole, hole.rs, opts);
+      }
     }
     if (sim.bodyScale <= 0 && sim.debris.length === 0) sim.state = "gone";
   }
-  const warp = opts.timeWarp;
-  const tdt = dt * warp;
   const diskIn = iscoRadius(hole.rs);
   const keep: DebrisParticle[] = [];
   for (const p of sim.debris) {
     p.age += dt;
+    integratePW(p, hx, hy, mHole, hole.rs, tdt);
     const dx = p.x - hx;
     const dy = p.y - hy;
     const r = Math.max(Math.hypot(dx, dy), 1);
-    const a = -mHole / (r * r);
-    p.vx += (dx / r) * a * tdt;
-    p.vy += (dy / r) * a * tdt;
-    if (r > diskIn * 0.95 && r < hole.diskOut * 1.15) {
-      const vc = circularSpeed(mHole, r);
+    if (r > diskIn * 0.9 && r < hole.diskOut * 0.85) {
+      const vc = pwCircularSpeed(mHole, r, hole.rs);
       const rvx = dx / r;
       const rvy = dy / r;
       const vrad = p.vx * rvx + p.vy * rvy;
-      const sense = p.vx * -dy + p.vy * dx >= 0 ? 1 : -1;
-      const k = Math.min(1, opts.dragRate * tdt);
-      p.vx += rvx * (-opts.inspiralRate * vc - vrad) * k;
-      p.vy += rvy * (-opts.inspiralRate * vc - vrad) * k;
       const vt = p.vx * -rvy + p.vy * rvx;
-      p.vx += (-rvy) * (vc * sense - vt) * k;
-      p.vy += rvx * (vc * sense - vt) * k;
+      const sense = vt >= 0 ? 1 : -1;
+      const k = Math.min(1, opts.diskDragRate * tdt);
+      p.vx += rvx * (-opts.diskInspiralRate * vc - vrad) * k + -rvy * (vc * sense - vt) * k;
+      p.vy += rvy * (-opts.diskInspiralRate * vc - vrad) * k + rvx * (vc * sense - vt) * k;
     }
-    p.x += p.vx * tdt;
-    p.y += p.vy * tdt;
     if (isCaptured(p.x, p.y, hx, hy, hole.rs)) {
-      sim.feed = clamp(sim.feed + 3 / opts.debrisCount, 0, 1);
+      sim.feed = clamp(sim.feed + 4.5 / opts.debrisCount, 0, 1);
       continue;
     }
     if (p.age < opts.debrisLife) keep.push(p);
   }
   sim.debris = keep;
   sim.feed *= Math.exp(-dt / opts.feedDecay);
-  if (sim.state === "disrupted" && sim.bodyScale <= 0 && sim.debris.length === 0) sim.state = "gone";
 }

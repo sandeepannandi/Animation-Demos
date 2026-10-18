@@ -15,6 +15,7 @@ import {
   PaintStyle,
   Rect,
   Skia,
+  StrokeCap,
   TileMode,
   vec,
   type SkCanvas,
@@ -27,6 +28,7 @@ import {
   HOLE_DEFAULTS,
   PLANET_DEFAULTS,
   clamp,
+  debrisHeat,
   holeTarget,
   iscoRadius,
   makeDiskNoise,
@@ -162,8 +164,8 @@ function drawPlanetSkia(canvas: SkCanvas, sim: PlanetSim, hx: number, hy: number
   const ang = (Math.atan2(hy - sim.y, hx - sim.x) * 180) / Math.PI;
   if (sim.bodyScale > 0.001) {
     const r = PLANET_DEFAULTS.radius * scale * sim.bodyScale;
-    const sx = 1 + sim.stretch * sim.bodyScale;
-    const sy = 1 / (1 + sim.stretch * 0.7 * sim.bodyScale);
+    const sx = 1 + sim.stretch;
+    const sy = 1 - sim.squeeze;
     const [lr, lg, lb] = PLANET_PALETTE.light;
     const [mr, mg, mb] = PLANET_PALETTE.mid;
     const [dr, dg, db] = PLANET_PALETTE.dark;
@@ -203,14 +205,39 @@ function drawPlanetSkia(canvas: SkCanvas, sim: PlanetSim, hx: number, hy: number
   }
   const [lr, lg, lb] = PLANET_PALETTE.light;
   const [mr, mg, mb] = PLANET_PALETTE.mid;
+  if (sim.debris.length > 1) {
+    const ordered = [...sim.debris].sort((a, b) => b.age - a.age);
+    const strand = Skia.Path.Make();
+    strand.moveTo(ordered[0].x * scale, ordered[0].y * scale);
+    for (let i = 1; i < ordered.length; i++) strand.lineTo(ordered[i].x * scale, ordered[i].y * scale);
+    paint.setStyle(PaintStyle.Stroke);
+    paint.setStrokeWidth(1.7);
+    paint.setStrokeCap(StrokeCap.Round);
+    paint.setColor(Skia.Color(`rgba(${mr},${mg},${mb},0.55)`));
+    canvas.drawPath(strand, paint);
+    paint.setStyle(PaintStyle.Fill);
+  }
   for (const d of sim.debris) {
     const fade = clamp(1 - d.age / PLANET_DEFAULTS.debrisLife, 0, 1);
     if (fade <= 0) continue;
-    const rr = Math.round(mr + (lr - mr) * d.tone);
-    const gg = Math.round(mg + (lg - mg) * d.tone);
-    const bb = Math.round(mb + (lb - mb) * d.tone);
-    paint.setColor(Skia.Color(`rgba(${rr},${gg},${bb},${(fade * 0.95).toFixed(3)})`));
-    canvas.drawCircle(d.x * scale, d.y * scale, Math.max(0.5, d.size * scale), paint);
+    const heat = debrisHeat(d.x, d.y, hx, hy, HOLE_DEFAULTS);
+    const baseR = mr + (lr - mr) * d.tone;
+    const baseG = mg + (lg - mg) * d.tone;
+    const baseB = mb + (lb - mb) * d.tone;
+    const rr = Math.round(baseR + (255 - baseR) * heat);
+    const gg = Math.round(baseG + (236 - baseG) * heat);
+    const bb = Math.round(baseB + (190 - baseB) * heat);
+    paint.setColor(Skia.Color(`rgba(${rr},${gg},${bb},${(fade * (0.55 + 0.45 * heat)).toFixed(3)})`));
+    const sp = Math.hypot(d.vx, d.vy);
+    if (sp > 0.02) {
+      canvas.save();
+      canvas.translate(d.x * scale, d.y * scale);
+      canvas.rotate((Math.atan2(d.vy, d.vx) * 180) / Math.PI, 0, 0);
+      canvas.drawOval(Skia.XYWHRect(-d.size * scale * 1.6, -d.size * scale * 0.6, d.size * scale * 3.2, d.size * scale * 1.2), paint);
+      canvas.restore();
+    } else {
+      canvas.drawCircle(d.x * scale, d.y * scale, Math.max(0.5, d.size * scale), paint);
+    }
   }
   paint.dispose();
 }
@@ -345,9 +372,9 @@ export function BlackHoleLens({
           sceneDirty.current = true;
         }
         const ps = planetSim.current;
-        planetStep(ps, s.cx, s.cy, dt, HOLE_DEFAULTS, PLANET_DEFAULTS);
+        planetStep(ps, s.cx, s.cy, dt, HOLE_DEFAULTS, PLANET_DEFAULTS, { width: cfg.width, height: cfg.height });
         feed = ps.feed;
-        const sig = `${ps.state}|${ps.bodyScale.toFixed(3)}|${ps.stretch.toFixed(3)}|${ps.debris.length}`;
+        const sig = `${ps.state}|${ps.bodyScale.toFixed(3)}|${ps.stretch.toFixed(3)}|${ps.squeeze.toFixed(3)}|${ps.x.toFixed(1)}|${ps.y.toFixed(1)}|${ps.debris.length}`;
         if (ps.debris.length > 0 || sig !== sceneSig.current) sceneDirty.current = true;
         sceneSig.current = sig;
         if (sceneDirty.current) {
