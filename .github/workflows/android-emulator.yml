@@ -60,6 +60,7 @@ jobs:
             bash scripts/android-smoke.sh apk/*.apk
             bash scripts/android-fog.sh
             bash scripts/android-pendulum.sh
+            bash scripts/android-blackhole.sh
             bash scripts/android-gestures.sh
             bash scripts/android-core.sh
             bash scripts/android-slowmotion.sh
