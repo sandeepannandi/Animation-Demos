@@ -239,3 +239,9 @@
 
 .miniFlap { display: flex; gap: 3px; align-items: center; }
 .miniFlap i { width: 13px; height: 19px; border-radius: 3px; background: linear-gradient(to bottom, #262931 47%, #0a0b0e 50%, #1b1d23 53%); box-shadow: inset 0 1px 0 rgba(255,255,255,0.08); }
+.miniCloth { position: relative; width: 150px; height: 100px; border-radius: 6px 6px 14px 14px; background: #20402c; box-shadow: inset 0 0 0 3px rgba(233, 223, 200, 0.5), inset -14px -10px 22px rgba(0, 0, 0, 0.28), inset 10px 8px 18px rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; }
+.miniCloth b { color: #e9dfc8; font-size: 10px; letter-spacing: 1.6px; font-weight: 600; }
+.miniCloth i { position: absolute; top: -4px; left: 10px; right: 10px; height: 5px; }
+.miniCloth i::before, .miniCloth i::after { content: ""; position: absolute; top: 0; width: 7px; height: 7px; border-radius: 50%; background: #2c4a37; box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.5); }
+.miniCloth i::before { left: 0; }
+.miniCloth i::after { right: 0; }
