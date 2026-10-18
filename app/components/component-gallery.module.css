@@ -248,3 +248,8 @@
 .miniFog { position: relative; width: 96px; height: 128px; border-radius: 10px; background: linear-gradient(180deg, rgba(237, 242, 247, 0.92), rgba(223, 231, 238, 0.88)); box-shadow: inset 0 0 0 2px rgba(19, 24, 40, 0.55), inset 0 -18px 26px rgba(35, 42, 74, 0.25); overflow: hidden; }
 .miniFog i { position: absolute; left: 14px; right: 14px; top: 44px; height: 26px; border-radius: 16px; background: linear-gradient(180deg, #d98a56, #232a4a); filter: blur(0.4px); }
 .miniFog b { position: absolute; left: 60px; top: 18px; width: 7px; height: 7px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffffff, rgba(255, 255, 255, 0.25) 55%, rgba(10, 16, 28, 0.3)); box-shadow: -34px 52px 0 -1px rgba(255, 255, 255, 0.75), -18px 78px 0 0 rgba(255, 255, 255, 0.65); }
+.miniPendulum { position: relative; width: 130px; height: 110px; border-radius: 12px; background: #0b1020; overflow: hidden; }
+.miniPendulum i, .miniPendulum b { position: absolute; width: 2px; height: 38px; background: #c9d1ee; transform-origin: 50% 0; border-radius: 2px; }
+.miniPendulum i { left: 64px; top: 16px; transform: rotate(-40deg); }
+.miniPendulum b { left: 88px; top: 45px; transform: rotate(35deg); }
+.miniPendulum u { position: absolute; left: 62px; top: 71px; width: 10px; height: 10px; border-radius: 50%; background: #f6f1e4; box-shadow: 0 0 12px 5px rgba(255, 210, 122, 0.55), 16px -14px 0 -1px rgba(255, 150, 120, 0.45), 30px -28px 0 -3px rgba(255, 79, 139, 0.35), 40px -46px 0 -4px rgba(255, 79, 139, 0.2); }
