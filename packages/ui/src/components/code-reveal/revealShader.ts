@@ -1,7 +1,7 @@
 export const REVEAL_SHADER = `
 uniform float2 size;
 uniform float mode;
-uniform float4 stamps[40];
+${Array.from({ length: 40 }, (_, i) => `uniform float4 s${i};`).join("\n")}
 
 const float CELL = 9.0;
 
@@ -91,19 +91,16 @@ float glyph(float k, float2 q) {
   return max(ring, dot0);
 }
 
+float stampAt(float4 s, float2 q) {
+  if (s.w <= 0.0) return 0.0;
+  return (1.0 - smoothstep(0.3, 1.0, length(q - s.xy) / s.z)) * s.w;
+}
+
 float3 codeRevealColor(float2 p) {
   float rp = 0.0;
   float2 cc = floor(p / CELL) * CELL + CELL * 0.5;
   float rc = 0.0;
-  for (int i = 0; i < 40; i++) {
-    float4 s = stamps[i];
-    if (s.w > 0.0) {
-      float dp = length(p - s.xy) / s.z;
-      float dc = length(cc - s.xy) / s.z;
-      rp = max(rp, (1.0 - smoothstep(0.3, 1.0, dp)) * s.w);
-      rc = max(rc, (1.0 - smoothstep(0.3, 1.0, dc)) * s.w);
-    }
-  }
+${Array.from({ length: 40 }, (_, i) => `  rp = max(rp, stampAt(s${i}, p));\n  rc = max(rc, stampAt(s${i}, cc));`).join("\n")}
   float3 img = scene(p);
   if (rp <= 0.002) return img;
   float h = CELL * 0.25;
