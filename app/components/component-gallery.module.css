@@ -262,3 +262,10 @@
 .miniReveal { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: linear-gradient(180deg, #2a1456 0%, #e0398a 55%, #ffa84a 78%, #3a1768 79%, #120a2c 100%); }
 .miniReveal i { position: absolute; left: 41px; top: 24px; width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(180deg, #ffe874, #ff5a8c); }
 .miniReveal b { position: absolute; left: 14px; top: 38px; width: 102px; height: 34px; border-radius: 17px; background: #07050f; color: #fff; font: 600 12px/34px ui-monospace, monospace; letter-spacing: 3px; text-align: center; }
+.miniFerro { position: relative; width: 130px; height: 110px; border-radius: 12px; background: radial-gradient(circle at 50% 100%, #1b2230 0%, #07080c 70%); overflow: hidden; }
+.miniFerro i { position: absolute; bottom: 8px; width: 11px; border-radius: 6px 6px 1px 1px; background: linear-gradient(90deg, #02030a 0%, #4b556b 45%, #05060b 100%); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.miniFerro i:nth-child(1) { left: 31px; height: 38px; transform: rotate(-12deg); }
+.miniFerro i:nth-child(2) { left: 50px; height: 60px; transform: rotate(-5deg); }
+.miniFerro i:nth-child(3) { left: 60px; height: 78px; }
+.miniFerro i:nth-child(4) { left: 71px; height: 58px; transform: rotate(6deg); }
+.miniFerro i:nth-child(5) { left: 90px; height: 36px; transform: rotate(13deg); }
