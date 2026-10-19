@@ -269,3 +269,7 @@
 .miniFerro i:nth-child(3) { left: 60px; height: 78px; }
 .miniFerro i:nth-child(4) { left: 71px; height: 58px; transform: rotate(6deg); }
 .miniFerro i:nth-child(5) { left: 90px; height: 36px; transform: rotate(13deg); }
+.miniPrism { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: linear-gradient(180deg, #04060c 0%, #0a0e18 100%); }
+.miniPrism i { position: absolute; left: 0; top: 44px; width: 58px; height: 5px; border-radius: 3px; background: linear-gradient(90deg, rgba(255,255,255,0.05), #fff8ee); filter: blur(0.5px); }
+.miniPrism b { position: absolute; left: 52px; top: 26px; width: 34px; height: 34px; background: linear-gradient(160deg, rgba(150,190,240,0.30), rgba(70,100,150,0.12)); clip-path: polygon(50% 0, 100% 100%, 0 100%); border-radius: 3px; }
+.miniPrism em { position: absolute; left: 80px; top: 52px; width: 46px; height: 22px; background: linear-gradient(180deg, #ff3b30 0%, #ff9500 20%, #ffd60a 36%, #34c759 55%, #0a84ff 76%, #bf5af2 100%); clip-path: polygon(0 38%, 100% 0, 100% 100%, 0 62%); filter: blur(1px); opacity: 0.9; }
