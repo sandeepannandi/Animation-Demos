@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  prism: { dir: "packages/ui/src/components/prism", files: ["Prism.tsx", "prismMath.ts", "prismShader.ts", "prismDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   ferro: { dir: "packages/ui/src/components/ferrofluid", files: ["Ferrofluid.tsx", "ferroMath.ts", "ferroShader.ts", "ferroDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   reveal: { dir: "packages/ui/src/components/code-reveal", files: ["CodeReveal.tsx", "revealMath.ts", "revealShader.ts", "revealDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   coin: { dir: "packages/ui/src/components/coin", files: ["Coin.tsx", "coinMath.ts", "coinShader.ts", "coinDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -51,6 +52,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    prism: read(components.prism.dir, components.prism.files),
     ferro: read(components.ferro.dir, components.ferro.files),
     reveal: read(components.reveal.dir, components.reveal.files),
     coin: read(components.coin.dir, components.coin.files),
