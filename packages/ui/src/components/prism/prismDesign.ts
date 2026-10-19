@@ -5,6 +5,8 @@ export const PRISM_SIDE = 100;
 export const BEAM_Y = 140;
 export const BEAM_W = 9;
 export const SCREEN_X = 296;
+// How far the prism centre must stay from the card edge while dragging.
+export const DRAG_MARGIN = 45;
 // Resting spot, below the beam so the beam passes over the prism.
 export const PRISM_REST_X = 160;
 export const PRISM_REST_Y = 252;

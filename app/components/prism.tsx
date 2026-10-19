@@ -4,7 +4,7 @@ import { useReducedMotion } from "framer-motion";
 import {
   PRISM_DEFAULTS, createPrism, prismDown, prismMove, prismRelease, prismStep, prismVertices, tracePrism,
 } from "../../packages/ui/src/components/prism/prismMath";
-import { BEAM_W, BEAM_Y, PRISM_H, PRISM_REST_X, PRISM_REST_Y, PRISM_SIDE, PRISM_W } from "../../packages/ui/src/components/prism/prismDesign";
+import { BEAM_W, BEAM_Y, DRAG_MARGIN, PRISM_H, PRISM_REST_X, PRISM_REST_Y, PRISM_SIDE, PRISM_W } from "../../packages/ui/src/components/prism/prismDesign";
 import { PRISM_SHADER } from "../../packages/ui/src/components/prism/prismShader";
 import styles from "./prism.module.css";
 
@@ -142,13 +142,13 @@ export function PrismPreview() {
     const down = (ev: PointerEvent) => {
       if (latest.current.reduced) return;
       const p = local(ev);
-      prismDown(st, p.x, p.y);
+      prismDown(st, p.x, p.y, PRISM_W, PRISM_H, DRAG_MARGIN);
       canvas.setPointerCapture(ev.pointerId);
     };
     const move = (ev: PointerEvent) => {
       if (!st.down) return;
       const p = local(ev);
-      prismMove(st, p.x, p.y);
+      prismMove(st, p.x, p.y, PRISM_W, PRISM_H, DRAG_MARGIN);
     };
     const up = () => {
       prismRelease(st);

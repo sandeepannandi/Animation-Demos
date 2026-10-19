@@ -320,20 +320,33 @@ export function createPrism(x: number, y: number): PrismState {
   "worklet";
   return { x, y, vx: 0, vy: 0, tx: x, ty: y, gx: 0, gy: 0, tilt: PRISM_DEFAULTS.restTilt, tiltv: 0, down: 0, seq: 0 };
 }
-export function prismDown(st: PrismState, x: number, y: number) {
+// Clamp the drag so the prism's centre stays inside the card and it can
+// never be lost off-canvas. Bounds of 0 (the default) mean no clamp.
+function clampTarget(st: PrismState, x: number, y: number, bw: number, bh: number, m: number) {
+  "worklet";
+  if (bw <= 0 || bh <= 0) return { x, y };
+  let cx = x + st.gx;
+  let cy = y + st.gy;
+  cx = Math.max(m, Math.min(bw - m, cx));
+  cy = Math.max(m, Math.min(bh - m, cy));
+  return { x: cx - st.gx, y: cy - st.gy };
+}
+export function prismDown(st: PrismState, x: number, y: number, bw = 0, bh = 0, m = 0) {
   "worklet";
   if (!st.down) {
     st.gx = st.x - x;
     st.gy = st.y - y;
   }
   st.down = 1;
-  st.tx = x;
-  st.ty = y;
+  const c = clampTarget(st, x, y, bw, bh, m);
+  st.tx = c.x;
+  st.ty = c.y;
 }
-export function prismMove(st: PrismState, x: number, y: number) {
+export function prismMove(st: PrismState, x: number, y: number, bw = 0, bh = 0, m = 0) {
   "worklet";
-  st.tx = x;
-  st.ty = y;
+  const c = clampTarget(st, x, y, bw, bh, m);
+  st.tx = c.x;
+  st.ty = c.y;
 }
 export function prismRelease(st: PrismState) {
   "worklet";

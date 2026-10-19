@@ -14,7 +14,7 @@ import {
   type PrismState,
   type PrismTrace,
 } from "./prismMath";
-import { BEAM_W, BEAM_Y, PRISM_BACKGROUND, PRISM_H, PRISM_REST_X, PRISM_REST_Y, PRISM_SIDE, PRISM_W } from "./prismDesign";
+import { BEAM_W, BEAM_Y, DRAG_MARGIN, PRISM_BACKGROUND, PRISM_H, PRISM_REST_X, PRISM_REST_Y, PRISM_SIDE, PRISM_W } from "./prismDesign";
 import { PRISM_SHADER } from "./prismShader";
 
 export type PrismProps = {
@@ -147,8 +147,8 @@ export function Prism({
     const s = st.value;
     const p = pointer.value;
     if (p.seq !== s.seq) {
-      if (p.down && !s.down) prismDown(s, p.x, p.y);
-      else if (p.down) prismMove(s, p.x, p.y);
+      if (p.down && !s.down) prismDown(s, p.x, p.y, PRISM_W, PRISM_H, DRAG_MARGIN);
+      else if (p.down) prismMove(s, p.x, p.y, PRISM_W, PRISM_H, DRAG_MARGIN);
       else prismRelease(s);
       s.seq = p.seq;
     }
