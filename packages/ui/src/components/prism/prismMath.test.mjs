@@ -175,3 +175,23 @@ test('triangle vertices form an equilateral apex-up triangle', () => {
   assert.ok(v[1] < v[3] && v[1] < v[5]); // apex on top
   assert.ok(Math.abs(v[3] - v[5]) < 1e-9); // base horizontal
 });
+
+test('the prism cannot be dragged out of the card', () => {
+  const st = createPrism(160, 252);
+  prismDown(st, 160, 252, 320, 340, 45);
+  prismMove(st, -500, 900, 320, 340, 45);
+  for (let i = 0; i < 400; i++) prismStep(st, 1 / 60);
+  assert.ok(Math.abs(st.x - 45) < 1 && Math.abs(st.y - 295) < 1, `settled at ${st.x},${st.y}`);
+  // Grab offset is respected inside the clamp: grabbed 40,48 past the centre.
+  const st2 = createPrism(160, 252);
+  prismDown(st2, 200, 300, 320, 340, 45);
+  prismMove(st2, -500, 900, 320, 340, 45);
+  for (let i = 0; i < 400; i++) prismStep(st2, 1 / 60);
+  assert.ok(Math.abs(st2.x - 45) < 1 && Math.abs(st2.y - 295) < 1, `settled at ${st2.x},${st2.y}`);
+  // Without bounds the old behaviour is unchanged.
+  const st3 = createPrism(160, 252);
+  prismDown(st3, 160, 252);
+  prismMove(st3, -500, 900);
+  for (let i = 0; i < 400; i++) prismStep(st3, 1 / 60);
+  assert.ok(Math.abs(st3.x - -500) < 1 && Math.abs(st3.y - 900) < 1);
+});
