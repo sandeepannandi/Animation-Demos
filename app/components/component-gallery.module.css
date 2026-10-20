@@ -269,6 +269,9 @@
 .miniFerro i:nth-child(3) { left: 60px; height: 78px; }
 .miniFerro i:nth-child(4) { left: 71px; height: 58px; transform: rotate(6deg); }
 .miniFerro i:nth-child(5) { left: 90px; height: 36px; transform: rotate(13deg); }
+.miniHourglass { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: linear-gradient(180deg, #0d1220 0%, #101828 100%); }
+.miniHourglass i { position: absolute; left: 41px; top: 10px; width: 48px; height: 74px; border: 2px solid rgba(226, 234, 255, 0.5); border-radius: 8px; background: linear-gradient(180deg, rgba(226, 234, 255, 0.10), rgba(226, 234, 255, 0.03)); clip-path: polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%, 40% 50%); }
+.miniHourglass b { position: absolute; left: 49px; top: 18px; width: 32px; height: 58px; background: linear-gradient(180deg, #e3b158 0%, #e3b158 36%, rgba(227, 177, 88, 0) 36%, rgba(227, 177, 88, 0) 48%, #c98f2e 52%, #f0cd7e 100%); clip-path: polygon(0 0, 100% 0, 58% 47%, 100% 100%, 0 100%, 42% 47%); }
 .miniPrism { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: linear-gradient(180deg, #04060c 0%, #0a0e18 100%); }
 .miniPrism i { position: absolute; left: 0; top: 44px; width: 58px; height: 5px; border-radius: 3px; background: linear-gradient(90deg, rgba(255,255,255,0.05), #fff8ee); filter: blur(0.5px); }
 .miniPrism b { position: absolute; left: 52px; top: 26px; width: 34px; height: 34px; background: linear-gradient(160deg, rgba(150,190,240,0.30), rgba(70,100,150,0.12)); clip-path: polygon(50% 0, 100% 100%, 0 100%); border-radius: 3px; }
