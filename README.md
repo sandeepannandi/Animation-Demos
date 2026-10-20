@@ -15,13 +15,13 @@
 ---
 
 
-Nativelet is a collection of 31 gesture- and physics-driven components for React Native and Expo, built with Reanimated and Skia. Each component ships as real React Native source you can copy into your own app, with a live preview and copyable code on the website.
+Nativelet is a collection of 32 gesture- and physics-driven components for React Native and Expo, built with Reanimated and Skia. Each component ships as real React Native source you can copy into your own app, with a live preview and copyable code on the website.
 
 
 ## Components
 
 
-Preview Rail · Morph Capsule · Toast Stack · Liquid Tabs · Swipe Row · Expanding Card · Drag to Sort · Stacked Carousel · Gooey Menu · Theme Reveal · Glass Lens · Scrub Chart · Pinch Gallery · Page Curl · Orbit QR · Blossom QR · Light on Painting · Text Morph · Genie Dismiss · Folded Pass · GL Transitions · Bubble Picker · Mosaic Gallery · Split-Flap Board · Cloth Banner · Fogged Glass · Chaos Pendulum · Black Hole Lens · Coin · Code Reveal · Prism
+Preview Rail · Morph Capsule · Toast Stack · Liquid Tabs · Swipe Row · Expanding Card · Drag to Sort · Stacked Carousel · Gooey Menu · Theme Reveal · Glass Lens · Scrub Chart · Pinch Gallery · Page Curl · Orbit QR · Blossom QR · Light on Painting · Text Morph · Genie Dismiss · Folded Pass · GL Transitions · Bubble Picker · Mosaic Gallery · Split-Flap Board · Cloth Banner · Fogged Glass · Chaos Pendulum · Black Hole Lens · Coin · Code Reveal · Prism · Sand Hourglass
 
 
 ## Use a component
