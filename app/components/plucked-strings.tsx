@@ -2,10 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
-  STRING_COUNT, STR_DX, STR_H, STR_NODES, STR_W, STR_X0, STR_X1,
-  createStrings, stringNodeGlow, stringY, stringsDragTo, stringsRelease, stepStringsFrame, type StringsState,
+  STR_H, STR_SLOW, STR_W,
+  createStrings, stringsDragTo, stringsRelease, stepStringsFrame, type StringsState,
 } from "../../packages/ui/src/components/plucked-strings/stringMath";
-import { STR_BACKGROUND, STR_BOARD_EDGE, STR_DOT, STR_END_BAR, STR_PIN, STRING_SHADES } from "../../packages/ui/src/components/plucked-strings/stringDesign";
+import { drawStrings } from "./plucked-strings-draw";
 import styles from "./plucked-strings.module.css";
 
 export function PluckedStringsPreview() {
@@ -31,45 +31,7 @@ export function PluckedStringsPreview() {
 
     const draw = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = STR_BACKGROUND;
-      ctx.fillRect(0, 0, STR_W, STR_H);
-      ctx.fillStyle = STR_BOARD_EDGE;
-      ctx.beginPath();
-      ctx.roundRect(8, 60, STR_W - 8, STR_H - 90, 14);
-      ctx.fill();
-      ctx.fillStyle = STR_END_BAR;
-      ctx.fillRect(STR_X0 - 9, 74, 7, 232);
-      ctx.fillRect(STR_X1 + 2, 74, 7, 232);
-      // Strings: round dots bucketed by copper shade. Nodes sit 2 px apart,
-      // so the dots merge into a line whose highlights travel with the wave.
-      for (let shade = 0; shade < STRING_SHADES.length; shade++) {
-        const half = STR_DOT / 2;
-        ctx.fillStyle = STRING_SHADES[shade];
-        ctx.beginPath();
-        for (let k = 0; k < STRING_COUNT; k++) {
-          const base = k * STR_NODES;
-          const y0 = stringY(k);
-          for (let i = 0; i < STR_NODES; i++) {
-            const glow = stringNodeGlow(sim, k, i);
-            const bucket = Math.min(3, Math.floor((1 - glow) * 4));
-            if (bucket !== shade) continue;
-            const x = STR_X0 + i * STR_DX;
-            const y = y0 + sim.u[base + i];
-            ctx.moveTo(x + half, y);
-            ctx.arc(x, y, half, 0, 6.2832);
-          }
-        }
-        ctx.fill();
-      }
-      ctx.fillStyle = STR_PIN;
-      ctx.beginPath();
-      for (let k = 0; k < STRING_COUNT; k++) {
-        ctx.moveTo(STR_X0 - 5 + 2.5, stringY(k));
-        ctx.arc(STR_X0 - 5, stringY(k), 2.5, 0, 6.2832);
-        ctx.moveTo(STR_X1 + 5 + 2.5, stringY(k));
-        ctx.arc(STR_X1 + 5, stringY(k), 2.5, 0, 6.2832);
-      }
-      ctx.fill();
+      drawStrings(ctx, sim);
     };
 
     let raf = 0;
@@ -90,7 +52,7 @@ export function PluckedStringsPreview() {
           wasReduced = false;
         }
         if (pointer.down) stringsDragTo(sim, pointer.x, pointer.y);
-        stepStringsFrame(sim, dt * (latest.current.slow ? 0.25 : 1));
+        stepStringsFrame(sim, dt * (latest.current.slow ? STR_SLOW : 1));
       }
       draw();
       raf = requestAnimationFrame(tick);
@@ -135,12 +97,12 @@ export function PluckedStringsPreview() {
 
   return (
     <div className={styles.stage}>
-      <canvas ref={canvasRef} className={styles.canvas} style={{ width: STR_W, height: STR_H }} role="img" aria-label="Plucked strings web preview: drag a copper string and let go, waves reflect off the fixed ends and fade" />
+      <canvas ref={canvasRef} className={styles.canvas} style={{ width: STR_W, height: STR_H }} role="img" aria-label="Plucked strings web preview: drag a copper string and let go, the strings ring at real pitch and fade" />
       <div className={styles.row}>
         <button type="button" className={slow ? styles.chipPrimary : styles.chip} onClick={() => setSlow((v) => !v)} aria-pressed={slow}>Slow motion: {slow ? "on" : "off"}</button>
         <button type="button" className={reduced ? styles.chipPrimary : styles.chip} onClick={() => setReducedOverride(!reduced)} aria-pressed={reduced}>Reduce motion: {reduced ? "on" : "off"}</button>
       </div>
-      <p className={styles.hint}>Drag a string up or down, then let go. Thick strings carry slower waves.</p>
+      <p className={styles.hint}>Drag a string and let go, or swipe across them to strum. Slow motion shows the wave.</p>
     </div>
   );
 }
