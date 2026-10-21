@@ -2,20 +2,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
-  GRAIN_COUNT, HOUR_BOT, HOUR_BOT_HALF, HOUR_CX, HOUR_MID, HOUR_NECK_HALF, HOUR_TOP, HOUR_TOP_HALF,
-  SAND_DEFAULTS, createSand, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
+  GRAIN_COUNT, HOUR_BOT, HOUR_BOT_HALF, HOUR_CX, HOUR_TOP, HOUR_TOP_HALF,
+  SAND_DEFAULTS, createSand, hourGlassOutline, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
 } from "../../packages/ui/src/components/sand-hourglass/sandMath";
 import { HOUR_BACKGROUND, HOUR_GLASS, HOUR_GLASS_SOFT, HOUR_H, HOUR_PLATE, HOUR_PLATE_EDGE, HOUR_W, SAND_SHADES, SAND_STROKES } from "../../packages/ui/src/components/sand-hourglass/sandDesign";
 import styles from "./sand-hourglass.module.css";
 
 function traceGlass(ctx: CanvasRenderingContext2D) {
+  const pts = hourGlassOutline();
   ctx.beginPath();
-  ctx.moveTo(HOUR_CX - HOUR_TOP_HALF, HOUR_TOP);
-  ctx.lineTo(HOUR_CX + HOUR_TOP_HALF, HOUR_TOP);
-  ctx.lineTo(HOUR_CX + HOUR_NECK_HALF, HOUR_MID);
-  ctx.lineTo(HOUR_CX + HOUR_BOT_HALF, HOUR_BOT);
-  ctx.lineTo(HOUR_CX - HOUR_BOT_HALF, HOUR_BOT);
-  ctx.lineTo(HOUR_CX - HOUR_NECK_HALF, HOUR_MID);
+  ctx.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) ctx.lineTo(pts[i], pts[i + 1]);
   ctx.closePath();
 }
 
@@ -61,6 +58,8 @@ export function SandHourglassPreview() {
       ctx.fillStyle = HOUR_GLASS_SOFT;
       ctx.fill();
       // Grains, bucketed by shade then size (batch fillStyle changes).
+      // Round dots like the Skia round-cap points, never squares: sand is
+      // round, pixels are not.
       for (let shade = 0; shade < SAND_SHADES.length; shade++) {
         for (let big = 0; big <= 1; big++) {
           const s = SAND_STROKES[big];
@@ -69,7 +68,8 @@ export function SandHourglassPreview() {
           ctx.beginPath();
           for (let i = 0; i < sim.n; i++) {
             if (sim.shade[i] !== shade || sim.big[i] !== big) continue;
-            ctx.rect(sim.x[i] - half, sim.y[i] - half, s, s);
+            ctx.moveTo(sim.x[i] + half, sim.y[i]);
+            ctx.arc(sim.x[i], sim.y[i], half, 0, 6.2832);
           }
           ctx.fill();
         }

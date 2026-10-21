@@ -19,7 +19,26 @@ export const HOUR_TOP_HALF = 104;
 export const HOUR_BOT_HALF = 104;
 export const HOUR_NECK_HALF = 8;
 export const HOUR_NECK_TUBE = 0;
-export const GRAIN_COUNT = 1400;
+// Bulb silhouette: how rounded the glass is. The profile is a rational
+// curve, (1+a)t / (1+a t): 0 at the neck, 1 at the cap, concave (wide upper
+// bulb) with a finite slope at the neck, so the funnel still converges
+// steeply enough for sand to flow - a pure power curve flares into a shelf
+// there and the sand arches and jams. Shared by the walls, the spawn
+// lattice, the escape test and both renderers, so they can never disagree.
+export const HOUR_BULB_CURVE = 0.86;
+// Wall segments per bulb slope (a smooth curve needs several short chords).
+export const HOUR_SLOPE_STEPS = 14;
+// Number of straight walls: top cap, bottom cap, 2 x 2 segmented slopes.
+export const HOUR_WALL_COUNT = 2 + HOUR_SLOPE_STEPS * 4;
+
+/** Silhouette profile: half-width fraction along one bulb, t=1 at the wide
+ *  cap and t=0 at the neck. */
+export function hourProfile(t: number) {
+  'worklet';
+  const tt = clampNum(t, 0, 1);
+  return ((1 + HOUR_BULB_CURVE) * tt) / (1 + HOUR_BULB_CURVE * tt);
+}
+export const GRAIN_COUNT = 1250;
 
 export type SandOptions = {
   gravity: number;      // px/s^2 along the gravity angle
@@ -31,19 +50,30 @@ export type SandOptions = {
   rolling: number;      // extra damping on contacting grains, 1/s
   maxSpeed: number;     // px/s, stability cap
   fixedDt: number;      // fixed substep, s
+  throatCap: number;    // max speed along gravity inside the neck, px/s
+  collimate: number;    // damping of across-gravity motion in the neck, 1/s
 };
 
 export const SAND_DEFAULTS: SandOptions = {
   gravity: 1500,
   airDrag: 0.35,
-  friction: 0.62,
-  wallFriction: 0.42,
+  friction: 0.55,
+  wallFriction: 0.18,
   stiffness: 0.75,
   iterations: 2,
   rolling: 2.4,
   maxSpeed: 1600,
   fixedDt: 1 / 120,
+  throatCap: 30,
+  collimate: 9,
 };
+
+// A real hourglass meters sand through a tiny orifice: grains exit slowly
+// (Beverloo) and the stream below contracts as it accelerates. The wide V
+// neck alone would flood, so inside the throat band we cap velocity along
+// gravity (the orifice meters the flow) and damp the across-stream motion
+// (the hole collimates it). Grains queue above the neck like a real funnel.
+export const HOUR_THROAT = 12;
 
 // Gravity-direction spring: the hourglass "turns" with a little inertia.
 const ANGLE_SPRING = { k: 120, c: 17 };
@@ -112,34 +142,45 @@ function wallSegment(out: Float32Array, slot: number, x1: number, y1: number, x2
 
 function buildWalls(): Float32Array {
   'worklet';
-  const w = new Float32Array(48);
+  const w = new Float32Array(HOUR_WALL_COUNT * 6);
   const cx = HOUR_CX, top = HOUR_TOP, mid = HOUR_MID, bot = HOUR_BOT;
-  const th = HOUR_TOP_HALF, bh = HOUR_BOT_HALF, nh = HOUR_NECK_HALF;
+  const th = HOUR_TOP_HALF, bh = HOUR_BOT_HALF;
   const upY = (top + mid) / 2, loY = (mid + bot) / 2;
-  const nt = HOUR_NECK_TUBE;
-  wallSegment(w, 0, cx - th, top, cx + th, top, cx, upY);              // top cap
-  wallSegment(w, 1, cx - th, top, cx - nh, mid - nt, cx, upY);         // upper left slope
-  wallSegment(w, 2, cx + th, top, cx + nh, mid - nt, cx, upY);         // upper right slope
-  wallSegment(w, 3, cx - nh, mid - nt, cx - nh, mid + nt, cx + nh, mid); // neck tube left
-  wallSegment(w, 4, cx + nh, mid - nt, cx + nh, mid + nt, cx - nh, mid); // neck tube right
-  wallSegment(w, 5, cx - nh, mid + nt, cx - bh, bot, cx, loY);         // lower left slope
-  wallSegment(w, 6, cx + nh, mid + nt, cx + bh, bot, cx, loY);         // lower right slope
-  wallSegment(w, 7, cx - bh, bot, cx + bh, bot, cx, loY);              // bottom cap
+  let slot = 0;
+  wallSegment(w, slot++, cx - th, top, cx + th, top, cx, upY); // top cap
+  // Segmented curved slopes, following the silhouette profile.
+  for (let k = 0; k < HOUR_SLOPE_STEPS; k++) {
+    // t = 0 at the neck, 1 at the wide cap; k climbs away from the neck.
+    const t0 = k / HOUR_SLOPE_STEPS, t1 = (k + 1) / HOUR_SLOPE_STEPS;
+    const y0 = mid - (mid - top) * t0;
+    const y1 = mid - (mid - top) * t1;
+    const h0 = HOUR_NECK_HALF + (th - HOUR_NECK_HALF) * hourProfile(t0);
+    const h1 = HOUR_NECK_HALF + (th - HOUR_NECK_HALF) * hourProfile(t1);
+    wallSegment(w, slot++, cx - h0, y0, cx - h1, y1, cx, upY); // upper left
+    wallSegment(w, slot++, cx + h0, y0, cx + h1, y1, cx, upY); // upper right
+    const ly0 = mid + (bot - mid) * t0;
+    const ly1 = mid + (bot - mid) * t1;
+    const l0 = HOUR_NECK_HALF + (bh - HOUR_NECK_HALF) * hourProfile(t0);
+    const l1 = HOUR_NECK_HALF + (bh - HOUR_NECK_HALF) * hourProfile(t1);
+    wallSegment(w, slot++, cx - l0, ly0, cx - l1, ly1, cx, loY); // lower left
+    wallSegment(w, slot++, cx + l0, ly0, cx + l1, ly1, cx, loY); // lower right
+  }
+  wallSegment(w, slot++, cx - bh, bot, cx + bh, bot, cx, loY); // bottom cap
   return w;
 }
 
-/** Interior half-width of the upper bulb at height y (linear silhouette). */
+/** Interior half-width of the upper bulb at height y (curved silhouette). */
 export function upperHalfWidth(y: number) {
   'worklet';
-  const t = clampNum((HOUR_MID - HOUR_NECK_TUBE - y) / (HOUR_MID - HOUR_NECK_TUBE - HOUR_TOP), 0, 1);
-  return HOUR_NECK_HALF + (HOUR_TOP_HALF - HOUR_NECK_HALF) * t;
+  const t = clampNum((HOUR_MID - y) / (HOUR_MID - HOUR_TOP), 0, 1);
+  return HOUR_NECK_HALF + (HOUR_TOP_HALF - HOUR_NECK_HALF) * hourProfile(t);
 }
 
 /** Interior half-width of the lower bulb at height y. */
 export function lowerHalfWidth(y: number) {
   'worklet';
-  const t = clampNum((y - HOUR_MID - HOUR_NECK_TUBE) / (HOUR_BOT - HOUR_MID - HOUR_NECK_TUBE), 0, 1);
-  return HOUR_NECK_HALF + (HOUR_BOT_HALF - HOUR_NECK_HALF) * t;
+  const t = clampNum((y - HOUR_MID) / (HOUR_BOT - HOUR_MID), 0, 1);
+  return HOUR_NECK_HALF + (HOUR_BOT_HALF - HOUR_NECK_HALF) * hourProfile(t);
 }
 
 export function createSand(opts: SandOptions = SAND_DEFAULTS, n: number = GRAIN_COUNT, seed = 20261020, settled = false): SandState {
@@ -151,8 +192,10 @@ export function createSand(opts: SandOptions = SAND_DEFAULTS, n: number = GRAIN_
   const r = new Float32Array(n);
   const shade = new Uint8Array(n), big = new Uint8Array(n);
   // Jittered lattice filling the upper bulb from just above the neck upward
-  // (or the lower bulb from the floor upward when `settled`).
-  const spacing = 3.45;
+  // (or the lower bulb from the floor upward when `settled`). Spacing must
+  // exceed the largest grain diameter, or the first frame is a pressure
+  // explosion instead of a settled pile.
+  const spacing = 3.2;
   let i = 0;
   for (let row = 0; i < n; row++) {
     const yy = settled ? HOUR_BOT - 4 - row * spacing : HOUR_MID - HOUR_NECK_TUBE - 4 - row * spacing;
@@ -160,10 +203,13 @@ export function createSand(opts: SandOptions = SAND_DEFAULTS, n: number = GRAIN_
     const half = (settled ? lowerHalfWidth(yy) : upperHalfWidth(yy)) - 3;
     const offset = (row % 2) * (spacing / 2);
     for (let xx = HOUR_CX - half + offset; xx <= HOUR_CX + half && i < n; xx += spacing) {
-      x[i] = xx + (rand() - 0.5) * 0.9;
-      y[i] = yy + (rand() - 0.5) * 0.9;
-      r[i] = 1.25 + rand() * 0.6; // 1.25 .. 1.85 px
-      shade[i] = Math.floor(rand() * 4) & 3;
+      x[i] = xx + (rand() - 0.5) * 0.5;
+      y[i] = yy + (rand() - 0.5) * 0.5;
+      r[i] = 1.05 + rand() * 0.45; // 1.05 .. 1.5 px
+      // Real sand is mostly mid-tones with a few dark grains mixed in, not
+      // an even four-way split.
+      const sh = rand();
+      shade[i] = sh < 0.34 ? 0 : sh < 0.67 ? 1 : sh < 0.9 ? 2 : 3;
       big[i] = rand() < 0.55 ? 1 : 0;
       i++;
     }
@@ -227,8 +273,9 @@ function hashIndex(s: SandState, px: number, py: number) {
 function solveSubstep(s: SandState, h: number, o: SandOptions) {
   'worklet';
   const n = s.n;
-  const gx = Math.cos(s.angle) * o.gravity;
-  const gy = Math.sin(s.angle) * o.gravity;
+  const ca = Math.cos(s.angle), sa = Math.sin(s.angle);
+  const gx = ca * o.gravity;
+  const gy = sa * o.gravity;
   const dragF = Math.exp(-o.airDrag * h);
   // Integrate: remember the substep-start position, then predict forward.
   for (let i = 0; i < n; i++) {
@@ -297,7 +344,7 @@ function solveSubstep(s: SandState, h: number, o: SandOptions) {
     // tangential friction cap so sand can grip the glass.
     for (let i = 0; i < n; i++) {
       const ri = s.r[i];
-      for (let w = 0; w < 8; w++) {
+      for (let w = 0; w < HOUR_WALL_COUNT; w++) {
         const b = w * 6;
         const ax = s.walls[b], ay = s.walls[b + 1], bx = s.walls[b + 2], by = s.walls[b + 3];
         const nx = s.walls[b + 4], ny = s.walls[b + 5];
@@ -328,6 +375,25 @@ function solveSubstep(s: SandState, h: number, o: SandOptions) {
         }
       }
     }
+  }
+  // Orifice metering: inside the neck band, cap each grain's per-substep
+  // travel along gravity and damp its across-stream travel. Velocity caps
+  // alone cannot hold back the queue - the positional solver would just
+  // shove grains through the neck - so the limit is applied to the accepted
+  // displacement itself, and the velocity re-derivation below inherits it.
+  // Grains above the band queue up like sand pressing on a real orifice;
+  // below it they free-fall and the stream contracts as it accelerates.
+  const capStep = o.throatCap * h;
+  for (let i = 0; i < n; i++) {
+    if (Math.abs(s.y[i] - HOUR_MID) >= HOUR_THROAT) continue;
+    const dx = s.x[i] - s.ox[i], dy = s.y[i] - s.oy[i];
+    const along = dx * ca + dy * sa;
+    const perp = dx * -sa + dy * ca;
+    const a2 = Math.min(along, capStep);
+    const p2 = perp * 0.35;
+    s.x[i] = s.ox[i] + a2 * ca + p2 * -sa;
+    s.y[i] = s.oy[i] + a2 * sa + p2 * ca;
+    s.contact[i] = 1;
   }
   // Re-derive velocities from the accepted displacements (inelastic, like
   // sand), then a touch of rolling resistance on grains that touched.
@@ -369,6 +435,34 @@ export function stepSandFrame(s: SandState, frameDt: number, o: SandOptions = SA
   s.time += frameDt;
 }
 
+/** The glass outline as a flat [x0,y0, x1,y1, ...] polygon, clockwise from
+ *  the top-left corner. Both renderers draw exactly this, so the visible
+ *  glass always matches the walls the physics uses. */
+export function hourGlassOutline(): number[] {
+  'worklet';
+  const cx = HOUR_CX;
+  const steps = HOUR_SLOPE_STEPS;
+  const poly: number[] = [cx - HOUR_TOP_HALF, HOUR_TOP, cx + HOUR_TOP_HALF, HOUR_TOP];
+  for (let k = steps - 1; k >= 0; k--) {
+    const y = HOUR_MID - (HOUR_MID - HOUR_TOP) * (k / steps);
+    poly.push(cx + upperHalfWidth(y), y);
+  }
+  for (let k = 1; k <= steps; k++) {
+    const y = HOUR_MID + (HOUR_BOT - HOUR_MID) * (k / steps);
+    poly.push(cx + lowerHalfWidth(y), y);
+  }
+  poly.push(cx - HOUR_BOT_HALF, HOUR_BOT);
+  for (let k = steps - 1; k >= 1; k--) {
+    const y = HOUR_MID + (HOUR_BOT - HOUR_MID) * (k / steps);
+    poly.push(cx - lowerHalfWidth(y), y);
+  }
+  for (let k = 1; k <= steps - 1; k++) {
+    const y = HOUR_MID - (HOUR_MID - HOUR_TOP) * (k / steps);
+    poly.push(cx - upperHalfWidth(y), y);
+  }
+  return poly;
+}
+
 // --- Test / debug helpers -------------------------------------------------
 
 /** Highest |velocity| of any grain, px/s. */
@@ -395,14 +489,8 @@ export function sandCountAbove(s: SandState, y: number = HOUR_MID) {
  *  margin, so grains resting against a corner are not false positives. */
 export function sandEscaped(s: SandState, tol = 2) {
   'worklet';
-  // Silhouette polygon (clockwise): top cap, right slopes, bottom, left slopes.
-  const cx = HOUR_CX, nh = HOUR_NECK_HALF, nt = HOUR_NECK_TUBE;
-  const poly = [
-    cx - HOUR_TOP_HALF, HOUR_TOP, cx + HOUR_TOP_HALF, HOUR_TOP,
-    cx + nh, HOUR_MID - nt, cx + nh, HOUR_MID + nt,
-    cx + HOUR_BOT_HALF, HOUR_BOT, cx - HOUR_BOT_HALF, HOUR_BOT,
-    cx - nh, HOUR_MID + nt, cx - nh, HOUR_MID - nt,
-  ];
+  // Silhouette polygon (clockwise), sampled along the curved profile.
+  const poly = hourGlassOutline();
   const m = poly.length / 2;
   let bad = 0;
   for (let i = 0; i < s.n; i++) {
@@ -414,7 +502,7 @@ export function sandEscaped(s: SandState, tol = 2) {
     }
     if (inside) continue;
     let best = 1e9;
-    for (let w = 0; w < 8; w++) {
+    for (let w = 0; w < HOUR_WALL_COUNT; w++) {
       const b = w * 6;
       const abx = s.walls[b + 2] - s.walls[b], aby = s.walls[b + 3] - s.walls[b + 1];
       const len2 = abx * abx + aby * aby;
