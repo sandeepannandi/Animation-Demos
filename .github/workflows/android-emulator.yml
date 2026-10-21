@@ -65,6 +65,7 @@ jobs:
             bash scripts/android-reveal.sh
             bash scripts/android-prism.sh
             bash scripts/android-hourglass.sh
+            bash scripts/android-strings.sh
             bash scripts/android-gestures.sh
             bash scripts/android-core.sh
             bash scripts/android-slowmotion.sh
