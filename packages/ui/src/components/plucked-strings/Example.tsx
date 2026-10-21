@@ -16,7 +16,7 @@ export default function Example({ onFeedback }: { onFeedback?: (event: "touch" |
           <Text style={{ fontSize: 12, color: slow ? "#fff" : "#315843", fontFamily: "Geist-Regular" }}>Slow motion: {slow ? "on" : "off"}</Text>
         </Pressable>
       </View>
-      <Text style={{ fontSize: 12, color: "#63705f", fontFamily: "Geist-Regular" }}>Drag a string up or down, then let go. Thick strings carry slower waves.</Text>
+      <Text style={{ fontSize: 12, color: "#63705f", fontFamily: "Geist-Regular" }}>Drag a string and let go, or swipe across them to strum. Slow motion shows the wave.</Text>
     </View>
   );
 }
