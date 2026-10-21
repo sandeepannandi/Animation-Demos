@@ -15,7 +15,7 @@
 ---
 
 
-Nativelet is a collection of 32 gesture- and physics-driven components for React Native and Expo, built with Reanimated and Skia. Each component ships as real React Native source you can copy into your own app, with a live preview and copyable code on the website.
+Nativelet is a growing collection of gesture- and physics-driven components for React Native and Expo, built with Reanimated and Skia. Each component ships as real React Native source you can copy into your own app, with a live preview and copyable code on the website.
 
 
 ## Components

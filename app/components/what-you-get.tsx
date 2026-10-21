@@ -1,10 +1,11 @@
+import { COMPONENT_COUNT } from "./component-registry";
 import styles from "./what-you-get.module.css";
 
 const REPO = "https://github.com/sandeepannandi/Nativelet";
 
 const items = [
   {
-    title: "13 interaction components",
+    title: `${COMPONENT_COUNT} interaction components`,
     body: "Each one is a small, focused piece: a chart you scrub, a menu that goes gooey, a lens that follows your finger.",
   },
   {
