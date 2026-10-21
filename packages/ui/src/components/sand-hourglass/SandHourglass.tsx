@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AccessibilityInfo, PanResponder, View, type ViewStyle } from "react-native";
-import { Canvas, Fill, Path, Points, Skia } from "@shopify/react-native-skia";
+import { Canvas, Fill, LinearGradient, Path, Points, RoundedRect, Skia, vec } from "@shopify/react-native-skia";
 import { useDerivedValue, useFrameCallback, useSharedValue } from "react-native-reanimated";
 import {
   GRAIN_COUNT, HOUR_BOT, HOUR_BOT_HALF, HOUR_CX, HOUR_TOP, HOUR_TOP_HALF,
-  SAND_DEFAULTS, createSand, hourGlassOutline, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
+  SAND_DEFAULTS, createSand, hourGlassOutline, hourSheen, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
 } from "./sandMath";
-import { HOUR_BACKGROUND, HOUR_GLASS, HOUR_GLASS_SOFT, HOUR_H, HOUR_PLATE, HOUR_PLATE_EDGE, HOUR_W, SAND_SHADES, SAND_STROKES } from "./sandDesign";
+import {
+  HOUR_BACK, HOUR_BACKGROUND, HOUR_FRONT, HOUR_GLASS, HOUR_GLASS_SHADE, HOUR_H, HOUR_W, SAND_RIM, SAND_RIM_STROKE, SAND_SHADES, SAND_STROKES,
+  type HourPrim,
+} from "./sandDesign";
 
 export type SandHourglassProps = {
   slowMotion?: boolean;
@@ -30,6 +33,23 @@ function glassPath() {
   return p;
 }
 const GLASS = glassPath();
+const SHEEN = hourSheen().map((line) => {
+  const p = Skia.Path.Make();
+  p.moveTo(line[0], line[1]);
+  for (let i = 2; i < line.length; i += 2) p.lineTo(line[i], line[i + 1]);
+  return p;
+});
+
+function Prim({ p }: { p: HourPrim }) {
+  const solid = typeof p.fill === "string" ? p.fill : undefined;
+  return (
+    <RoundedRect x={p.x} y={p.y} width={p.w} height={p.h} r={p.r} color={solid}>
+      {typeof p.fill === "string" ? null : (
+        <LinearGradient start={vec(p.fill.lin[0], p.fill.lin[1])} end={vec(p.fill.lin[2], p.fill.lin[3])} colors={p.fill.stops.map((s) => s[1])} positions={p.fill.stops.map((s) => s[0])} />
+      )}
+    </RoundedRect>
+  );
+}
 
 // Android stops presenting a canvas whose only change is internal on an idle
 // screen. A 1 px layout change every frame keeps it drawing.
@@ -79,6 +99,17 @@ function GrainBucket({ sim, frame, shade, big }: BucketProps) {
       strokeCap="round"
     />
   );
+}
+
+function GrainRim({ sim, frame }: { sim: { value: SandState }; frame: { value: number } }) {
+  const points = useDerivedValue(() => {
+    frame.value;
+    const s = sim.value;
+    const out: { x: number; y: number }[] = [];
+    for (let i = 0; i < s.n; i++) out.push({ x: s.x[i], y: s.y[i] });
+    return out;
+  });
+  return <Points points={points} mode="points" color={SAND_RIM} style="stroke" strokeWidth={SAND_RIM_STROKE} strokeCap="round" />;
 }
 
 export function SandHourglass({
@@ -190,18 +221,30 @@ export function SandHourglass({
       {!reduce ? <CanvasKeepAlive /> : null}
       <Canvas pointerEvents="none" style={{ width: HOUR_W, height: HOUR_H }}>
         <Fill color={HOUR_BACKGROUND} />
-        {/* top and bottom plates */}
-        <Path path={GLASS} color={HOUR_GLASS_SOFT} style="fill" />
+        <RoundedRect x={0} y={0} width={HOUR_W} height={HOUR_H} r={0}>
+          <LinearGradient start={vec(0, 0)} end={vec(0, HOUR_H)} colors={["#131b2e", "#080c16"]} />
+        </RoundedRect>
+        {HOUR_BACK.map((p, i) => (
+          <Prim key={`b${i}`} p={p} />
+        ))}
+        <Path path={GLASS} style="fill">
+          <LinearGradient start={vec(HOUR_GLASS_SHADE.lin[0], 0)} end={vec(HOUR_GLASS_SHADE.lin[2], 0)} colors={HOUR_GLASS_SHADE.stops.map((s) => s[1])} positions={HOUR_GLASS_SHADE.stops.map((s) => s[0])} />
+        </Path>
+        <GrainRim sim={sim} frame={frame} />
         {[0, 1, 2, 3].map((shade) =>
           [0, 1].map((big) => (
             <GrainBucket key={`${shade}-${big}`} sim={sim} frame={frame} shade={shade} big={big} />
           )),
         )}
-        <Path path={GLASS} color={HOUR_GLASS} style="stroke" strokeWidth={3.5} strokeJoin="round" />
+        <Path path={GLASS} color="rgba(226, 234, 255, 0.10)" style="stroke" strokeWidth={7} strokeJoin="round" />
+        <Path path={GLASS} color={HOUR_GLASS} style="stroke" strokeWidth={2.2} strokeJoin="round" />
+        {SHEEN.map((p, i) => (
+          <Path key={`s${i}`} path={p} color="rgba(255, 255, 255, 0.42)" style="stroke" strokeWidth={2.2} strokeCap="round" />
+        ))}
+        {HOUR_FRONT.map((p, i) => (
+          <Prim key={`f${i}`} p={p} />
+        ))}
       </Canvas>
-      {/* plates drawn as native views so they sit above the glass edges */}
-      <View pointerEvents="none" style={{ position: "absolute", left: HOUR_CX - HOUR_TOP_HALF - 10, top: HOUR_TOP - 12, width: (HOUR_TOP_HALF + 10) * 2, height: 12, borderRadius: 6, backgroundColor: HOUR_PLATE, borderBottomWidth: 2, borderBottomColor: HOUR_PLATE_EDGE }} />
-      <View pointerEvents="none" style={{ position: "absolute", left: HOUR_CX - HOUR_BOT_HALF - 10, top: HOUR_BOT, width: (HOUR_BOT_HALF + 10) * 2, height: 12, borderRadius: 6, backgroundColor: HOUR_PLATE, borderTopWidth: 2, borderTopColor: HOUR_PLATE_EDGE }} />
     </View>
   );
 }

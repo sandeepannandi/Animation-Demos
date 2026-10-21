@@ -64,7 +64,7 @@ export const SAND_DEFAULTS: SandOptions = {
   rolling: 2.4,
   maxSpeed: 1600,
   fixedDt: 1 / 120,
-  throatCap: 30,
+  throatCap: 22,
   collimate: 9,
 };
 
@@ -554,4 +554,24 @@ export function sandPileSlope(s: SandState) {
   if (m < 3) return 0;
   const slope = (m * sxy - sx * sy) / (m * sxx - sx * sx);
   return Math.abs(slope);
+}
+
+/** Polylines for the glass's specular streaks, as flat [x, y, ...] arrays:
+ *  a bright line running down the left of each bulb, inset from the wall. */
+export function hourSheen(): number[][] {
+  'worklet';
+  const lines: number[][] = [];
+  const up: number[] = [];
+  for (let k = 0; k <= 10; k++) {
+    const y = HOUR_TOP + 20 + ((HOUR_MID - HOUR_TOP - 48) * k) / 10;
+    up.push(HOUR_CX - upperHalfWidth(y) + 9, y);
+  }
+  lines.push(up);
+  const lo: number[] = [];
+  for (let k = 0; k <= 10; k++) {
+    const y = HOUR_MID + 26 + ((HOUR_BOT - HOUR_MID - 46) * k) / 10;
+    lo.push(HOUR_CX - lowerHalfWidth(y) + 9, y);
+  }
+  lines.push(lo);
+  return lines;
 }
