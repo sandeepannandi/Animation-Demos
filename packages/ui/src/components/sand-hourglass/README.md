@@ -10,10 +10,10 @@ above the pinch, and the falling stream contracts as it accelerates.
 
 ## Files
 
-- `SandHourglass.tsx` — Skia/Reanimated component (glass, plates, grain buckets).
+- `SandHourglass.tsx` — Skia/Reanimated component (shaded glass, wooden frame, grain layers, sheen).
 - `sandMath.ts` — the simulation: pure worklets, no imports, seeded and
   deterministic so web, native and the unit tests agree.
-- `sandDesign.ts` — colors, card size and grain stroke widths.
+- `sandDesign.ts` — scene data (frame, glass shading), colors and grain sizes.
 - `Example.tsx` — demo wiring (Flip button, slow-motion switch, haptics hook).
 
 ## Use
@@ -53,7 +53,7 @@ inertia); release springs back to vertical; a fling or the Flip button rotates
 down 180 degrees. Slow motion steps the clock about four times slower. Reduce
 Motion spawns the sand already settled, no animation.
 
-Honest limits: grains are round dots of two visual sizes; there is no grain
+Honest limits: grains are overlapping discs, not a continuum, drawn with a dark under-layer so the pile reads as one mass; there is no grain
 spin or air entrainment of the stream; the drain is faster than a real
 hourglass; the upper bulb drains funnel-flow style (a crater forms) where a
 real tall bulb keeps a flatter sinking surface; physical-device frame rate is

@@ -3,9 +3,9 @@ import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "framer-motion";
 import {
   GRAIN_COUNT, HOUR_BOT, HOUR_BOT_HALF, HOUR_CX, HOUR_TOP, HOUR_TOP_HALF,
-  SAND_DEFAULTS, createSand, hourGlassOutline, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
+  SAND_DEFAULTS, createSand, hourGlassOutline, hourSheen, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
 } from "../../packages/ui/src/components/sand-hourglass/sandMath";
-import { HOUR_BACKGROUND, HOUR_GLASS, HOUR_GLASS_SOFT, HOUR_H, HOUR_PLATE, HOUR_PLATE_EDGE, HOUR_W, SAND_SHADES, SAND_STROKES } from "../../packages/ui/src/components/sand-hourglass/sandDesign";
+import { HOUR_BACK, HOUR_BACKGROUND, HOUR_FRONT, HOUR_GLASS, HOUR_GLASS_SHADE, HOUR_H, HOUR_W, SAND_RIM, SAND_RIM_STROKE, SAND_SHADES, SAND_STROKES, type HourPrim } from "../../packages/ui/src/components/sand-hourglass/sandDesign";
 import styles from "./sand-hourglass.module.css";
 
 function traceGlass(ctx: CanvasRenderingContext2D) {
@@ -39,23 +39,38 @@ export function SandHourglassPreview() {
     let wasReduced = false;
     let seenFlips = flips;
 
-    const plate = (y: number, top: boolean) => {
-      const w = ((top ? HOUR_TOP_HALF : HOUR_BOT_HALF) + 10) * 2;
-      const x = HOUR_CX - w / 2;
-      ctx.fillStyle = HOUR_PLATE;
+    const prim = (p: HourPrim) => {
+      if (typeof p.fill === "string") ctx.fillStyle = p.fill;
+      else {
+        const g = ctx.createLinearGradient(p.fill.lin[0], p.fill.lin[1], p.fill.lin[2], p.fill.lin[3]);
+        for (const [o, c] of p.fill.stops) g.addColorStop(o, c);
+        ctx.fillStyle = g;
+      }
       ctx.beginPath();
-      ctx.roundRect(x, y, w, 12, 6);
+      ctx.roundRect(p.x, p.y, p.w, p.h, p.r);
       ctx.fill();
-      ctx.fillStyle = HOUR_PLATE_EDGE;
-      ctx.fillRect(x + 4, top ? y + 10 : y, w - 8, 2);
     };
+    const sheen = hourSheen();
 
     const draw = () => {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = HOUR_BACKGROUND;
+      const bg = ctx.createLinearGradient(0, 0, 0, HOUR_H);
+      bg.addColorStop(0, "#131b2e");
+      bg.addColorStop(1, "#080c16");
+      ctx.fillStyle = bg;
       ctx.fillRect(0, 0, HOUR_W, HOUR_H);
+      for (const p of HOUR_BACK) prim(p);
       traceGlass(ctx);
-      ctx.fillStyle = HOUR_GLASS_SOFT;
+      const gg = ctx.createLinearGradient(HOUR_GLASS_SHADE.lin[0], 0, HOUR_GLASS_SHADE.lin[2], 0);
+      for (const [o, c] of HOUR_GLASS_SHADE.stops) gg.addColorStop(o, c);
+      ctx.fillStyle = gg;
+      ctx.fill();
+      ctx.fillStyle = SAND_RIM;
+      ctx.beginPath();
+      for (let i = 0; i < sim.n; i++) {
+        ctx.moveTo(sim.x[i] + SAND_RIM_STROKE / 2, sim.y[i]);
+        ctx.arc(sim.x[i], sim.y[i], SAND_RIM_STROKE / 2, 0, 6.2832);
+      }
       ctx.fill();
       // Grains, bucketed by shade then size (batch fillStyle changes).
       // Round dots like the Skia round-cap points, never squares: sand is
@@ -75,12 +90,23 @@ export function SandHourglassPreview() {
         }
       }
       traceGlass(ctx);
-      ctx.strokeStyle = HOUR_GLASS;
-      ctx.lineWidth = 3.5;
       ctx.lineJoin = "round";
+      ctx.strokeStyle = "rgba(226, 234, 255, 0.10)";
+      ctx.lineWidth = 7;
       ctx.stroke();
-      plate(HOUR_TOP - 12, true);
-      plate(HOUR_BOT, false);
+      ctx.strokeStyle = HOUR_GLASS;
+      ctx.lineWidth = 2.2;
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.42)";
+      ctx.lineWidth = 2.2;
+      ctx.lineCap = "round";
+      for (const line of sheen) {
+        ctx.beginPath();
+        ctx.moveTo(line[0], line[1]);
+        for (let i = 2; i < line.length; i += 2) ctx.lineTo(line[i], line[i + 1]);
+        ctx.stroke();
+      }
+      for (const p of HOUR_FRONT) prim(p);
     };
 
     let raf = 0;
