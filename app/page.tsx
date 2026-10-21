@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  strings: { dir: "packages/ui/src/components/plucked-strings", files: ["PluckedStrings.tsx", "stringMath.ts", "stringDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   hourglass: { dir: "packages/ui/src/components/sand-hourglass", files: ["SandHourglass.tsx", "sandMath.ts", "sandDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   prism: { dir: "packages/ui/src/components/prism", files: ["Prism.tsx", "prismMath.ts", "prismShader.ts", "prismDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   reveal: { dir: "packages/ui/src/components/code-reveal", files: ["CodeReveal.tsx", "revealMath.ts", "revealShader.ts", "revealDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -52,6 +53,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    strings: read(components.strings.dir, components.strings.files),
     hourglass: read(components.hourglass.dir, components.hourglass.files),
     prism: read(components.prism.dir, components.prism.files),
     reveal: read(components.reveal.dir, components.reveal.files),
