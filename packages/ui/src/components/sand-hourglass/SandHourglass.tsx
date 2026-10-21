@@ -3,8 +3,8 @@ import { AccessibilityInfo, PanResponder, View, type ViewStyle } from "react-nat
 import { Canvas, Fill, Path, Points, Skia } from "@shopify/react-native-skia";
 import { useDerivedValue, useFrameCallback, useSharedValue } from "react-native-reanimated";
 import {
-  GRAIN_COUNT, HOUR_BOT, HOUR_BOT_HALF, HOUR_CX, HOUR_MID, HOUR_NECK_HALF, HOUR_TOP, HOUR_TOP_HALF,
-  SAND_DEFAULTS, createSand, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
+  GRAIN_COUNT, HOUR_BOT, HOUR_BOT_HALF, HOUR_CX, HOUR_TOP, HOUR_TOP_HALF,
+  SAND_DEFAULTS, createSand, hourGlassOutline, sandDragTo, sandFlip, sandReleaseDrag, stepSandFrame, type SandState,
 } from "./sandMath";
 import { HOUR_BACKGROUND, HOUR_GLASS, HOUR_GLASS_SOFT, HOUR_H, HOUR_PLATE, HOUR_PLATE_EDGE, HOUR_W, SAND_SHADES, SAND_STROKES } from "./sandDesign";
 
@@ -20,15 +20,12 @@ export type SandHourglassProps = {
 
 type Pointer = { x: number; y: number; down: number; seq: number; vy: number };
 
-// Glass silhouette: the wall polygon the physics uses, drawn as one path.
+// Glass silhouette: the exact outline the physics uses, drawn as one path.
 function glassPath() {
+  const pts = hourGlassOutline();
   const p = Skia.Path.Make();
-  p.moveTo(HOUR_CX - HOUR_TOP_HALF, HOUR_TOP);
-  p.lineTo(HOUR_CX + HOUR_TOP_HALF, HOUR_TOP);
-  p.lineTo(HOUR_CX + HOUR_NECK_HALF, HOUR_MID);
-  p.lineTo(HOUR_CX + HOUR_BOT_HALF, HOUR_BOT);
-  p.lineTo(HOUR_CX - HOUR_BOT_HALF, HOUR_BOT);
-  p.lineTo(HOUR_CX - HOUR_NECK_HALF, HOUR_MID);
+  p.moveTo(pts[0], pts[1]);
+  for (let i = 2; i < pts.length; i += 2) p.lineTo(pts[i], pts[i + 1]);
   p.close();
   return p;
 }
