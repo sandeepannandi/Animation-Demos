@@ -119,16 +119,18 @@ function TileShape({ model, kind, i }: { model: Model; kind: "old" | "new" | "sk
 }
 
 function BandShape({ model, i }: { model: Model; i: number }) {
-  const x = useDerivedValue(() => model.value.bands[i]?.x0 ?? 0);
-  const y = useDerivedValue(() => (model.value.bands[i]?.y ?? 0) - RS_DOT_R);
-  const w = useDerivedValue(() => {
+  // One RRect value built on the UI thread: the native side rejects a
+  // RoundedRect whose separate animated props are momentarily inconsistent.
+  const rr = useDerivedValue(() => {
     const b = model.value.bands[i];
-    const v = b ? b.x1 - b.x0 : 0;
-    return Number.isFinite(v) ? Math.max(0, v) : 0;
+    const x0 = b && Number.isFinite(b.x0) ? b.x0 : 0;
+    const x1 = b && Number.isFinite(b.x1) ? b.x1 : 0;
+    const y = b && Number.isFinite(b.y) ? b.y : 0;
+    const w = Math.max(0.5, x1 - x0);
+    return rrect(rect(x0, y - RS_DOT_R, w, RS_DOT_R * 2), Math.min(RS_DOT_R, w / 2), Math.min(RS_DOT_R, w / 2));
   });
-  const r = useDerivedValue(() => Math.min(RS_DOT_R, w.value / 2));
-  const o = useDerivedValue(() => model.value.bands[i]?.alpha ?? 0);
-  return <RoundedRect x={x} y={y} width={w} height={RS_DOT_R * 2} r={r} color={RS_BAND} opacity={o} />;
+  const o = useDerivedValue(() => (model.value.bands[i] ? model.value.bands[i].alpha : 0));
+  return <RoundedRect rect={rr} color={RS_BAND} opacity={o} />;
 }
 
 function DotShape({ model, i }: { model: Model; i: number }) {
