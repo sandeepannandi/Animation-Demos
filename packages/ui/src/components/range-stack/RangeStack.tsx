@@ -1,7 +1,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { AccessibilityInfo, Pressable, Text, View, type ViewStyle } from "react-native";
 import {
-  Canvas, Circle, Group, LinearGradient, RoundedRect, Shadow, rect, rrect, vec,
+  Canvas, Circle, Group, LinearGradient, Path, RoundedRect, Shadow, Skia, rect, rrect, vec,
 } from "@shopify/react-native-skia";
 import Animated, {
   interpolateColor, useAnimatedStyle, useDerivedValue, useFrameCallback, useSharedValue,
@@ -121,41 +121,42 @@ function TileShape({ model, kind, i }: { model: Model; kind: "old" | "new" | "sk
   );
 }
 
+// Animated rounded shapes are built as Paths on the UI thread. Emulator CI
+// showed the native RoundedRect rejecting the animated rect/size props the
+// moment the screen mounted ("Invalid properties for rounded rect"); a Path
+// has no such validation and draws the same rounded square.
+function roundedPath(x: number, y: number, w: number, h: number, r: number) {
+  'worklet';
+  const p = Skia.Path.Make();
+  const ww = Number.isFinite(w) ? Math.max(0.5, w) : 0.5;
+  const hh = Number.isFinite(h) ? Math.max(0.5, h) : 0.5;
+  const rr = Math.max(0, Math.min(r, ww / 2, hh / 2));
+  p.addRRect(Skia.RRectXY(Skia.XYWHRect(Number.isFinite(x) ? x : 0, Number.isFinite(y) ? y : 0, ww, hh), rr, rr));
+  return p;
+}
+
 function BandShape({ model, i }: { model: Model; i: number }) {
-  // One RRect value built on the UI thread: the native side rejects a
-  // RoundedRect whose separate animated props are momentarily inconsistent.
-  const rr = useDerivedValue(() => {
+  const path = useDerivedValue(() => {
     const b = model.value.bands[i];
-    const x0 = b && Number.isFinite(b.x0) ? b.x0 : 0;
-    const x1 = b && Number.isFinite(b.x1) ? b.x1 : 0;
-    const y = b && Number.isFinite(b.y) ? b.y : 0;
-    const w = Math.max(0.5, x1 - x0);
-    return rrect(rect(x0, y - RS_DOT_R, w, RS_DOT_R * 2), Math.min(RS_DOT_R_CORNER, w / 2), Math.min(RS_DOT_R_CORNER, w / 2));
+    const x0 = b ? b.x0 : 0;
+    const x1 = b ? b.x1 : 0;
+    const y = b ? b.y : 0;
+    return roundedPath(x0, y - RS_DOT_R, x1 - x0, RS_DOT_R * 2, RS_DOT_R_CORNER);
   });
   const o = useDerivedValue(() => (model.value.bands[i] ? model.value.bands[i].alpha : 0));
-  return <RoundedRect rect={rr} color={RS_BAND} opacity={o} />;
+  return <Path path={path} color={RS_BAND} opacity={o} />;
 }
 
 function DotShape({ model, i }: { model: Model; i: number }) {
-  const cx = useDerivedValue(() => {
-    const d = model.value.dots[i];
-    return d ? rsCellX(d.day) : 0;
-  });
-  const cy = useDerivedValue(() => {
-    const d = model.value.dots[i];
-    return d ? rsCellY(d.day) : 0;
-  });
-  const r = useDerivedValue(() => {
-    const d = model.value.dots[i];
-    return d ? RS_DOT_R * Math.max(0, d.scale) : 0;
-  });
-  const rr = useDerivedValue(() => {
+  const path = useDerivedValue(() => {
     const d = model.value.dots[i];
     const k = d ? Math.max(0.001, d.scale) : 0.001;
     const h = RS_DOT_R * k;
-    return rrect(rect(cx.value - h, cy.value - h, h * 2, h * 2), RS_DOT_R_CORNER * k, RS_DOT_R_CORNER * k);
+    const cx = d ? rsCellX(d.day) : 0;
+    const cy = d ? rsCellY(d.day) : 0;
+    return roundedPath(cx - h, cy - h, h * 2, h * 2, RS_DOT_R_CORNER * k);
   });
-  return <RoundedRect rect={rr} color={RS_DOT} />;
+  return <Path path={path} color={RS_DOT} />;
 }
 
 function DayLabel({ model, day, ff }: { model: Model; day: number; ff?: string }) {
