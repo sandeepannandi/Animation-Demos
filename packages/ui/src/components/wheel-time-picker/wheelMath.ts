@@ -14,7 +14,7 @@ export const WHEEL_CY = 150;
 export const WHEEL_ROW_H = 40;
 export const WHEEL_DTH = 0.36; // rad between rows
 export const WHEEL_R = WHEEL_ROW_H / WHEEL_DTH;
-export const WHEEL_COLS = [84, 170, 252];
+export const WHEEL_COLS = [67, 160, 253];
 export const WHEEL_SIZES = [12, 60, 2];
 export const WHEEL_WRAP = [1, 1, 0];
 export const WHEEL_SLOW = 0.25;
@@ -210,11 +210,12 @@ export function drumTicks(p: number, speed: number): { ticks: Tick[]; blur: numb
     if (Math.abs(th) >= 1.4) continue;
     const c = Math.cos(th);
     const whole = Math.abs(row - Math.round(row)) < 0.01;
+    if (!whole) continue;
     out.push({
       y: WHEEL_CY + WHEEL_R * Math.sin(th),
       len: (whole ? 7 : 4) * c * (1 + (1 - sharp) * 0.9),
       w: (whole ? 1.6 : 1.1) * (0.6 + c * 0.4),
-      a: (0.18 + 0.5 * sharp) * c * (whole ? 1 : 0.7),
+      a: (0.14 + 0.4 * sharp) * c,
     });
   }
   return { ticks: out, blur: 2.6 * (1 - sharp) };

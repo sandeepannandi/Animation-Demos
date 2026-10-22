@@ -2,7 +2,7 @@ import {
   WHEEL_COLS, WHEEL_CY, WHEEL_H, WHEEL_SIZES, WHEEL_W, drumTicks, rowGeom, rowLabel, rowOffset, type WheelState,
 } from "../../packages/ui/src/components/wheel-time-picker/wheelMath";
 import {
-  WHEEL_ACCENT, WHEEL_BAND, WHEEL_BAND_H, WHEEL_BAND_W, WHEEL_BAND_X, WHEEL_COLON_X, WHEEL_DRUM_MID, WHEEL_DRUM_TOP,
+  WHEEL_BAND_RADIUS, WHEEL_DRUM_RADIUS, WHEEL_DRUM_W, WHEEL_DRUM_X, WHEEL_SHEET_RADIUS, WHEEL_BAND, WHEEL_BAND_H, WHEEL_BAND_W, WHEEL_BAND_X, WHEEL_COLON_X, WHEEL_DRUM_MID, WHEEL_DRUM_TOP,
   WHEEL_FONT_SIZE, WHEEL_INK_DIM, WHEEL_INK_LIT, WHEEL_SHEET, WHEEL_SHEET_EDGE, WHEEL_TITLE, WHEEL_TITLE_Y,
 } from "../../packages/ui/src/components/wheel-time-picker/wheelDesign";
 
@@ -17,7 +17,7 @@ export function drawWheel(ctx: CanvasRenderingContext2D, s: WheelState) {
   ctx.clearRect(0, 0, WHEEL_W, WHEEL_H);
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(0.5, 0.5, WHEEL_W - 1, WHEEL_H - 1, 26);
+  ctx.roundRect(0.5, 0.5, WHEEL_W - 1, WHEEL_H - 1, WHEEL_SHEET_RADIUS);
   ctx.fillStyle = WHEEL_SHEET;
   ctx.fill();
   ctx.strokeStyle = WHEEL_SHEET_EDGE;
@@ -30,27 +30,14 @@ export function drawWheel(ctx: CanvasRenderingContext2D, s: WheelState) {
   bg.addColorStop(1, WHEEL_DRUM_TOP);
   ctx.fillStyle = bg;
   ctx.beginPath();
-  ctx.roundRect(12, 54, WHEEL_W - 24, WHEEL_H - 108, 18);
+  ctx.roundRect(WHEEL_DRUM_X, 54, WHEEL_DRUM_W, WHEEL_H - 108, WHEEL_DRUM_RADIUS);
   ctx.fill();
 
   const top = WHEEL_CY - WHEEL_BAND_H / 2;
-  ctx.save();
-  ctx.filter = "blur(10px)";
-  ctx.globalAlpha = 0.22;
-  ctx.fillStyle = WHEEL_ACCENT;
-  ctx.beginPath();
-  ctx.roundRect(WHEEL_BAND_X, top, WHEEL_BAND_W, WHEEL_BAND_H, 12);
-  ctx.fill();
-  ctx.restore();
   ctx.fillStyle = WHEEL_BAND;
   ctx.beginPath();
-  ctx.roundRect(WHEEL_BAND_X, top, WHEEL_BAND_W, WHEEL_BAND_H, 12);
+  ctx.roundRect(WHEEL_BAND_X, top, WHEEL_BAND_W, WHEEL_BAND_H, WHEEL_BAND_RADIUS);
   ctx.fill();
-  ctx.strokeStyle = WHEEL_ACCENT;
-  ctx.globalAlpha = 0.55;
-  ctx.lineWidth = 1;
-  ctx.stroke();
-  ctx.globalAlpha = 1;
 
   for (let d = 0; d < 3; d++) {
     const m = s.drums[d];
@@ -85,26 +72,22 @@ export function drawWheel(ctx: CanvasRenderingContext2D, s: WheelState) {
       ctx.globalAlpha = g.a;
       ctx.font = `500 ${WHEEL_FONT_SIZE}px ${siteFont()}`;
       ctx.filter = g.blur > 0.15 ? `blur(${(g.blur * 0.6).toFixed(2)}px)` : "none";
-      if (g.lit > 0.05) {
-        ctx.shadowColor = WHEEL_ACCENT;
-        ctx.shadowBlur = 10 * g.lit;
-      }
       ctx.fillStyle = mixHex(WHEEL_INK_DIM, WHEEL_INK_LIT, g.lit);
       ctx.fillText(rowLabel(d, i), 0, 1);
       ctx.restore();
     }
   }
   ctx.font = `400 ${WHEEL_FONT_SIZE}px ${siteFont()}`;
-  ctx.fillStyle = WHEEL_ACCENT;
+  ctx.fillStyle = WHEEL_INK_LIT;
   ctx.fillText(":", WHEEL_COLON_X + 6, WHEEL_CY - 1);
 
   const fadeTop = ctx.createLinearGradient(0, 40, 0, 96);
   fadeTop.addColorStop(0, WHEEL_SHEET);
-  fadeTop.addColorStop(1, "rgba(13,15,20,0)");
+  fadeTop.addColorStop(1, "rgba(16,17,20,0)");
   ctx.fillStyle = fadeTop;
   ctx.fillRect(0, 40, WHEEL_W, 56);
   const fadeBot = ctx.createLinearGradient(0, WHEEL_H - 96, 0, WHEEL_H - 40);
-  fadeBot.addColorStop(0, "rgba(13,15,20,0)");
+  fadeBot.addColorStop(0, "rgba(16,17,20,0)");
   fadeBot.addColorStop(1, WHEEL_SHEET);
   ctx.fillStyle = fadeBot;
   ctx.fillRect(0, WHEEL_H - 96, WHEEL_W, 56);

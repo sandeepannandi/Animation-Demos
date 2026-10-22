@@ -10,7 +10,7 @@ import {
   type WheelState,
 } from "./wheelMath";
 import {
-  WHEEL_ACCENT, WHEEL_BAND, WHEEL_BAND_H, WHEEL_BAND_W, WHEEL_BAND_X, WHEEL_COLON_X, WHEEL_DRUM_MID, WHEEL_DRUM_TOP,
+  WHEEL_BAND, WHEEL_BAND_RADIUS, WHEEL_DRUM_RADIUS, WHEEL_DRUM_W, WHEEL_DRUM_X, WHEEL_SHEET_RADIUS, WHEEL_BAND_H, WHEEL_BAND_W, WHEEL_BAND_X, WHEEL_COLON_X, WHEEL_DRUM_MID, WHEEL_DRUM_TOP,
   WHEEL_FONT_SIZE, WHEEL_INK_DIM, WHEEL_INK_LIT, WHEEL_SHEET, WHEEL_SHEET_EDGE, WHEEL_TITLE, WHEEL_TITLE_Y,
 } from "./wheelDesign";
 
@@ -22,6 +22,8 @@ export type WheelTimePickerProps = {
   onChange?: (time: WheelTime) => void;
   onFeedback?: (event: "tick" | "settle") => void;
   label?: string;
+  /** Font family for every label. Defaults to the platform font; pass your app font once loaded. */
+  fontFamily?: string;
   style?: ViewStyle;
 };
 
@@ -48,7 +50,7 @@ function CanvasKeepAlive() {
   return <View pointerEvents="none" style={{ position: "absolute", width: 1, height: 1, opacity: 0, transform: [{ translateX: beat % 2 }] }} />;
 }
 
-function Row({ st, frame, d, i }: { st: Shared; frame: { value: number }; d: number; i: number }) {
+function Row({ st, frame, d, i, ff }: { st: Shared; frame: { value: number }; d: number; i: number; ff?: string }) {
   const style = useAnimatedStyle(() => {
     frame.value;
     const m = st.value.drums[d];
@@ -57,8 +59,8 @@ function Row({ st, frame, d, i }: { st: Shared; frame: { value: number }; d: num
     return {
       opacity: g.a * (1 - g.blur / 9),
       color: interpolateColor(g.lit, [0, 1], [WHEEL_INK_DIM, WHEEL_INK_LIT]),
-      textShadowColor: g.lit > 0.5 ? WHEEL_ACCENT : WHEEL_INK_DIM,
-      textShadowRadius: g.blur * 1.6 + g.lit * 3,
+      textShadowColor: WHEEL_INK_DIM,
+      textShadowRadius: g.blur * 1.4,
       transform: [{ translateY: g.y - WHEEL_CY }, { scaleY: Math.max(0.02, g.s) }, { scaleX: 0.92 + 0.08 * g.s }],
     };
   });
@@ -67,7 +69,7 @@ function Row({ st, frame, d, i }: { st: Shared; frame: { value: number }; d: num
       pointerEvents="none"
       style={[{
         position: "absolute", left: WHEEL_COLS[d] - 40, top: WHEEL_CY - 22, width: 80, height: 44, textAlign: "center",
-        fontSize: WHEEL_FONT_SIZE, fontWeight: "500", lineHeight: 44, includeFontPadding: false, opacity: 0,
+        fontSize: WHEEL_FONT_SIZE, fontWeight: "500", lineHeight: 44, includeFontPadding: false, fontFamily: ff, opacity: 0,
         color: WHEEL_INK_DIM, textShadowOffset: { width: 0, height: 0 },
       }, style]}
     >
@@ -103,6 +105,7 @@ export const WheelTimePicker = forwardRef<WheelTimePickerHandle, WheelTimePicker
     reducedMotion,
     onChange,
     onFeedback,
+    fontFamily: ff,
     label = "Time picker. Three drums for hour, minute and AM or PM. Drag or fling a drum, it coasts and snaps to a row.",
     style,
   },
@@ -211,32 +214,28 @@ export const WheelTimePicker = forwardRef<WheelTimePickerHandle, WheelTimePicker
 
   return (
     <View
-      style={[{ width: WHEEL_W, height: WHEEL_H, borderRadius: 26, backgroundColor: WHEEL_SHEET, borderWidth: 1, borderColor: WHEEL_SHEET_EDGE, overflow: "hidden" }, style]}
+      style={[{ width: WHEEL_W, height: WHEEL_H, borderRadius: WHEEL_SHEET_RADIUS, backgroundColor: WHEEL_SHEET, borderWidth: 1, borderColor: WHEEL_SHEET_EDGE, overflow: "hidden" }, style]}
       accessibilityLabel={label}
     >
       {!reduce ? <CanvasKeepAlive /> : null}
       <Canvas pointerEvents="none" style={{ position: "absolute", left: -1, top: -1, width: WHEEL_W, height: WHEEL_H }}>
-        <RoundedRect x={12} y={54} width={WHEEL_W - 24} height={WHEEL_H - 108} r={18}>
+        <RoundedRect x={WHEEL_DRUM_X} y={54} width={WHEEL_DRUM_W} height={WHEEL_H - 108} r={WHEEL_DRUM_RADIUS}>
           <LinearGradient start={vec(0, 54)} end={vec(0, WHEEL_H - 54)} colors={[WHEEL_DRUM_TOP, WHEEL_DRUM_MID, WHEEL_DRUM_TOP]} positions={[0, 0.5, 1]} />
         </RoundedRect>
-        <RoundedRect x={WHEEL_BAND_X} y={bandTop} width={WHEEL_BAND_W} height={WHEEL_BAND_H} r={12} color={WHEEL_ACCENT} opacity={0.22}>
-          <BlurMask blur={14} style="normal" />
-        </RoundedRect>
-        <RoundedRect x={WHEEL_BAND_X} y={bandTop} width={WHEEL_BAND_W} height={WHEEL_BAND_H} r={12} color={WHEEL_BAND} />
-        <RoundedRect x={WHEEL_BAND_X} y={bandTop} width={WHEEL_BAND_W} height={WHEEL_BAND_H} r={12} color={WHEEL_ACCENT} style="stroke" strokeWidth={1} opacity={0.55} />
+        <RoundedRect x={WHEEL_BAND_X} y={bandTop} width={WHEEL_BAND_W} height={WHEEL_BAND_H} r={WHEEL_BAND_RADIUS} color={WHEEL_BAND} />
         {[0, 1, 2].map((d) => (<Ticks key={d} st={st} frame={frame} d={d} />))}
       </Canvas>
-      <Animated.Text pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: WHEEL_TITLE_Y - 11, textAlign: "center", fontSize: 13, letterSpacing: 1.2, color: WHEEL_INK_DIM, includeFontPadding: false }}>{WHEEL_TITLE}</Animated.Text>
-      {hourRows.map((i) => (<Row key={`h${i}`} st={st} frame={frame} d={0} i={i} />))}
-      {minRows.map((i) => (<Row key={`m${i}`} st={st} frame={frame} d={1} i={i} />))}
-      {perRows.map((i) => (<Row key={`p${i}`} st={st} frame={frame} d={2} i={i} />))}
-      <Animated.Text pointerEvents="none" style={{ position: "absolute", left: WHEEL_COLON_X, top: WHEEL_CY - 22, width: 12, textAlign: "center", fontSize: WHEEL_FONT_SIZE, lineHeight: 44, color: WHEEL_ACCENT, includeFontPadding: false }}>:</Animated.Text>
+      <Animated.Text pointerEvents="none" style={{ position: "absolute", left: 0, right: 0, top: WHEEL_TITLE_Y - 11, textAlign: "center", fontSize: 13, letterSpacing: 1.2, color: WHEEL_INK_DIM, includeFontPadding: false, fontFamily: ff }}>{WHEEL_TITLE}</Animated.Text>
+      {hourRows.map((i) => (<Row key={`h${i}`} st={st} frame={frame} d={0} i={i} ff={ff} />))}
+      {minRows.map((i) => (<Row key={`m${i}`} st={st} frame={frame} d={1} i={i} ff={ff} />))}
+      {perRows.map((i) => (<Row key={`p${i}`} st={st} frame={frame} d={2} i={i} ff={ff} />))}
+      <Animated.Text pointerEvents="none" style={{ position: "absolute", left: WHEEL_COLON_X, top: WHEEL_CY - 22, width: 12, textAlign: "center", fontSize: WHEEL_FONT_SIZE, lineHeight: 44, color: WHEEL_INK_LIT, includeFontPadding: false, fontFamily: ff }}>:</Animated.Text>
       <Canvas pointerEvents="none" style={{ position: "absolute", left: -1, top: -1, width: WHEEL_W, height: WHEEL_H }}>
         <RoundedRect x={0} y={0} width={WHEEL_W} height={96}>
-          <LinearGradient start={vec(0, 40)} end={vec(0, 96)} colors={[WHEEL_SHEET, "rgba(13,15,20,0)"]} />
+          <LinearGradient start={vec(0, 40)} end={vec(0, 96)} colors={[WHEEL_SHEET, "rgba(16,17,20,0)"]} />
         </RoundedRect>
         <RoundedRect x={0} y={WHEEL_H - 96} width={WHEEL_W} height={96}>
-          <LinearGradient start={vec(0, WHEEL_H - 96)} end={vec(0, WHEEL_H - 40)} colors={["rgba(13,15,20,0)", WHEEL_SHEET]} />
+          <LinearGradient start={vec(0, WHEEL_H - 96)} end={vec(0, WHEEL_H - 40)} colors={["rgba(16,17,20,0)", WHEEL_SHEET]} />
         </RoundedRect>
       </Canvas>
       {[0, 1, 2].map((d) => (
