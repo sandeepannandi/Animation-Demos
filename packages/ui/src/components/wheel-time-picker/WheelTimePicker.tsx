@@ -231,10 +231,10 @@ export const WheelTimePicker = forwardRef<WheelTimePickerHandle, WheelTimePicker
       {perRows.map((i) => (<Row key={`p${i}`} st={st} frame={frame} d={2} i={i} ff={ff} />))}
       <Animated.Text pointerEvents="none" style={{ position: "absolute", left: WHEEL_COLON_X, top: WHEEL_CY - 22, width: 12, textAlign: "center", fontSize: WHEEL_FONT_SIZE, lineHeight: 44, color: WHEEL_INK_LIT, includeFontPadding: false, fontFamily: ff }}>:</Animated.Text>
       <Canvas pointerEvents="none" style={{ position: "absolute", left: -1, top: -1, width: WHEEL_W, height: WHEEL_H }}>
-        <RoundedRect x={0} y={0} width={WHEEL_W} height={96}>
+        <RoundedRect x={0} y={0} width={WHEEL_W} height={96} r={0}>
           <LinearGradient start={vec(0, 40)} end={vec(0, 96)} colors={[WHEEL_SHEET, "rgba(16,17,20,0)"]} />
         </RoundedRect>
-        <RoundedRect x={0} y={WHEEL_H - 96} width={WHEEL_W} height={96}>
+        <RoundedRect x={0} y={WHEEL_H - 96} width={WHEEL_W} height={96} r={0}>
           <LinearGradient start={vec(0, WHEEL_H - 96)} end={vec(0, WHEEL_H - 40)} colors={["rgba(16,17,20,0)", WHEEL_SHEET]} />
         </RoundedRect>
       </Canvas>

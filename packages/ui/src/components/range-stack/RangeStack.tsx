@@ -264,8 +264,8 @@ export const RangeStack = forwardRef<RangeStackHandle, RangeStackProps>(function
         {SLOTS4.map((i) => <BandShape key={`b${i}`} model={model} i={i} />)}
         {SLOTS4.map((i) => <DotShape key={`d${i}`} model={model} i={i} />)}
         <RoundedRect x={RS_STRIP_X} y={RS_STRIP_Y} width={RS_STRIP_W} height={RS_STRIP_H} r={10} color={RS_STRIP} />
-        <RoundedRect x={0} y={318} width={RS_W} height={1} color={RS_SHEET_EDGE} />
-        <RoundedRect x={20} y={349} width={38} height={1} color={RS_INK} />
+        <RoundedRect x={0} y={318} width={RS_W} height={1} color={RS_SHEET_EDGE} r={0} />
+        <RoundedRect x={20} y={349} width={38} height={1} color={RS_INK} r={0} />
         <RoundedRect x={220} y={322} width={80} height={34} r={8} color={RS_DOT} />
         {SLOTS3.map((i) => <TileShape key={`s${i}`} model={model} kind="skel" i={i} />)}
         <RoundedRect x={36} y={cy - 6} width={92} height={12} r={4} color={RS_SKELETON} opacity={barOpacity}>
