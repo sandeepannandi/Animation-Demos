@@ -123,10 +123,12 @@ function BandShape({ model, i }: { model: Model; i: number }) {
   const y = useDerivedValue(() => (model.value.bands[i]?.y ?? 0) - RS_DOT_R);
   const w = useDerivedValue(() => {
     const b = model.value.bands[i];
-    return b ? b.x1 - b.x0 : 0;
+    const v = b ? b.x1 - b.x0 : 0;
+    return Number.isFinite(v) ? Math.max(0, v) : 0;
   });
+  const r = useDerivedValue(() => Math.min(RS_DOT_R, w.value / 2));
   const o = useDerivedValue(() => model.value.bands[i]?.alpha ?? 0);
-  return <RoundedRect x={x} y={y} width={w} height={RS_DOT_R * 2} r={RS_DOT_R} color={RS_BAND} opacity={o} />;
+  return <RoundedRect x={x} y={y} width={w} height={RS_DOT_R * 2} r={r} color={RS_BAND} opacity={o} />;
 }
 
 function DotShape({ model, i }: { model: Model; i: number }) {
