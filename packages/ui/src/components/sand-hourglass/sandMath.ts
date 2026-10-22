@@ -31,6 +31,11 @@ export const HOUR_SLOPE_STEPS = 24;
 // Number of straight walls: top cap, bottom cap, 2 x 2 segmented slopes.
 export const HOUR_WALL_COUNT = 2 + HOUR_SLOPE_STEPS * 4;
 
+export function clampNum(value: number, min: number, max: number) {
+  'worklet';
+  return Math.max(min, Math.min(max, Number.isFinite(value) ? value : min));
+}
+
 /** Silhouette profile: half-width fraction along one bulb, t=1 at the wide
  *  cap and t=0 at the neck. */
 export function hourProfile(t: number) {
@@ -110,10 +115,6 @@ export type SandState = {
   settled: number;   // 1 when spawned already settled in the lower bulb
 };
 
-export function clampNum(value: number, min: number, max: number) {
-  'worklet';
-  return Math.max(min, Math.min(max, Number.isFinite(value) ? value : min));
-}
 
 // mulberry32: small seeded generator, stable across platforms.
 export function sandRandom(seed: number) {
