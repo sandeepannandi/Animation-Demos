@@ -142,7 +142,17 @@ function DotShape({ model, i }: { model: Model; i: number }) {
     const d = model.value.dots[i];
     return d ? RS_DOT_R * Math.max(0, d.scale) : 0;
   });
-  return <Circle cx={cx} cy={cy} r={r} color={RS_DOT} />;
+  const halo = useDerivedValue(() => r.value * 1.34);
+  const haloA = useDerivedValue(() => {
+    const d = model.value.dots[i];
+    return d ? 0.11 * Math.min(1, Math.max(0, d.scale)) : 0;
+  });
+  return (
+    <>
+      <Circle cx={cx} cy={cy} r={halo} color={RS_DOT} opacity={haloA} />
+      <Circle cx={cx} cy={cy} r={r} color={RS_DOT} />
+    </>
+  );
 }
 
 function DayLabel({ model, day }: { model: Model; day: number }) {
