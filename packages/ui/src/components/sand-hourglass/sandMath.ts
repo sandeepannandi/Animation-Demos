@@ -27,7 +27,7 @@ export const HOUR_NECK_TUBE = 0;
 // lattice, the escape test and both renderers, so they can never disagree.
 export const HOUR_BULB_CURVE = 0.86;
 // Wall segments per bulb slope (a smooth curve needs several short chords).
-export const HOUR_SLOPE_STEPS = 14;
+export const HOUR_SLOPE_STEPS = 24;
 // Number of straight walls: top cap, bottom cap, 2 x 2 segmented slopes.
 export const HOUR_WALL_COUNT = 2 + HOUR_SLOPE_STEPS * 4;
 
@@ -38,7 +38,7 @@ export function hourProfile(t: number) {
   const tt = clampNum(t, 0, 1);
   return ((1 + HOUR_BULB_CURVE) * tt) / (1 + HOUR_BULB_CURVE * tt);
 }
-export const GRAIN_COUNT = 1250;
+export const GRAIN_COUNT = 2400;
 
 export type SandOptions = {
   gravity: number;      // px/s^2 along the gravity angle
@@ -195,7 +195,7 @@ export function createSand(opts: SandOptions = SAND_DEFAULTS, n: number = GRAIN_
   // (or the lower bulb from the floor upward when `settled`). Spacing must
   // exceed the largest grain diameter, or the first frame is a pressure
   // explosion instead of a settled pile.
-  const spacing = 3.2;
+  const spacing = 2.3;
   let i = 0;
   for (let row = 0; i < n; row++) {
     const yy = settled ? HOUR_BOT - 4 - row * spacing : HOUR_MID - HOUR_NECK_TUBE - 4 - row * spacing;
@@ -205,7 +205,7 @@ export function createSand(opts: SandOptions = SAND_DEFAULTS, n: number = GRAIN_
     for (let xx = HOUR_CX - half + offset; xx <= HOUR_CX + half && i < n; xx += spacing) {
       x[i] = xx + (rand() - 0.5) * 0.5;
       y[i] = yy + (rand() - 0.5) * 0.5;
-      r[i] = 1.05 + rand() * 0.45; // 1.05 .. 1.5 px
+      r[i] = 0.74 + rand() * 0.33; // 0.74 .. 1.07 px: fine sand
       // Real sand is mostly mid-tones with a few dark grains mixed in, not
       // an even four-way split.
       const sh = rand();
@@ -215,7 +215,7 @@ export function createSand(opts: SandOptions = SAND_DEFAULTS, n: number = GRAIN_
     }
   }
   const placed = i;
-  const cell = 4.4;
+  const cell = 3.2;
   const gridW = Math.ceil(340 / cell), gridH = Math.ceil(400 / cell);
   return {
     n: placed,
@@ -456,7 +456,7 @@ export function hourGlassOutline(): number[] {
     const y = HOUR_MID + (HOUR_BOT - HOUR_MID) * (k / steps);
     poly.push(cx - lowerHalfWidth(y), y);
   }
-  for (let k = 1; k <= steps - 1; k++) {
+  for (let k = 0; k <= steps - 1; k++) {
     const y = HOUR_MID - (HOUR_MID - HOUR_TOP) * (k / steps);
     poly.push(cx - upperHalfWidth(y), y);
   }

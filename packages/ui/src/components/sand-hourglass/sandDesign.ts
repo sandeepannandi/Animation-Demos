@@ -12,11 +12,11 @@ export const HOUR_PLATE_EDGE = "#7a5c34";
 export const SAND_SHADES = ["#f1cf8a", "#e8c070", "#dfb25c", "#d2a24c"];
 // Under-layer behind every grain: shades the rim of the pile and the gaps.
 export const SAND_RIM = "#8f6322";
-export const SAND_RIM_STROKE = 6.4;
+export const SAND_RIM_STROKE = 3.5;
 // Grain disks are drawn a little larger than the physics radius so that
 // neighbours overlap into a continuous body of sand, with the shade variation
 // left as fine mottling. Two sizes keep the pile from looking like a grid.
-export const SAND_STROKES = [4.3, 3.7];
+export const SAND_STROKES = [2.8, 2.4];
 
 export type HourFill =
   | string
