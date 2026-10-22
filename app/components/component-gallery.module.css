@@ -276,6 +276,13 @@
 .miniStrings em { top: 52px; border-color: #f4c079; height: 18px; transform: rotate(0.5deg); }
 .miniStrings span { top: 70px; border-color: #b26f31; transform: rotate(2deg); height: 14px; }
 .miniStrings strong { top: 88px; border-color: #7d4a20; transform: rotate(-1deg); height: 10px; }
+.miniRange { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: #ffffff; border: 1px solid #ebe7df; }
+.miniRange::before { content: ""; position: absolute; left: 10px; right: 10px; top: 16px; height: 22px; border-radius: 11px; background: #efede8; }
+.miniRange::after { content: ""; position: absolute; left: 10px; top: 16px; width: 22px; height: 22px; border-radius: 50%; background: #1c1a17; box-shadow: 86px 0 0 #1c1a17; }
+.miniRange i, .miniRange b, .miniRange em { position: absolute; top: 60px; width: 28px; height: 28px; border-radius: 7px; border: 3px solid #fff; box-shadow: 0 3px 8px rgba(40, 32, 20, 0.28); }
+.miniRange i { left: 38px; transform: rotate(-9deg); background: linear-gradient(180deg, #f6e8d5, #c8643c); }
+.miniRange b { left: 54px; transform: rotate(2deg); background: linear-gradient(180deg, #dce8f4, #5f8bc4); }
+.miniRange em { left: 70px; transform: rotate(9deg); background: linear-gradient(180deg, #ff9f6e, #4d7ea3); }
 .miniOtp { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: #ffffff; border: 1px solid #ebe7df; }
 .miniOtp i, .miniOtp b, .miniOtp em, .miniOtp span { position: absolute; top: 34px; width: 20px; height: 24px; border-radius: 6px; background: #fbfaf7; border: 1.5px solid #ff5a1f; box-shadow: 0 0 10px rgba(255, 90, 31, 0.45); }
 .miniOtp i { left: 22px; transform: rotate(-9deg); }
