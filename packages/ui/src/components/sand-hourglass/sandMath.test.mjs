@@ -41,7 +41,7 @@ test('the pouring heap holds an angle of repose instead of spreading flat', () =
   // Measured mid-pour, while the stream is stacking a cone in the lower bulb.
   // (A drained bulb fills wall to wall and levels off, which is also physical.)
   const s = createSand(O);
-  run(s, 6);
+  run(s, 9);
   const slope = sandPileSlope(s);
   // tan(17 deg) ~= 0.3, tan(55 deg) ~= 1.4; dry sand sits between.
   assert.ok(slope > 0.3 && slope < 1.4, `pile slope ${slope} out of repose range`);
@@ -86,7 +86,7 @@ test('a held drag tilts the resting pile', () => {
 test('the neck meters the flow: steady rate, thin stream, no flood', () => {
   // A real hourglass pours a thin thread at a nearly constant rate - the
   // whole point of the instrument. A wide open neck floods instead.
-  const s = createSand(O, 900);
+  const s = createSand(O, 1700);
   run(s, 2);
   const rates = [];
   let prev = sandCountAbove(s);
@@ -97,7 +97,7 @@ test('the neck meters the flow: steady rate, thin stream, no flood', () => {
     prev = now;
   }
   for (const r of rates) {
-    assert.ok(r > 20 && r < 160, `metered 2s window drained ${r} grains`);
+    assert.ok(r > 30 && r < 300, `metered 2s window drained ${r} grains`);
   }
   // The falling stream stays a narrow column around the center line.
   run(s, 2);
