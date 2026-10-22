@@ -110,11 +110,6 @@ export function drawRange(ctx: CanvasRenderingContext2D, m: RsModel, s: RsSel) {
   for (const d of m.dots) {
     if (d.scale <= 0.002) continue;
     ctx.fillStyle = RS_DOT;
-    ctx.globalAlpha = 0.11 * Math.min(1, d.scale);
-    ctx.beginPath();
-    ctx.arc(rsCellX(d.day), rsCellY(d.day), RS_DOT_R * Math.max(0, d.scale) * 1.34, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
     ctx.beginPath();
     ctx.arc(rsCellX(d.day), rsCellY(d.day), RS_DOT_R * Math.max(0, d.scale), 0, Math.PI * 2);
     ctx.fill();
