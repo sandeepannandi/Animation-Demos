@@ -4,7 +4,6 @@ import NativeletSite from "./components/nativelet-site";
 
 const components = {
   range: { dir: "packages/ui/src/components/range-stack", files: ["RangeStack.tsx", "rangeMath.ts", "rangeDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
-  otp: { dir: "packages/ui/src/components/otp-verify", files: ["OtpVerify.tsx", "otpMath.ts", "otpState.ts", "otpDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   strings: { dir: "packages/ui/src/components/plucked-strings", files: ["PluckedStrings.tsx", "stringMath.ts", "stringDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   hourglass: { dir: "packages/ui/src/components/sand-hourglass", files: ["SandHourglass.tsx", "sandMath.ts", "sandDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   prism: { dir: "packages/ui/src/components/prism", files: ["Prism.tsx", "prismMath.ts", "prismShader.ts", "prismDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -56,7 +55,6 @@ function read(dir: string, files: readonly string[]) {
 export default function Home() {
   const sources = {
     range: read(components.range.dir, components.range.files),
-    otp: read(components.otp.dir, components.otp.files),
     strings: read(components.strings.dir, components.strings.files),
     hourglass: read(components.hourglass.dir, components.hourglass.files),
     prism: read(components.prism.dir, components.prism.files),

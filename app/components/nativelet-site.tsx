@@ -48,7 +48,6 @@ import { FoggedGlassPreview } from "./fogged-glass";
 import { CoinPreview } from "./coin";
 import { CodeRevealPreview } from "./code-reveal";
 import { RangeStackPreview } from "./range-stack";
-import { OtpVerifyPreview } from "./otp-verify";
 import { PluckedStringsPreview } from "./plucked-strings";
 import { SandHourglassPreview } from "./sand-hourglass";
 import { PrismPreview } from "./prism";
@@ -139,7 +138,6 @@ const capsuleDescriptions: Record<CapsuleState, string> = {
 
 const COMPONENT_NAMES: [string, string][] = [
   ["Range Stack", "Pick two dates · a photo stack reloads and fans out"],
-  ["OTP Verify", "Type a code · boxes glow, merge and turn into a check"],
   ["Plucked Strings", "Drag and release copper strings · waves reflect and fade"],
   ["Sand Hourglass", "Tilt and flip a glass hourglass · real granular physics"],
   ["Prism", "Drag a glass prism through a light beam · real refraction splits a rainbow"],
@@ -555,10 +553,6 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniRange}><i /><b /><em /><span /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 36</span><strong>Range Stack</strong><small>Pick two dates · a photo stack reloads and fans out</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("OTP Verify", "Type a code · boxes glow, merge and turn into a check")} onClick={(event) => openComponent(event, "otp")} aria-haspopup="dialog" aria-label="Open OTP Verify web preview">
-                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniOtp}><i /><b /><em /><span /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 35</span><strong>OTP Verify</strong><small>Type a code · boxes glow, merge and turn into a check</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
-              </button>
               <button className={gallery.tile} hidden={!matches("Plucked Strings", "Drag and release copper strings · waves reflect and fade")} onClick={(event) => openComponent(event, "strings")} aria-haspopup="dialog" aria-label="Open Plucked Strings web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniStrings}><i /><b /><em /><span /><strong /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 34</span><strong>Plucked Strings</strong><small>Drag and release copper strings · waves reflect and fade</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
@@ -642,7 +636,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "range" ? <RangeStackPreview /> : which === "otp" ? <OtpVerifyPreview /> : which === "strings" ? <PluckedStringsPreview /> : which === "hourglass" ? <SandHourglassPreview /> : which === "prism" ? <PrismPreview /> : which === "reveal" ? <CodeRevealPreview /> : which === "coin" ? <CoinPreview /> : which === "blackhole" ? <BlackHoleLensPreview /> : which === "pendulum" ? <ChaosPendulumPreview /> : which === "fog" ? <FoggedGlassPreview /> : which === "banner" ? <ClothBannerPreview /> : which === "flap" ? <SplitFlapBoardPreview /> : which === "mosaic" ? <MosaicGalleryPreview /> : which === "bubbles" ? <BubblePickerPreview /> : which === "transitions" ? <GLTransitionsPreview /> : which === "fold" ? <FoldedPassPreview /> : which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "range" ? <RangeStackPreview /> : which === "strings" ? <PluckedStringsPreview /> : which === "hourglass" ? <SandHourglassPreview /> : which === "prism" ? <PrismPreview /> : which === "reveal" ? <CodeRevealPreview /> : which === "coin" ? <CoinPreview /> : which === "blackhole" ? <BlackHoleLensPreview /> : which === "pendulum" ? <ChaosPendulumPreview /> : which === "fog" ? <FoggedGlassPreview /> : which === "banner" ? <ClothBannerPreview /> : which === "flap" ? <SplitFlapBoardPreview /> : which === "mosaic" ? <MosaicGalleryPreview /> : which === "bubbles" ? <BubblePickerPreview /> : which === "transitions" ? <GLTransitionsPreview /> : which === "fold" ? <FoldedPassPreview /> : which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
