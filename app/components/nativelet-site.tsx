@@ -138,14 +138,14 @@ const capsuleDescriptions: Record<CapsuleState, string> = {
 };
 
 const COMPONENT_NAMES: [string, string][] = [
-  ["Range Stack", "Pick two dates \u00b7 a photo stack reloads and fans out"],
-  ["OTP Verify", "Type a code \u00b7 boxes glow, merge and turn into a check"],
-  ["Plucked Strings", "Drag and release copper strings \u00b7 waves reflect and fade"],
-  ["Sand Hourglass", "Tilt and flip a glass hourglass \u00b7 real granular physics"],
+  ["Range Stack", "Pick two dates · a photo stack reloads and fans out"],
+  ["OTP Verify", "Type a code · boxes glow, merge and turn into a check"],
+  ["Plucked Strings", "Drag and release copper strings · waves reflect and fade"],
+  ["Sand Hourglass", "Tilt and flip a glass hourglass · real granular physics"],
   ["Prism", "Drag a glass prism through a light beam · real refraction splits a rainbow"],
   ["Code Reveal", "Drag across a picture · it turns into glyphs under your finger"],
   ["Coin", "Flick a floating metal coin · it tumbles with exact rigid-body physics"],
-  ["Black Hole Lens", "Drag a black hole across a starfield \u00b7 real gravitational lensing"],
+  ["Black Hole Lens", "Drag a black hole across a starfield · real gravitational lensing"],
   ["Chaos Pendulum", "Grab and fling a double pendulum · glowing trails, exact physics"],
   ["Fogged Glass", "Wipe the misted window · beads run, fog creeps back"],
   ["Cloth Banner", "A banner in the breeze · drag the fabric and let go"],
@@ -531,9 +531,9 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniFold}><span>BLR → LHR</span><i /><b /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 20</span><strong>Folded Pass</strong><small>A paper pass that unfolds under your finger · drag to fold</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("Split-Flap Board", "Letter flaps clatter to the next word \u00b7 tap to flip")} onClick={(event) => openComponent(event, "flap")} aria-haspopup="dialog" aria-label="Open Split-Flap Board web preview">
+              <button className={gallery.tile} hidden={!matches("Split-Flap Board", "Letter flaps clatter to the next word · tap to flip")} onClick={(event) => openComponent(event, "flap")} aria-haspopup="dialog" aria-label="Open Split-Flap Board web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniFlap}><i /><i /><i /><i /><i /><i /><i /><i /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 24</span><strong>Split-Flap Board</strong><small>Letter flaps clatter to the next word \u00b7 tap to flip</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 24</span><strong>Split-Flap Board</strong><small>Letter flaps clatter to the next word · tap to flip</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
               <button className={gallery.tile} hidden={!matches("Mosaic Gallery", "Paintings as 2,816 flying tiles · tap to ripple to the next")} onClick={(event) => openComponent(event, "mosaic")} aria-haspopup="dialog" aria-label="Open Mosaic Gallery web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniMosaic}><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div></div>
@@ -551,21 +551,21 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniCloth}><i /><b>FLOWER SHOW</b></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 25</span><strong>Cloth Banner</strong><small>A banner in the breeze · drag the fabric and let go</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("Range Stack", "Pick two dates \u00b7 a photo stack reloads and fans out")} onClick={(event) => openComponent(event, "range")} aria-haspopup="dialog" aria-label="Open Range Stack web preview">
+              <button className={gallery.tile} hidden={!matches("Range Stack", "Pick two dates · a photo stack reloads and fans out")} onClick={(event) => openComponent(event, "range")} aria-haspopup="dialog" aria-label="Open Range Stack web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniRange}><i /><b /><em /><span /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 36</span><strong>Range Stack</strong><small>Pick two dates \u00b7 a photo stack reloads and fans out</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 36</span><strong>Range Stack</strong><small>Pick two dates · a photo stack reloads and fans out</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("OTP Verify", "Type a code \u00b7 boxes glow, merge and turn into a check")} onClick={(event) => openComponent(event, "otp")} aria-haspopup="dialog" aria-label="Open OTP Verify web preview">
+              <button className={gallery.tile} hidden={!matches("OTP Verify", "Type a code · boxes glow, merge and turn into a check")} onClick={(event) => openComponent(event, "otp")} aria-haspopup="dialog" aria-label="Open OTP Verify web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniOtp}><i /><b /><em /><span /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 35</span><strong>OTP Verify</strong><small>Type a code \u00b7 boxes glow, merge and turn into a check</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 35</span><strong>OTP Verify</strong><small>Type a code · boxes glow, merge and turn into a check</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("Plucked Strings", "Drag and release copper strings \u00b7 waves reflect and fade")} onClick={(event) => openComponent(event, "strings")} aria-haspopup="dialog" aria-label="Open Plucked Strings web preview">
+              <button className={gallery.tile} hidden={!matches("Plucked Strings", "Drag and release copper strings · waves reflect and fade")} onClick={(event) => openComponent(event, "strings")} aria-haspopup="dialog" aria-label="Open Plucked Strings web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniStrings}><i /><b /><em /><span /><strong /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 34</span><strong>Plucked Strings</strong><small>Drag and release copper strings \u00b7 waves reflect and fade</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 34</span><strong>Plucked Strings</strong><small>Drag and release copper strings · waves reflect and fade</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("Sand Hourglass", "Tilt and flip a glass hourglass \u00b7 real granular physics")} onClick={(event) => openComponent(event, "hourglass")} aria-haspopup="dialog" aria-label="Open Sand Hourglass web preview">
+              <button className={gallery.tile} hidden={!matches("Sand Hourglass", "Tilt and flip a glass hourglass · real granular physics")} onClick={(event) => openComponent(event, "hourglass")} aria-haspopup="dialog" aria-label="Open Sand Hourglass web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniHourglass}><i /><b /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 33</span><strong>Sand Hourglass</strong><small>Tilt and flip a glass hourglass \u00b7 real granular physics</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 33</span><strong>Sand Hourglass</strong><small>Tilt and flip a glass hourglass · real granular physics</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
               <button className={gallery.tile} hidden={!matches("Prism", "Drag a glass prism through a light beam · real refraction splits a rainbow")} onClick={(event) => openComponent(event, "prism")} aria-haspopup="dialog" aria-label="Open Prism web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniPrism}><i /><b /><em /></div></div>
@@ -579,9 +579,9 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniCoin}><i /></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 29</span><strong>Coin</strong><small>Flick a floating metal coin · it tumbles with exact rigid-body physics</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
-              <button className={gallery.tile} hidden={!matches("Black Hole Lens", "Drag a black hole across a starfield \u00b7 real gravitational lensing")} onClick={(event) => openComponent(event, "blackhole")} aria-haspopup="dialog" aria-label="Open Black Hole Lens web preview">
+              <button className={gallery.tile} hidden={!matches("Black Hole Lens", "Drag a black hole across a starfield · real gravitational lensing")} onClick={(event) => openComponent(event, "blackhole")} aria-haspopup="dialog" aria-label="Open Black Hole Lens web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniBlackHole}><i /><b /><u /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 28</span><strong>Black Hole Lens</strong><small>Drag a black hole across a starfield \u00b7 real gravitational lensing</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 28</span><strong>Black Hole Lens</strong><small>Drag a black hole across a starfield · real gravitational lensing</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
               <button className={gallery.tile} hidden={!matches("Chaos Pendulum", "Grab and fling a double pendulum · glowing trails, exact physics")} onClick={(event) => openComponent(event, "pendulum")} aria-haspopup="dialog" aria-label="Open Chaos Pendulum web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniPendulum}><i /><b /><u /></div></div>
