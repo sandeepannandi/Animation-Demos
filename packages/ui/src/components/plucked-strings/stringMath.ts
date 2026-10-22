@@ -171,6 +171,30 @@ function setHeldShape(s: StringsState, k: number, beta: number, d: number) {
   }
 }
 
+function tryGrab(s: StringsState, x: number, y: number, py0: number) {
+  'worklet';
+  let pick = -1;
+  let bestD = 1e9;
+  for (let k = 0; k < K; k++) {
+    if (s.touched[k]) continue;
+    const y0 = stringY(k);
+    let hit = false;
+    if (py0 === NONE) hit = Math.abs(y - y0) <= STR_GRAB_RANGE;
+    else hit = (py0 - y0) * (y - y0) <= 0 || Math.abs(y - y0) <= 2;
+    if (!hit) continue;
+    const d = py0 === NONE ? Math.abs(y - y0) : Math.abs(py0 - y0);
+    if (d < bestD) {
+      bestD = d;
+      pick = k;
+    }
+  }
+  if (pick < 0) return;
+  s.grabString = pick;
+  s.touched[pick] = 1;
+  s.settled = false;
+  s.grabBeta = Math.min(0.97, Math.max(0.03, (x - STR_X0) / STR_LENGTH));
+}
+
 /** Finger at canvas point (x, y): hold a string it touches, or strum across. */
 export function stringsDragTo(s: StringsState, x: number, y: number) {
   'worklet';
@@ -197,29 +221,6 @@ export function stringsDragTo(s: StringsState, x: number, y: number) {
   }
 }
 
-function tryGrab(s: StringsState, x: number, y: number, py0: number) {
-  'worklet';
-  let pick = -1;
-  let bestD = 1e9;
-  for (let k = 0; k < K; k++) {
-    if (s.touched[k]) continue;
-    const y0 = stringY(k);
-    let hit = false;
-    if (py0 === NONE) hit = Math.abs(y - y0) <= STR_GRAB_RANGE;
-    else hit = (py0 - y0) * (y - y0) <= 0 || Math.abs(y - y0) <= 2;
-    if (!hit) continue;
-    const d = py0 === NONE ? Math.abs(y - y0) : Math.abs(py0 - y0);
-    if (d < bestD) {
-      bestD = d;
-      pick = k;
-    }
-  }
-  if (pick < 0) return;
-  s.grabString = pick;
-  s.touched[pick] = 1;
-  s.settled = false;
-  s.grabBeta = Math.min(0.97, Math.max(0.03, (x - STR_X0) / STR_LENGTH));
-}
 
 /** Let go: the string keeps the shape the finger left and rings on. */
 export function stringsRelease(s: StringsState) {
@@ -300,6 +301,18 @@ function buildFrame(s: StringsState) {
   }
 }
 
+/** Largest absolute displacement of string k right now, px. */
+export function stringMaxAbs(s: StringsState, k: number) {
+  'worklet';
+  let m = 0;
+  for (let i = 0; i < STR_NODES; i++) {
+    let y = 0;
+    for (let n = 0; n < N; n++) y += s.a[k * N + n] * SIN[n * STR_NODES + i];
+    if (Math.abs(y) > m) m = Math.abs(y);
+  }
+  return m;
+}
+
 export function stepStringsFrame(s: StringsState, dt: number) {
   'worklet';
   if (s.settled) return;
@@ -351,17 +364,6 @@ export function stepStringsFrame(s: StringsState, dt: number) {
   }
 }
 
-/** Largest absolute displacement of string k right now, px. */
-export function stringMaxAbs(s: StringsState, k: number) {
-  'worklet';
-  let m = 0;
-  for (let i = 0; i < STR_NODES; i++) {
-    let y = 0;
-    for (let n = 0; n < N; n++) y += s.a[k * N + n] * SIN[n * STR_NODES + i];
-    if (Math.abs(y) > m) m = Math.abs(y);
-  }
-  return m;
-}
 
 /** Mechanical energy of string k: sum over modes of (v^2 + w^2 a^2) L / 4. */
 export function stringEnergy(s: StringsState, k: number) {
