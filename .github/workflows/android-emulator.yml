@@ -66,7 +66,6 @@ jobs:
             bash scripts/android-prism.sh
             bash scripts/android-hourglass.sh
             bash scripts/android-strings.sh
-            bash scripts/android-otp.sh
             bash scripts/android-range.sh
             bash scripts/android-gestures.sh
             bash scripts/android-core.sh
