@@ -6,7 +6,7 @@ import {
   WHEEL_FONT_SIZE, WHEEL_INK_DIM, WHEEL_INK_LIT, WHEEL_SHEET, WHEEL_SHEET_EDGE, WHEEL_TITLE, WHEEL_TITLE_Y,
 } from "../../packages/ui/src/components/wheel-time-picker/wheelDesign";
 
-const FONT = "Geist, system-ui, -apple-system, sans-serif";
+import { siteFont } from "./site-font";
 const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 const mixHex = (a: string, b: string, t: number) => {
   const x = hex(a), y = hex(b);
@@ -69,7 +69,7 @@ export function drawWheel(ctx: CanvasRenderingContext2D, s: WheelState) {
 
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.font = `400 13px ${FONT}`;
+  ctx.font = `400 13px ${siteFont()}`;
   ctx.fillStyle = WHEEL_INK_DIM;
   ctx.fillText(WHEEL_TITLE.split("").join("\u200a"), WHEEL_W / 2, WHEEL_TITLE_Y);
 
@@ -83,7 +83,7 @@ export function drawWheel(ctx: CanvasRenderingContext2D, s: WheelState) {
       ctx.translate(WHEEL_COLS[d], g.y);
       ctx.scale(0.92 + 0.08 * g.s, Math.max(0.02, g.s));
       ctx.globalAlpha = g.a;
-      ctx.font = `500 ${WHEEL_FONT_SIZE}px ${FONT}`;
+      ctx.font = `500 ${WHEEL_FONT_SIZE}px ${siteFont()}`;
       ctx.filter = g.blur > 0.15 ? `blur(${(g.blur * 0.6).toFixed(2)}px)` : "none";
       if (g.lit > 0.05) {
         ctx.shadowColor = WHEEL_ACCENT;
@@ -94,7 +94,7 @@ export function drawWheel(ctx: CanvasRenderingContext2D, s: WheelState) {
       ctx.restore();
     }
   }
-  ctx.font = `400 ${WHEEL_FONT_SIZE}px ${FONT}`;
+  ctx.font = `400 ${WHEEL_FONT_SIZE}px ${siteFont()}`;
   ctx.fillStyle = WHEEL_ACCENT;
   ctx.fillText(":", WHEEL_COLON_X + 6, WHEEL_CY - 1);
 

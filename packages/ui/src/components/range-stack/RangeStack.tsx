@@ -22,15 +22,18 @@ export type RangeStackProps = {
   onFeedback?: (event: "select" | "reset") => void;
   onSave?: (range: { start: number; end: number; homes: number } | null) => void;
   label?: string;
+  /** Font family for every label. Defaults to the platform font; pass your app font (for example "Geist-Medium" once loaded). */
+  fontFamily?: string;
   style?: ViewStyle;
 };
 
 const DAYS = Array.from({ length: RS_DAYS }, (_, i) => i + 1);
+const RS_DOT_R_CORNER = 9;
 const SLOTS4 = [0, 1, 2, 3];
 const SLOTS5 = Array.from({ length: RS_MAX_HOMES }, (_, i) => i);
 const SLOTS3 = [0, 1, 2];
 const BORDER = RS_TILE + 6;
-const TILE_RRECT = rrect(rect(-RS_TILE / 2, -RS_TILE / 2, RS_TILE, RS_TILE), 8, 8);
+const TILE_RRECT = rrect(rect(-RS_TILE / 2, -RS_TILE / 2, RS_TILE, RS_TILE), 6, 6);
 
 // Android stops presenting a canvas whose only change is internal on an idle
 // screen. A 1 px layout change every frame keeps it drawing.
@@ -106,11 +109,11 @@ function TileShape({ model, kind, i }: { model: Model; kind: "old" | "new" | "sk
   });
   return (
     <Group transform={transform} opacity={opacity}>
-      <RoundedRect x={-BORDER / 2} y={-BORDER / 2} width={BORDER} height={BORDER} r={10} color="#ffffff">
+      <RoundedRect x={-BORDER / 2} y={-BORDER / 2} width={BORDER} height={BORDER} r={8} color="#ffffff">
         <Shadow dx={0} dy={3} blur={4} color="rgba(40, 32, 20, 0.28)" />
       </RoundedRect>
       {kind === "skel" ? (
-        <RoundedRect x={-RS_TILE / 2} y={-RS_TILE / 2} width={RS_TILE} height={RS_TILE} r={8} color={RS_SKELETON} />
+        <RoundedRect x={-RS_TILE / 2} y={-RS_TILE / 2} width={RS_TILE} height={RS_TILE} r={6} color={RS_SKELETON} />
       ) : (
         <Group clip={TILE_RRECT}>{ROOM_ELEMENTS[i % ROOM_ELEMENTS.length]}</Group>
       )}
@@ -127,7 +130,7 @@ function BandShape({ model, i }: { model: Model; i: number }) {
     const x1 = b && Number.isFinite(b.x1) ? b.x1 : 0;
     const y = b && Number.isFinite(b.y) ? b.y : 0;
     const w = Math.max(0.5, x1 - x0);
-    return rrect(rect(x0, y - RS_DOT_R, w, RS_DOT_R * 2), Math.min(RS_DOT_R, w / 2), Math.min(RS_DOT_R, w / 2));
+    return rrect(rect(x0, y - RS_DOT_R, w, RS_DOT_R * 2), Math.min(RS_DOT_R_CORNER, w / 2), Math.min(RS_DOT_R_CORNER, w / 2));
   });
   const o = useDerivedValue(() => (model.value.bands[i] ? model.value.bands[i].alpha : 0));
   return <RoundedRect rect={rr} color={RS_BAND} opacity={o} />;
@@ -146,15 +149,21 @@ function DotShape({ model, i }: { model: Model; i: number }) {
     const d = model.value.dots[i];
     return d ? RS_DOT_R * Math.max(0, d.scale) : 0;
   });
-  return <Circle cx={cx} cy={cy} r={r} color={RS_DOT} />;
+  const rr = useDerivedValue(() => {
+    const d = model.value.dots[i];
+    const k = d ? Math.max(0.001, d.scale) : 0.001;
+    const h = RS_DOT_R * k;
+    return rrect(rect(cx.value - h, cy.value - h, h * 2, h * 2), RS_DOT_R_CORNER * k, RS_DOT_R_CORNER * k);
+  });
+  return <RoundedRect rect={rr} color={RS_DOT} />;
 }
 
-function DayLabel({ model, day }: { model: Model; day: number }) {
+function DayLabel({ model, day, ff }: { model: Model; day: number; ff?: string }) {
   const style = useAnimatedStyle(() => ({ color: interpolateColor(model.value.ink[day], [0, 1], [RS_INK, "#ffffff"]) }));
   return (
     <Animated.Text
       pointerEvents="none"
-      style={[{ position: "absolute", left: rsCellX(day) - 20, top: rsCellY(day) - 10, width: 40, height: 20, textAlign: "center", fontSize: 15, fontWeight: "500", lineHeight: 20, includeFontPadding: false }, style]}
+      style={[{ position: "absolute", left: rsCellX(day) - 20, top: rsCellY(day) - 10, width: 40, height: 20, textAlign: "center", fontSize: 15, fontWeight: "500", lineHeight: 20, includeFontPadding: false, fontFamily: ff }, style]}
     >
       {day}
     </Animated.Text>
@@ -167,6 +176,7 @@ export const RangeStack = forwardRef<RangeStackHandle, RangeStackProps>(function
     reducedMotion,
     onFeedback,
     onSave,
+    fontFamily: ff,
     label = "Date range picker. Tap a start and an end day: a skeleton appears and a fanned stack of home photos springs in.",
     style,
   },
@@ -236,8 +246,8 @@ export const RangeStack = forwardRef<RangeStackHandle, RangeStackProps>(function
 
   const labelOldStyle = useAnimatedStyle(() => ({ opacity: model.value.labelOld }));
   const labelNewStyle = useAnimatedStyle(() => ({ opacity: model.value.labelNew, transform: [{ translateY: model.value.labelNewY }] }));
-  const barX = useDerivedValue(() => 32 + model.value.shimmer * 190 - 60);
-  const barEnd = useDerivedValue(() => 32 + model.value.shimmer * 190 + 60);
+  const barX = useDerivedValue(() => 36 + model.value.shimmer * 190 - 60);
+  const barEnd = useDerivedValue(() => 36 + model.value.shimmer * 190 + 60);
   const barStart = useDerivedValue(() => vec(barX.value, 0));
   const barStop = useDerivedValue(() => vec(barEnd.value, 0));
   const barOpacity = useDerivedValue(() => model.value.skeleton);
@@ -245,28 +255,28 @@ export const RangeStack = forwardRef<RangeStackHandle, RangeStackProps>(function
 
   return (
     <View
-      style={[{ width: RS_W, height: RS_H, borderRadius: 28, backgroundColor: RS_SHEET, borderWidth: 1, borderColor: RS_SHEET_EDGE, overflow: "hidden" }, style]}
+      style={[{ width: RS_W, height: RS_H, borderRadius: 16, backgroundColor: RS_SHEET, borderWidth: 1, borderColor: RS_SHEET_EDGE, overflow: "hidden" }, style]}
       accessibilityLabel={label}
     >
       {!reduce ? <CanvasKeepAlive /> : null}
       <Canvas pointerEvents="none" style={{ position: "absolute", left: -1, top: -1, width: RS_W, height: RS_H }}>
         {SLOTS4.map((i) => <BandShape key={`b${i}`} model={model} i={i} />)}
         {SLOTS4.map((i) => <DotShape key={`d${i}`} model={model} i={i} />)}
-        <RoundedRect x={RS_STRIP_X} y={RS_STRIP_Y} width={RS_STRIP_W} height={RS_STRIP_H} r={16} color={RS_STRIP} />
+        <RoundedRect x={RS_STRIP_X} y={RS_STRIP_Y} width={RS_STRIP_W} height={RS_STRIP_H} r={10} color={RS_STRIP} />
         <RoundedRect x={0} y={318} width={RS_W} height={1} color={RS_SHEET_EDGE} />
-        <RoundedRect x={24} y={349} width={38} height={1} color={RS_INK} />
-        <RoundedRect x={220} y={322} width={80} height={34} r={12} color={RS_DOT} />
+        <RoundedRect x={20} y={349} width={38} height={1} color={RS_INK} />
+        <RoundedRect x={220} y={322} width={80} height={34} r={8} color={RS_DOT} />
         {SLOTS3.map((i) => <TileShape key={`s${i}`} model={model} kind="skel" i={i} />)}
-        <RoundedRect x={32} y={cy - 6} width={92} height={12} r={6} color={RS_SKELETON} opacity={barOpacity}>
+        <RoundedRect x={36} y={cy - 6} width={92} height={12} r={4} color={RS_SKELETON} opacity={barOpacity}>
           <LinearGradient start={barStart} end={barStop} colors={[RS_SKELETON, RS_SKELETON_HI, RS_SKELETON]} />
         </RoundedRect>
         {SLOTS5.map((i) => <TileShape key={`o${i}`} model={model} kind="old" i={i} />)}
         {SLOTS5.map((i) => <TileShape key={`n${i}`} model={model} kind="new" i={i} />)}
       </Canvas>
       {RS_WEEKDAYS.map((w, c) => (
-        <Text key={c} pointerEvents="none" style={{ position: "absolute", left: RS_X0 + c * RS_CELL_X - 20, top: 31, width: 40, textAlign: "center", fontSize: 12, fontWeight: "500", color: RS_MUTED, includeFontPadding: false }}>{w}</Text>
+        <Text key={c} pointerEvents="none" style={{ position: "absolute", left: RS_X0 + c * RS_CELL_X - 20, top: 31, width: 40, textAlign: "center", fontSize: 12, fontWeight: "500", color: RS_MUTED, includeFontPadding: false, fontFamily: ff }}>{w}</Text>
       ))}
-      {DAYS.map((d) => <DayLabel key={d} model={model} day={d} />)}
+      {DAYS.map((d) => <DayLabel key={d} model={model} day={d} ff={ff} />)}
       {DAYS.map((d) => (
         <Pressable
           key={d}
@@ -276,10 +286,10 @@ export const RangeStack = forwardRef<RangeStackHandle, RangeStackProps>(function
           style={{ position: "absolute", left: rsCellX(d) - RS_CELL_X / 2, top: rsCellY(d) - RS_CELL_Y / 2, width: RS_CELL_X, height: RS_CELL_Y }}
         />
       ))}
-      <Animated.Text pointerEvents="none" style={[{ position: "absolute", left: 32, top: cy - 10, height: 20, lineHeight: 20, fontSize: 14, fontWeight: "500", color: RS_INK, includeFontPadding: false }, labelOldStyle]}>{labels.old}</Animated.Text>
-      <Animated.Text pointerEvents="none" style={[{ position: "absolute", left: 32, top: cy - 10, height: 20, lineHeight: 20, fontSize: 14, fontWeight: "500", color: labels.live ? RS_INK : RS_MUTED, includeFontPadding: false }, labelNewStyle]}>{labels.cur}</Animated.Text>
-      <Pressable onPress={doReset} accessibilityRole="button" accessibilityLabel="Reset" hitSlop={8} style={{ position: "absolute", left: 18, top: 322, width: 60, height: 34, justifyContent: "center", alignItems: "flex-start", paddingLeft: 6 }}>
-        <Text style={{ fontSize: 14, fontWeight: "500", color: RS_INK, includeFontPadding: false }}>Reset</Text>
+      <Animated.Text pointerEvents="none" style={[{ position: "absolute", left: 36, top: cy - 10, height: 20, lineHeight: 20, fontSize: 14, fontWeight: "500", color: RS_INK, includeFontPadding: false, fontFamily: ff }, labelOldStyle]}>{labels.old}</Animated.Text>
+      <Animated.Text pointerEvents="none" style={[{ position: "absolute", left: 36, top: cy - 10, height: 20, lineHeight: 20, fontSize: 14, fontWeight: "500", color: labels.live ? RS_INK : RS_MUTED, includeFontPadding: false, fontFamily: ff }, labelNewStyle]}>{labels.cur}</Animated.Text>
+      <Pressable onPress={doReset} accessibilityRole="button" accessibilityLabel="Reset" hitSlop={8} style={{ position: "absolute", left: 14, top: 322, width: 60, height: 34, justifyContent: "center", alignItems: "flex-start", paddingLeft: 6 }}>
+        <Text style={{ fontSize: 14, fontWeight: "500", color: RS_INK, includeFontPadding: false, fontFamily: ff }}>Reset</Text>
       </Pressable>
       <Pressable
         onPress={() => {
@@ -288,9 +298,9 @@ export const RangeStack = forwardRef<RangeStackHandle, RangeStackProps>(function
         }}
         accessibilityRole="button"
         accessibilityLabel="Save"
-        style={{ position: "absolute", left: 220, top: 322, width: 80, height: 34, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
+        style={{ position: "absolute", left: 220, top: 322, width: 80, height: 34, borderRadius: 8, alignItems: "center", justifyContent: "center" }}
       >
-        <Text style={{ fontSize: 14, fontWeight: "600", color: "#ffffff", includeFontPadding: false }}>Save</Text>
+        <Text style={{ fontSize: 14, fontWeight: "600", color: "#ffffff", includeFontPadding: false, fontFamily: ff }}>Save</Text>
       </Pressable>
     </View>
   );
