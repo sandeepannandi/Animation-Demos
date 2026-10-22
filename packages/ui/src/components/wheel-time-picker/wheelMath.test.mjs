@@ -1,0 +1,11 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { wheelCreate, wheelFling, wheelStep, wheelSettled, wheelValue, wheelGrab, wheelRelease, drumTicks } from './wheelMath.ts';
+const run=(s,sec)=>{for(let i=0;i<sec*60;i++)wheelStep(s,1/60)};
+test('a fling coasts, then snaps to a whole row and stops',()=>{const s=wheelCreate();wheelFling(s,1,40);run(s,0.2);assert.ok(s.drums[1].v>5);run(s,6);assert.ok(wheelSettled(s));assert.equal(s.drums[1].p,Math.round(s.drums[1].p));});
+test('inertia: a harder fling travels further',()=>{const a=wheelCreate(),b=wheelCreate();wheelFling(a,1,20);wheelFling(b,1,50);run(a,6);run(b,6);assert.ok(b.drums[1].p-30>a.drums[1].p-30+5);});
+test('minutes wrap around',()=>{const s=wheelCreate(7,58);wheelFling(s,1,12);run(s,5);const v=wheelValue(s);assert.ok(v.minute<58||v.minute>=58);assert.ok(v.minute>=0&&v.minute<60);});
+test('AM/PM does not wrap and springs back inside',()=>{const s=wheelCreate(7,30,0);wheelFling(s,2,-40);run(s,5);assert.ok(wheelSettled(s));assert.equal(s.drums[2].p,0);wheelFling(s,2,60);run(s,5);assert.equal(s.drums[2].p,1);});
+test('dragging follows the finger and release throws',()=>{const s=wheelCreate();wheelGrab(s,0,0);wheelGrab(s,0,-80);assert.ok(Math.abs(s.drums[0].p-(6+2))<1e-9);wheelRelease(s,0,-1.2);run(s,0.1);assert.ok(s.drums[0].v>5);run(s,6);assert.ok(wheelSettled(s));});
+test('ticks sharpen as the drum slows',()=>{const f=drumTicks(3,40),sl=drumTicks(3,0);assert.ok(f.blur>sl.blur);assert.ok(sl.ticks[0].a>f.ticks[0].a);});
+test('hour spans 1..12',()=>{const s=wheelCreate(12,0);assert.equal(wheelValue(s).hour,12);wheelFling(s,0,30);run(s,6);const h=wheelValue(s).hour;assert.ok(h>=1&&h<=12);});

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
+  wheel: { dir: "packages/ui/src/components/wheel-time-picker", files: ["WheelTimePicker.tsx", "wheelMath.ts", "wheelDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   range: { dir: "packages/ui/src/components/range-stack", files: ["RangeStack.tsx", "rangeMath.ts", "rangeDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   strings: { dir: "packages/ui/src/components/plucked-strings", files: ["PluckedStrings.tsx", "stringMath.ts", "stringDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   hourglass: { dir: "packages/ui/src/components/sand-hourglass", files: ["SandHourglass.tsx", "sandMath.ts", "sandDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
@@ -54,6 +55,7 @@ function read(dir: string, files: readonly string[]) {
 
 export default function Home() {
   const sources = {
+    wheel: read(components.wheel.dir, components.wheel.files),
     range: read(components.range.dir, components.range.files),
     strings: read(components.strings.dir, components.strings.files),
     hourglass: read(components.hourglass.dir, components.hourglass.files),
