@@ -47,6 +47,7 @@ import { ClothBannerPreview } from "./cloth-banner";
 import { FoggedGlassPreview } from "./fogged-glass";
 import { CoinPreview } from "./coin";
 import { CodeRevealPreview } from "./code-reveal";
+import { OtpVerifyPreview } from "./otp-verify";
 import { PluckedStringsPreview } from "./plucked-strings";
 import { SandHourglassPreview } from "./sand-hourglass";
 import { PrismPreview } from "./prism";
@@ -136,6 +137,7 @@ const capsuleDescriptions: Record<CapsuleState, string> = {
 };
 
 const COMPONENT_NAMES: [string, string][] = [
+  ["OTP Verify", "Type a code \u00b7 boxes glow, merge and turn into a check"],
   ["Plucked Strings", "Drag and release copper strings \u00b7 waves reflect and fade"],
   ["Sand Hourglass", "Tilt and flip a glass hourglass \u00b7 real granular physics"],
   ["Prism", "Drag a glass prism through a light beam · real refraction splits a rainbow"],
@@ -529,7 +531,7 @@ export default function NativeletSite({
               </button>
               <button className={gallery.tile} hidden={!matches("Split-Flap Board", "Letter flaps clatter to the next word \u00b7 tap to flip")} onClick={(event) => openComponent(event, "flap")} aria-haspopup="dialog" aria-label="Open Split-Flap Board web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniFlap}><i /><i /><i /><i /><i /><i /><i /><i /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW \u00b7 24</span><strong>Split-Flap Board</strong><small>Letter flaps clatter to the next word \u00b7 tap to flip</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 24</span><strong>Split-Flap Board</strong><small>Letter flaps clatter to the next word \u00b7 tap to flip</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
               <button className={gallery.tile} hidden={!matches("Mosaic Gallery", "Paintings as 2,816 flying tiles · tap to ripple to the next")} onClick={(event) => openComponent(event, "mosaic")} aria-haspopup="dialog" aria-label="Open Mosaic Gallery web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniMosaic}><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div></div>
@@ -547,13 +549,17 @@ export default function NativeletSite({
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniCloth}><i /><b>FLOWER SHOW</b></div></div>
                 <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 25</span><strong>Cloth Banner</strong><small>A banner in the breeze · drag the fabric and let go</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
+              <button className={gallery.tile} hidden={!matches("OTP Verify", "Type a code \u00b7 boxes glow, merge and turn into a check")} onClick={(event) => openComponent(event, "otp")} aria-haspopup="dialog" aria-label="Open OTP Verify web preview">
+                <div className={gallery.study} aria-hidden="true"><div className={gallery.miniOtp}><i /><b /><em /><span /></div></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 35</span><strong>OTP Verify</strong><small>Type a code \u00b7 boxes glow, merge and turn into a check</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+              </button>
               <button className={gallery.tile} hidden={!matches("Plucked Strings", "Drag and release copper strings \u00b7 waves reflect and fade")} onClick={(event) => openComponent(event, "strings")} aria-haspopup="dialog" aria-label="Open Plucked Strings web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniStrings}><i /><b /><em /><span /><strong /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW \u00b7 34</span><strong>Plucked Strings</strong><small>Drag and release copper strings \u00b7 waves reflect and fade</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 34</span><strong>Plucked Strings</strong><small>Drag and release copper strings \u00b7 waves reflect and fade</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
               <button className={gallery.tile} hidden={!matches("Sand Hourglass", "Tilt and flip a glass hourglass \u00b7 real granular physics")} onClick={(event) => openComponent(event, "hourglass")} aria-haspopup="dialog" aria-label="Open Sand Hourglass web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniHourglass}><i /><b /></div></div>
-                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW \u00b7 33</span><strong>Sand Hourglass</strong><small>Tilt and flip a glass hourglass \u00b7 real granular physics</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
+                <div className={gallery.caption}><div><span className={gallery.label}>WEB PREVIEW · 33</span><strong>Sand Hourglass</strong><small>Tilt and flip a glass hourglass \u00b7 real granular physics</small></div><ArrowUpRight size={20} aria-hidden="true" /></div>
               </button>
               <button className={gallery.tile} hidden={!matches("Prism", "Drag a glass prism through a light beam · real refraction splits a rainbow")} onClick={(event) => openComponent(event, "prism")} aria-haspopup="dialog" aria-label="Open Prism web preview">
                 <div className={gallery.study} aria-hidden="true"><div className={gallery.miniPrism}><i /><b /><em /></div></div>
@@ -630,7 +636,7 @@ export default function NativeletSite({
               </div>
               {panel === "preview" ? (
                 <>
-                {which === "strings" ? <PluckedStringsPreview /> : which === "hourglass" ? <SandHourglassPreview /> : which === "prism" ? <PrismPreview /> : which === "reveal" ? <CodeRevealPreview /> : which === "coin" ? <CoinPreview /> : which === "blackhole" ? <BlackHoleLensPreview /> : which === "pendulum" ? <ChaosPendulumPreview /> : which === "fog" ? <FoggedGlassPreview /> : which === "banner" ? <ClothBannerPreview /> : which === "flap" ? <SplitFlapBoardPreview /> : which === "mosaic" ? <MosaicGalleryPreview /> : which === "bubbles" ? <BubblePickerPreview /> : which === "transitions" ? <GLTransitionsPreview /> : which === "fold" ? <FoldedPassPreview /> : which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
+                {which === "otp" ? <OtpVerifyPreview /> : which === "strings" ? <PluckedStringsPreview /> : which === "hourglass" ? <SandHourglassPreview /> : which === "prism" ? <PrismPreview /> : which === "reveal" ? <CodeRevealPreview /> : which === "coin" ? <CoinPreview /> : which === "blackhole" ? <BlackHoleLensPreview /> : which === "pendulum" ? <ChaosPendulumPreview /> : which === "fog" ? <FoggedGlassPreview /> : which === "banner" ? <ClothBannerPreview /> : which === "flap" ? <SplitFlapBoardPreview /> : which === "mosaic" ? <MosaicGalleryPreview /> : which === "bubbles" ? <BubblePickerPreview /> : which === "transitions" ? <GLTransitionsPreview /> : which === "fold" ? <FoldedPassPreview /> : which === "genie" ? <GenieDismissPreview /> : which === "morph" ? <TextMorphPreview /> : which === "light" ? <LightPaintingPreview /> : which === "blossom" ? <BlossomQRPreview /> : which === "orbit" ? <OrbitQRPreview /> : which === "curl" ? <PageCurlPreview /> : which === "pinch" ? <PinchGalleryPreview /> : which === "chart" ? <ScrubChartPreview /> : which === "lens" ? <GlassLensPreview /> : which === "ripple" ? <RippleRevealPreview /> : which === "gooey" ? <GooeyMenuPreview /> : which === "carousel" ? <StackedCarouselPreview /> : which === "sort" ? <DragToSortPreview /> : which === "expand" ? <ExpandingCardPreview /> : which === "swipe" ? <SwipeRowPreview /> : which === "glass" ? <LiquidTabsPreview /> : which === "toast" ? <ToastStackPreview /> : which === "capsule" ? (
                   <>
                     <div className={gallery.orientation} role="group" aria-label="Capsule state">
                       {CAPSULE_STATES.map((name) => (
