@@ -67,6 +67,7 @@ jobs:
             bash scripts/android-hourglass.sh
             bash scripts/android-strings.sh
             bash scripts/android-range.sh
+            bash scripts/android-wheel.sh
             bash scripts/android-gestures.sh
             bash scripts/android-core.sh
             bash scripts/android-slowmotion.sh
