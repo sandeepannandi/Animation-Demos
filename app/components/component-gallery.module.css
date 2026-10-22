@@ -276,6 +276,12 @@
 .miniStrings em { top: 52px; border-color: #f4c079; height: 18px; transform: rotate(0.5deg); }
 .miniStrings span { top: 70px; border-color: #b26f31; transform: rotate(2deg); height: 14px; }
 .miniStrings strong { top: 88px; border-color: #7d4a20; transform: rotate(-1deg); height: 10px; }
+.miniOtp { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: #ffffff; border: 1px solid #ebe7df; }
+.miniOtp i, .miniOtp b, .miniOtp em, .miniOtp span { position: absolute; top: 34px; width: 20px; height: 24px; border-radius: 6px; background: #fbfaf7; border: 1.5px solid #ff5a1f; box-shadow: 0 0 10px rgba(255, 90, 31, 0.45); }
+.miniOtp i { left: 22px; transform: rotate(-9deg); }
+.miniOtp b { left: 38px; transform: rotate(6deg); }
+.miniOtp em { left: 54px; transform: rotate(-5deg); }
+.miniOtp span { left: 70px; transform: rotate(8deg); }
 .miniHourglass { position: relative; width: 130px; height: 110px; border-radius: 12px; overflow: hidden; background: linear-gradient(180deg, #0d1220 0%, #101828 100%); }
 .miniHourglass i { position: absolute; left: 41px; top: 10px; width: 48px; height: 74px; border: 2px solid rgba(226, 234, 255, 0.5); border-radius: 8px; background: linear-gradient(180deg, rgba(226, 234, 255, 0.10), rgba(226, 234, 255, 0.03)); clip-path: polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%, 40% 50%); }
 .miniHourglass b { position: absolute; left: 49px; top: 18px; width: 32px; height: 58px; background: linear-gradient(180deg, #e3b158 0%, #e3b158 36%, rgba(227, 177, 88, 0) 36%, rgba(227, 177, 88, 0) 48%, #c98f2e 52%, #f0cd7e 100%); clip-path: polygon(0 0, 100% 0, 58% 47%, 100% 100%, 0 100%, 42% 47%); }
