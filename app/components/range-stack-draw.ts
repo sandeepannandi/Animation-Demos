@@ -7,7 +7,7 @@ import {
   type RsFill,
 } from "../../packages/ui/src/components/range-stack/rangeDesign";
 
-const FONT = "Geist, system-ui, -apple-system, sans-serif";
+import { siteFont } from "./site-font";
 
 function fillStyle(ctx: CanvasRenderingContext2D, f: RsFill): string | CanvasGradient {
   if (typeof f === "string") return f;
@@ -24,7 +24,7 @@ function fillStyle(ctx: CanvasRenderingContext2D, f: RsFill): string | CanvasGra
 function text(ctx: CanvasRenderingContext2D, s: string, x: number, y: number, size: number, weight: number, color: string, alpha: number, align: CanvasTextAlign = "center") {
   if (alpha <= 0.002) return;
   ctx.globalAlpha = alpha;
-  ctx.font = `${weight} ${size}px ${FONT}`;
+  ctx.font = `${weight} ${size}px ${siteFont()}`;
   ctx.fillStyle = color;
   ctx.textAlign = align;
   ctx.textBaseline = "middle";
@@ -47,13 +47,13 @@ function tile(ctx: CanvasRenderingContext2D, t: RsTile, room: number | null) {
   ctx.shadowOffsetY = 3;
   ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.roundRect(-b / 2, -b / 2, b, b, 10);
+  ctx.roundRect(-b / 2, -b / 2, b, b, 8);
   ctx.fill();
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
   ctx.beginPath();
-  ctx.roundRect(-RS_TILE / 2, -RS_TILE / 2, RS_TILE, RS_TILE, 8);
+  ctx.roundRect(-RS_TILE / 2, -RS_TILE / 2, RS_TILE, RS_TILE, 6);
   if (room === null) {
     ctx.fillStyle = RS_SKELETON;
     ctx.fill();
@@ -90,7 +90,7 @@ export function drawRange(ctx: CanvasRenderingContext2D, m: RsModel, s: RsSel) {
   ctx.clearRect(0, 0, RS_W, RS_H);
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(0.5, 0.5, RS_W - 1, RS_H - 1, 28);
+  ctx.roundRect(0.5, 0.5, RS_W - 1, RS_H - 1, 16);
   ctx.fillStyle = RS_SHEET;
   ctx.fill();
   ctx.strokeStyle = RS_SHEET_EDGE;
@@ -103,7 +103,7 @@ export function drawRange(ctx: CanvasRenderingContext2D, m: RsModel, s: RsSel) {
     ctx.globalAlpha = b.alpha;
     ctx.fillStyle = RS_BAND;
     ctx.beginPath();
-    ctx.roundRect(b.x0, b.y - RS_DOT_R, b.x1 - b.x0, RS_DOT_R * 2, RS_DOT_R);
+    ctx.roundRect(b.x0, b.y - RS_DOT_R, b.x1 - b.x0, RS_DOT_R * 2, Math.min(9, (b.x1 - b.x0) / 2));
     ctx.fill();
     ctx.globalAlpha = 1;
   }
@@ -111,7 +111,8 @@ export function drawRange(ctx: CanvasRenderingContext2D, m: RsModel, s: RsSel) {
     if (d.scale <= 0.002) continue;
     ctx.fillStyle = RS_DOT;
     ctx.beginPath();
-    ctx.arc(rsCellX(d.day), rsCellY(d.day), RS_DOT_R * Math.max(0, d.scale), 0, Math.PI * 2);
+    const h = RS_DOT_R * Math.max(0.001, d.scale);
+    ctx.roundRect(rsCellX(d.day) - h, rsCellY(d.day) - h, h * 2, h * 2, 9 * Math.max(0.001, d.scale));
     ctx.fill();
   }
   for (let d = 1; d <= RS_DAYS; d++) text(ctx, String(d), rsCellX(d), rsCellY(d) + 0.5, 15, 500, mix([28, 26, 23], [255, 255, 255], m.ink[d]), 1);
@@ -119,25 +120,25 @@ export function drawRange(ctx: CanvasRenderingContext2D, m: RsModel, s: RsSel) {
   // Footer strip.
   ctx.fillStyle = RS_STRIP;
   ctx.beginPath();
-  ctx.roundRect(RS_STRIP_X, RS_STRIP_Y, RS_STRIP_W, RS_STRIP_H, 16);
+  ctx.roundRect(RS_STRIP_X, RS_STRIP_Y, RS_STRIP_W, RS_STRIP_H, 10);
   ctx.fill();
   const cy = RS_STRIP_Y + RS_STRIP_H / 2;
   const ghost = Math.max(m.skeleton, m.idleGhost * 0.7);
   if (ghost > 0.002) for (const t of m.skelTiles) tile(ctx, { ...t, alpha: ghost }, null);
   if (m.skeleton > 0.002) {
-    const g = ctx.createLinearGradient(32 + m.shimmer * 190 - 60, 0, 32 + m.shimmer * 190 + 60, 0);
+    const g = ctx.createLinearGradient(36 + m.shimmer * 190 - 60, 0, 36 + m.shimmer * 190 + 60, 0);
     g.addColorStop(0, RS_SKELETON);
     g.addColorStop(0.5, RS_SKELETON_HI);
     g.addColorStop(1, RS_SKELETON);
     ctx.globalAlpha = m.skeleton;
     ctx.fillStyle = g;
     ctx.beginPath();
-    ctx.roundRect(32, cy - 6, 92, 12, 6);
+    ctx.roundRect(36, cy - 6, 92, 12, 4);
     ctx.fill();
     ctx.globalAlpha = 1;
   }
-  text(ctx, rsLabel(s.fFrom), 32, cy, 14, 500, RS_INK, m.labelOld, "left");
-  text(ctx, rsLabel(s.homes), 32, cy + m.labelNewY, 14, 500, s.homes > 0 ? RS_INK : RS_MUTED, m.labelNew, "left");
+  text(ctx, rsLabel(s.fFrom), 36, cy, 14, 500, RS_INK, m.labelOld, "left");
+  text(ctx, rsLabel(s.homes), 36, cy + m.labelNewY, 14, 500, s.homes > 0 ? RS_INK : RS_MUTED, m.labelNew, "left");
   for (let i = 0; i < m.oldTiles.length; i++) tile(ctx, m.oldTiles[i], i);
   for (let i = 0; i < m.newTiles.length; i++) tile(ctx, m.newTiles[i], i);
 
@@ -148,12 +149,12 @@ export function drawRange(ctx: CanvasRenderingContext2D, m: RsModel, s: RsSel) {
   ctx.moveTo(0, 318);
   ctx.lineTo(RS_W, 318);
   ctx.stroke();
-  text(ctx, "Reset", 24, 339, 14, 500, RS_INK, 1, "left");
+  text(ctx, "Reset", 20, 339, 14, 500, RS_INK, 1, "left");
   ctx.fillStyle = RS_INK;
-  ctx.fillRect(24, 349, 38, 1);
+  ctx.fillRect(20, 349, 38, 1);
   ctx.fillStyle = RS_DOT;
   ctx.beginPath();
-  ctx.roundRect(220, 322, 80, 34, 12);
+  ctx.roundRect(220, 322, 80, 34, 8);
   ctx.fill();
   text(ctx, "Save", 260, 339, 14, 600, "#ffffff", 1);
   ctx.restore();
