@@ -5,6 +5,7 @@ import {
   OTP_ACCENT, OTP_BOX_EDGE, OTP_BOX_FILL, OTP_BOX_RADIUS, OTP_CHECK_PATH, OTP_ERROR, OTP_INK, OTP_MUTED, OTP_RESEND, OTP_RESEND_LEAD,
   OTP_RESEND_Y, OTP_SHEET, OTP_SHEET_EDGE, OTP_SHEET_RADIUS, OTP_SUB1, OTP_SUB1_Y, OTP_SUB2, OTP_SUB2_Y, OTP_TITLE, OTP_TITLE_DONE,
   OTP_TITLE_DONE_Y, OTP_TITLE_Y,
+  OTP_GRABBER, OTP_RIM_ALPHA,
 } from "../../packages/ui/src/components/otp-verify/otpDesign";
 
 const FONT = "Geist, system-ui, -apple-system, sans-serif";
@@ -35,6 +36,13 @@ export function drawOtp(ctx: CanvasRenderingContext2D, m: OtpModel, digits: stri
   ctx.lineWidth = 1;
   ctx.stroke();
   ctx.clip();
+
+  ctx.globalAlpha = m.titleOld;
+  ctx.fillStyle = OTP_GRABBER.color;
+  ctx.beginPath();
+  ctx.roundRect(OTP_CX - OTP_GRABBER.w / 2, OTP_GRABBER.y, OTP_GRABBER.w, OTP_GRABBER.h, 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
 
   text(ctx, OTP_TITLE, OTP_CX, OTP_TITLE_Y, 22, 600, OTP_INK, m.titleOld);
   text(ctx, OTP_SUB1, OTP_CX, OTP_SUB1_Y, 13, 400, OTP_MUTED, m.titleOld);
@@ -104,6 +112,11 @@ export function drawOtp(ctx: CanvasRenderingContext2D, m: OtpModel, digits: stri
     ctx.lineWidth = 1.5;
     ctx.strokeStyle = OTP_BOX_EDGE;
     ctx.stroke();
+    if (b.glow > 0.002) {
+      ctx.strokeStyle = rgba(OTP_ACCENT, b.glow * OTP_RIM_ALPHA);
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+    }
     if (b.ring > 0.002) {
       ctx.strokeStyle = rgba(edge, b.ring);
       ctx.lineWidth = 1.8;

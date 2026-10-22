@@ -25,3 +25,7 @@ export const OTP_SUB2_Y = 112;
 export const OTP_RESEND_Y = 242;
 export const OTP_TITLE_DONE_Y = 104;
 export const OTP_SHEET_RADIUS = 28;
+// Grabber pill at the top of the sheet and the rim light that sweeps the
+// boxes while they glow.
+export const OTP_GRABBER = { w: 36, h: 4, y: 14, color: "#dcd8cf" };
+export const OTP_RIM_ALPHA = 0.9;

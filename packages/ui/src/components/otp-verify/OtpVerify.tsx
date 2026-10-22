@@ -16,6 +16,7 @@ import {
   OTP_ACCENT, OTP_BOX_EDGE, OTP_BOX_FILL, OTP_BOX_RADIUS, OTP_CHECK_PATH, OTP_ERROR, OTP_INK, OTP_MUTED, OTP_RESEND, OTP_RESEND_LEAD,
   OTP_RESEND_Y, OTP_SHEET, OTP_SHEET_EDGE, OTP_SHEET_RADIUS, OTP_SUB1, OTP_SUB1_Y, OTP_SUB2, OTP_SUB2_Y, OTP_TITLE, OTP_TITLE_DONE,
   OTP_TITLE_DONE_Y, OTP_TITLE_Y,
+  OTP_GRABBER, OTP_RIM_ALPHA,
 } from "./otpDesign";
 
 export type OtpVerifyHandle = { typeDemo: () => void; reset: () => void };
@@ -77,6 +78,7 @@ function BoxSkia({ model, i }: { model: Model; i: number }) {
   const glow = useDerivedValue(() => model.value.boxes[i].glow * 0.62);
   const tint = useDerivedValue(() => model.value.boxes[i].glow * 0.1);
   const ring = useDerivedValue(() => model.value.boxes[i].ring);
+  const rim = useDerivedValue(() => model.value.boxes[i].glow * OTP_RIM_ALPHA);
   const ringColor = useDerivedValue(() => (model.value.boxes[i].err > 0.5 ? OTP_ERROR : OTP_ACCENT));
   const x = -OTP_BOX_W / 2;
   const y = -OTP_BOX_H / 2;
@@ -89,6 +91,7 @@ function BoxSkia({ model, i }: { model: Model; i: number }) {
       <RoundedRect x={x} y={y} width={OTP_BOX_W} height={OTP_BOX_H} r={OTP_BOX_RADIUS} color={OTP_ACCENT} opacity={tint} />
       <RoundedRect x={x} y={y} width={OTP_BOX_W} height={OTP_BOX_H} r={OTP_BOX_RADIUS} color={OTP_BOX_EDGE} style="stroke" strokeWidth={1.5} />
       <RoundedRect x={x} y={y} width={OTP_BOX_W} height={OTP_BOX_H} r={OTP_BOX_RADIUS} color={ringColor} style="stroke" strokeWidth={1.8} opacity={ring} />
+      <RoundedRect x={x} y={y} width={OTP_BOX_W} height={OTP_BOX_H} r={OTP_BOX_RADIUS} color={OTP_ACCENT} style="stroke" strokeWidth={1.6} opacity={rim} />
     </Group>
   );
 }
@@ -248,6 +251,7 @@ export const OtpVerify = forwardRef<OtpVerifyHandle, OtpVerifyProps>(function Ot
   });
   const checkOpacity = useDerivedValue(() => (model.value.check > 0.002 ? 1 : 0));
   const checkGlow = useDerivedValue(() => (model.value.check > 0.002 ? 0.45 : 0));
+  const grabberStyle = useAnimatedStyle(() => ({ opacity: model.value.titleOld }));
   const resendStyle = useAnimatedStyle(() => ({ opacity: model.value.titleOld }));
   const digits = useMemo(() => code.split(""), [code]);
 
@@ -270,6 +274,7 @@ export const OtpVerify = forwardRef<OtpVerifyHandle, OtpVerifyProps>(function Ot
           <Path path={CHECK} color={OTP_ACCENT} style="stroke" strokeWidth={3.4} strokeCap="round" strokeJoin="round" start={0} end={checkEnd} />
         </Group>
       </Canvas>
+      <Animated.View pointerEvents="none" style={[{ position: "absolute", left: OTP_CX - OTP_GRABBER.w / 2, top: OTP_GRABBER.y, width: OTP_GRABBER.w, height: OTP_GRABBER.h, borderRadius: 2, backgroundColor: OTP_GRABBER.color }, grabberStyle]} />
       <Label model={model} y={OTP_TITLE_Y} size={22} weight="600" color={OTP_INK} text={OTP_TITLE} kind="old" />
       <Label model={model} y={OTP_SUB1_Y} size={13} weight="400" color={OTP_MUTED} text={OTP_SUB1} kind="old" />
       <Label model={model} y={OTP_SUB2_Y} size={13} weight="400" color={OTP_MUTED} text={OTP_SUB2} kind="old" />
