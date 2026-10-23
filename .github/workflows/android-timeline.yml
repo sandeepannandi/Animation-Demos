@@ -6,8 +6,6 @@ on:
         description: Run ID of a build containing this exact Timeline source
         required: true
         default: '39937689831'
-  push:
-    branches: ['verify/timeline/**']
 permissions:
   contents: read
   actions: read
@@ -21,7 +19,7 @@ jobs:
         with:
           name: apk
           path: apk
-          run-id: ${{ inputs.apk_run || '39937689831' }}
+          run-id: ${{ inputs.apk_run }}
           github-token: ${{ github.token }}
       - name: Enable KVM
         run: |
