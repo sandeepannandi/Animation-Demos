@@ -1,4 +1,4 @@
-name: Android Motion Path verification
+name: Android Signature Ink verification
 on:
   workflow_dispatch:
     inputs:
@@ -54,7 +54,7 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Path editor real native gestures
+      - name: Signature drawing and handwriting replay
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 34
@@ -66,16 +66,16 @@ jobs:
           disable-animations: false
           script: |
             adb install -r apk/*.apk
-            bash scripts/android-path.sh
+            bash scripts/android-signature.sh
       - name: Reject incomplete or crash evidence
         if: always()
         run: |
-          python3 scripts/check-android-results.py smoke-out --require-summary path
-          for file in rest.png anchor.png anchor.xml split.png split.xml undo.png handle.png handle.xml smooth.png smooth.xml zoom.png motion-1.png motion-2.png session.logcat.txt; do
-            test -s "smoke-out/path/$file" || exit 1
+          python3 scripts/check-android-results.py smoke-out --require-summary signature
+          for file in rest.png drawn.png replay-1.png replay-2.png undo.png clear.png session.logcat.txt; do
+            test -s "smoke-out/signature/$file" || exit 1
           done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: path-results
+          name: signature-results
           path: smoke-out
