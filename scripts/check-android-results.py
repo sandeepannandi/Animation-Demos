@@ -11,7 +11,7 @@ combined='\n'.join(x.read_text(errors='replace') for x in summaries)
 if not combined.strip():failures.append('Empty summary evidence')
 for path in summaries:
  for line in path.read_text(errors='replace').splitlines():
-  if re.search(r'\bcrash=yes\b|\bjserr=[1-9]\d*\b|\balive=(?:no)?(?:\s|$)|\b(?:failed|failure)=yes\b',line,re.I):failures.append(f'{path}: {line}')
+  if re.search(r'\bcrashes=[1-9]\d*\b|\bcrash=yes\b|\bjserr=[1-9]\d*\b|\balive=(?:no)?(?:\s|$)|\b(?:failed|failure)=yes\b',line,re.I):failures.append(f'{path}: {line}')
 for path in root.rglob('*logcat*.txt'):
  text=path.read_text(errors='replace')
  if re.search(r'FATAL EXCEPTION|Fatal signal \d+|JavascriptException|ANR in com\.[\w.]*nativelet|Process: com\.[\w.]*nativelet',text,re.I):failures.append(f'{path}: fatal native/JS/ANR evidence')
