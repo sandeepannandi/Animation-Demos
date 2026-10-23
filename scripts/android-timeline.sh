@@ -40,10 +40,24 @@ PY
 SX=$((X1+(X2-X1)*7/10)); EX=$((X1+(X2-X1)*4/10)); Y=$((Y1+(Y2-Y1)*255/300))
 adb shell input swipe "$SX" "$Y" "$EX" "$Y" 450
 sleep 2; adb exec-out screencap -p > "$OUT/panned.png"
+# Reset and exercise native trim/playhead gestures against known source geometry.
+XY=$(center 'Reset'); adb shell input tap $XY; sleep 1
+A=$((X1+(X2-X1)*80/340)); B=$((X1+(X2-X1)*115/340)); TY=$((Y1+(Y2-Y1)*175/300))
+adb shell input swipe "$A" "$TY" "$B" "$TY" 700
+sleep 2; adb exec-out screencap -p > "$OUT/trimmed.png"
+adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+adb shell cat /sdcard/ui.xml > "$OUT/trimmed.xml"
+grep -q '00:38' "$OUT/trimmed.xml"
+A=$((X1+(X2-X1)*140/340)); B=$((X1+(X2-X1)*180/340)); PY=$((Y1+(Y2-Y1)*100/300))
+adb shell input swipe "$A" "$PY" "$B" "$PY" 700
+sleep 2; adb exec-out screencap -p > "$OUT/playhead.png"
+adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+adb shell cat /sdcard/ui.xml > "$OUT/playhead.xml"
+grep -q '01:04' "$OUT/playhead.xml"
 adb logcat -d > "$OUT/session.logcat.txt"
 if grep -Eq "Process: $PKG|Process $PKG .*has died|ANR in $PKG|FATAL EXCEPTION|Fatal signal|JavascriptException" "$OUT/session.logcat.txt"; then
  echo 'timeline-session crash=yes' | tee "$OUT/summary.txt"; exit 1
 fi
 cmp -s "$OUT/rest.png" "$OUT/zoomed.png" && { echo 'zoom unchanged'; exit 1; }
 cmp -s "$OUT/zoomed.png" "$OUT/panned.png" && { echo 'pan unchanged'; exit 1; }
-echo 'timeline-session crash=no zoom=changed range=25s pan=changed pinch=untested haptics=untested' | tee "$OUT/summary.txt"
+echo 'timeline-session crash=no zoom=changed range=25s pan=changed trim=38s playhead=64s pinch=untested haptics=untested' | tee "$OUT/summary.txt"
