@@ -50,6 +50,11 @@ import sys,re,xml.etree.ElementTree as E
 s=next(n.get('text','') for n in E.parse(sys.argv[1]).iter('node') if n.get('text','').startswith('M 40 220 C'))
 v=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 249<v[8]<261 and 159<v[9]<171,s
 PY
+# Resume and capture distinct native motion frames; helper tests independently check distance integration.
+XY=$(center Pause); adb shell input tap $XY
+sleep 1; adb exec-out screencap -p > "$OUT/motion-1.png"
+sleep 1; adb exec-out screencap -p > "$OUT/motion-2.png"
+cmp -s "$OUT/motion-1.png" "$OUT/motion-2.png" && { echo 'Native marker frames unchanged'; exit 1; }
 adb logcat -d > "$OUT/session.logcat.txt"
 if grep -Eq "Process: $PKG|Process $PKG .*has died|ANR in $PKG|FATAL EXCEPTION|Fatal signal|JavascriptException" "$OUT/session.logcat.txt"; then echo 'path-session crash=yes' | tee "$OUT/summary.txt"; exit 1; fi
-echo 'path-session crash=no anchor=source-changed split=4 undo=3 tangent=source-changed marker=unverified' | tee "$OUT/summary.txt"
+echo 'path-session crash=no anchor=source-changed split=4 undo=3 tangent=source-changed marker=frames-changed' | tee "$OUT/summary.txt"
