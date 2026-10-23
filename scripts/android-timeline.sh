@@ -80,10 +80,11 @@ XY=$(center 'Reset'); adb shell input tap $XY; sleep 1
 SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}
 ANDROID_JAR=$(find "$SDK/platforms" -name android.jar | sort -V | tail -1)
 UI_JAR=$(dirname "$ANDROID_JAR")/uiautomator.jar
+JUNIT_JAR=$(dirname "$ANDROID_JAR")/optional/android.test.base.jar
 BUILD_TOOLS=$(find "$SDK/build-tools" -name d8 | sort -V | tail -1)
 mkdir -p /tmp/timeline-pinch/classes /tmp/timeline-pinch/dex
-javac -source 8 -target 8 -cp "$ANDROID_JAR:$UI_JAR" -d /tmp/timeline-pinch/classes scripts/TimelinePinch.java
-"$BUILD_TOOLS" --lib "$ANDROID_JAR" --lib "$UI_JAR" --output /tmp/timeline-pinch/dex /tmp/timeline-pinch/classes/TimelinePinch.class
+javac -source 8 -target 8 -cp "$ANDROID_JAR:$UI_JAR:$JUNIT_JAR" -d /tmp/timeline-pinch/classes scripts/TimelinePinch.java
+"$BUILD_TOOLS" --lib "$ANDROID_JAR" --lib "$UI_JAR" --lib "$JUNIT_JAR" --output /tmp/timeline-pinch/dex /tmp/timeline-pinch/classes/TimelinePinch.class
 (cd /tmp/timeline-pinch/dex && jar cf ../timeline-pinch.jar classes.dex)
 adb push /tmp/timeline-pinch/timeline-pinch.jar /data/local/tmp/ >/dev/null
 adb shell uiautomator runtest timeline-pinch.jar -c TimelinePinch > "$OUT/pinch-test.txt"
