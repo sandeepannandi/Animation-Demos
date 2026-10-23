@@ -296,3 +296,5 @@
 .miniWheel i { left: 22px; }
 .miniWheel b { left: 52px; }
 .miniWheel em { left: 82px; }
+
+.miniTimeline{position:relative;width:230px;height:130px;border-radius:10px;background:#141618;overflow:hidden}.miniTimeline:before{content:"";position:absolute;left:20px;right:20px;top:47px;height:42px;background:repeating-linear-gradient(90deg,#b8c6b0 0 2px,transparent 2px 5px);clip-path:polygon(0 40%,10% 15%,20% 38%,30% 0,40% 35%,50% 10%,60% 32%,70% 5%,80% 30%,90% 15%,100% 40%,100% 60%,90% 85%,80% 70%,70% 95%,60% 68%,50% 90%,40% 65%,30% 100%,20% 62%,10% 85%,0 60%)}.miniTimeline i,.miniTimeline b{position:absolute;top:42px;width:8px;height:52px;background:#e2eadb;border-radius:3px;left:53px}.miniTimeline b{left:177px}.miniTimeline em{position:absolute;left:115px;top:25px;height:75px;width:2px;background:white}
