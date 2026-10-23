@@ -54,6 +54,7 @@ sleep 2; adb exec-out screencap -p > "$OUT/playhead.png"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
 adb shell cat /sdcard/ui.xml > "$OUT/playhead.xml"
 grep -q '01:04' "$OUT/playhead.xml"
+adb shell getevent -lp > "$OUT/input-devices.txt"
 adb logcat -d > "$OUT/session.logcat.txt"
 if grep -Eq "Process: $PKG|Process $PKG .*has died|ANR in $PKG|FATAL EXCEPTION|Fatal signal|JavascriptException" "$OUT/session.logcat.txt"; then
  echo 'timeline-session crash=yes' | tee "$OUT/summary.txt"; exit 1
