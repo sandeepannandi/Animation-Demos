@@ -128,8 +128,13 @@ export function seatScene(f: SeatFlow) {
     if (bx > VW || by > VH || bx + bw < 0 || by + bh < 0) continue;
     rect(bx, by, bw, bh, tier.color, .1 + venueLabels * .08, 10 * c.scale, tier.color, Math.max(1, 1.6 * c.scale));
     if (venueLabels > 0) {
-      labels.push({ x: bx + bw / 2, y: by + bh / 2 - 4, text: s.name, size: 13, color: '#2e3a30', opacity: venueLabels, align: 'center', weight: 700 });
-      labels.push({ x: bx + bw / 2, y: by + bh / 2 + 14, text: formatPrice(tier.price), size: 11, color: '#5f6f60', opacity: venueLabels, align: 'center' });
+      // Fit labels to the section's on-screen width; drop them when too small to read.
+      const nameSize = Math.min(13, (bw - 12) / (s.name.length * 0.62));
+      const priceSize = Math.min(11, nameSize * 0.85);
+      if (nameSize >= 6.5) {
+        labels.push({ x: bx + bw / 2, y: by + bh / 2 - nameSize * 0.4, text: s.name, size: nameSize, color: '#2e3a30', opacity: venueLabels, align: 'center', weight: 700 });
+        labels.push({ x: bx + bw / 2, y: by + bh / 2 + priceSize + nameSize * 0.15, text: formatPrice(tier.price), size: priceSize, color: '#5f6f60', opacity: venueLabels, align: 'center' });
+      }
     }
     for (const seat of s.seats) {
       if (!visible(seat.x, seat.y, 40)) continue;
