@@ -50,6 +50,17 @@ import sys,re,xml.etree.ElementTree as E
 s=next(n.get('text','') for n in E.parse(sys.argv[1]).iter('node') if n.get('text','').startswith('M 40 220 C'))
 v=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 249<v[8]<261 and 159<v[9]<171,s
 PY
+# Linked tangents must change the opposite side, while preserving both anchor positions.
+XY=$(center Smooth); adb shell input tap $XY; sleep 1; snapshot smooth
+python3 - "$OUT/handle.xml" "$OUT/smooth.xml" <<'PYTEST'
+import sys,re,xml.etree.ElementTree as E
+vals=[]
+for f in sys.argv[1:]:
+ s=next(n.get('text','') for n in E.parse(f).iter('node') if n.get('text','').startswith('M 40 220 C'))
+ vals.append(list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s))))
+a,b=vals;assert a[4:6]!=b[4:6] and a[6:8]==b[6:8] and a[8:10]==b[8:10],vals
+PYTEST
+XY=$(center +); adb shell input tap $XY; sleep 1; snapshot zoom
 # Resume and capture distinct native motion frames; helper tests independently check distance integration.
 XY=$(center Pause); adb shell input tap $XY
 sleep 1; adb exec-out screencap -p > "$OUT/motion-1.png"
