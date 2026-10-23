@@ -10,7 +10,10 @@ snapshot boot
 if grep -q "Pixel Launcher isn't responding" "$OUT/boot.xml"; then adb shell input keyevent KEYCODE_BACK; adb shell am force-stop com.google.android.apps.nexuslauncher; adb shell am start -W -a android.intent.action.VIEW -d nativelet-showcase:///path "$PKG" >/dev/null; sleep 3; fi
 snapshot rest
 grep -q 'Motion path canvas' "$OUT/rest.xml"
-center(){ python3 - "$OUT/rest.xml" "$1" <<'PY'
+center(){
+ adb shell uiautomator dump /sdcard/current-path.xml >/dev/null 2>&1
+ adb shell cat /sdcard/current-path.xml > "$OUT/current-ui.xml"
+ python3 - "$OUT/current-ui.xml" "$1" <<'PY'
 import sys,re,xml.etree.ElementTree as E
 for n in E.parse(sys.argv[1]).iter('node'):
  if n.get('text')==sys.argv[2] or n.get('content-desc')==sys.argv[2]:
@@ -71,7 +74,7 @@ a,b=vals;assert a[4:6]!=b[4:6] and a[6:8]==b[6:8] and a[8:10]==b[8:10],vals
 PYTEST
 XY=$(center +); adb shell input tap $XY; sleep 1; snapshot zoom
 # Resume and capture distinct native motion frames; helper tests independently check distance integration.
-XY=$(center Pause); adb shell input tap $XY
+XY=$(center Play); adb shell input tap $XY
 sleep 1; adb exec-out screencap -p > "$OUT/motion-1.png"
 sleep 1; adb exec-out screencap -p > "$OUT/motion-2.png"
 cmp -s "$OUT/motion-1.png" "$OUT/motion-2.png" && { echo 'Native marker frames unchanged'; exit 1; }
