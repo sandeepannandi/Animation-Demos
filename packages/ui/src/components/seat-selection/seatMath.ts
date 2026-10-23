@@ -122,6 +122,7 @@ export function seatScene(f: SeatFlow) {
   rect(sx, sy, sw, sh, '#c3d2bd', .9, sh / 2);
   labels.push({ x: sx + sw / 2, y: sy + sh + 15, text: sc.label, size: 10, color: '#8b9885', opacity: clamp((c.scale - .2) * 4, .35, .9), align: 'center', weight: 600 });
   const venueLabels = clamp((.78 - c.scale) / .18, 0, 1), rowLabels = clamp((c.scale * 30 - 15) / 7, 0, 1);
+  const plates: Shape[] = [];
   for (const s of v.sections) {
     const tier = v.tiers[s.tier];
     const bx = screenX(c, s.x), by = screenY(c, s.y), bw = s.w * c.scale, bh = s.h * c.scale;
@@ -134,7 +135,7 @@ export function seatScene(f: SeatFlow) {
       if (nameSize >= 6.5) {
         const pillW = Math.max(s.name.length * 0.62 * nameSize, formatPrice(tier.price).length * 0.58 * priceSize) + 12;
         const pillH = nameSize * 1.15 + priceSize * 1.3 + 6;
-        rect(bx + bw / 2 - pillW / 2, by + bh / 2 - pillH / 2 + priceSize * 0.3, pillW, pillH, '#f7f9f4', venueLabels * .88, 6);
+        plates.push({ x: bx + bw / 2 - pillW / 2, y: by + bh / 2 - pillH / 2 + priceSize * 0.3, w: pillW, h: pillH, color: '#f7f9f4', opacity: venueLabels * .88, r: 6 });
         labels.push({ x: bx + bw / 2, y: by + bh / 2 - nameSize * 0.4, text: s.name, size: nameSize, color: '#2e3a30', opacity: venueLabels, align: 'center', weight: 700 });
         labels.push({ x: bx + bw / 2, y: by + bh / 2 + priceSize + nameSize * 0.15, text: formatPrice(tier.price), size: priceSize, color: '#5f6f60', opacity: venueLabels, align: 'center' });
       }
@@ -159,6 +160,8 @@ export function seatScene(f: SeatFlow) {
       }
     }
   }
+  // Label plates draw over seats so venue labels stay legible.
+  for (const p of plates) shapes.push(p);
   // Mini-map with viewport indicator.
   const mw = 74, mh = 60, mx = VW - mw - 10, my = 10, ms = Math.min(mw / v.width, mh / v.height);
   rect(mx, my, mw, mh, '#ffffff', .88, 7, '#c9d3c4', 1);
