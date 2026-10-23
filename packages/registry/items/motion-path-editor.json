@@ -1,1 +1,24 @@
-{"slug":"motion-path-editor","title":"Motion Path Editor","category":"interaction","files":["MotionPathEditor.tsx","pathMath.ts","pathScene.ts","Example.tsx","README.md","LICENSE"],"dependencies":["react","react-native","@shopify/react-native-skia"],"tested":{"expo":"57.0.27","reactNative":"0.86.3","web":"0.21.2","skia":"2.6.2"},"nativeDeviceVerified":false}
+{
+  "slug": "motion-path-editor",
+  "title": "Signature Ink",
+  "category": "interaction",
+  "files": [
+    "SignatureCanvas.tsx",
+    "signatureMath.ts",
+    "Example.tsx",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": [
+    "react",
+    "react-native",
+    "@shopify/react-native-skia"
+  ],
+  "tested": {
+    "expo": "57.0.27",
+    "reactNative": "0.86.3",
+    "web": "0.21.2",
+    "skia": "2.6.2"
+  },
+  "nativeDeviceVerified": false
+}

@@ -1,16 +1,16 @@
-# Motion Path Editor
+# Signature Ink
 
-An original Skia cubic-path editor. Anchors and linked or independent tangent handles edit the real path. Split uses de Casteljau, so inserting an anchor does not change the curve. The marker travels at 48 logical units per second by numerically integrated arc length, rather than by Bezier parameter. It follows live edits and reverses at open endpoints, rather than teleporting back to the start. Handle guides unfold, but geometry always follows the pointer directly.
+Draw with a finger, mouse or stylus and replay that actual handwriting stroke by stroke. Ink is smoothed with Catmull-Rom cubics; velocity and available stylus pressure affect width. Measured stroke timing is retained for replay, bounded to .1–4 seconds per stroke with .2-second pen-up gaps. Slow motion reduces replay speed, not drawing responsiveness. Reduced Motion reveals the complete signature immediately.
 
-Copy all source files, retain LICENSE, and install React Native and `@shopify/react-native-skia`. See Example.tsx for the minimal buttons and Geist typography.
+The existing Motion Path Editor card was revised at the user's request. Its earlier curve-editor helpers are historical source, not dependencies of this control. No path-data display, anchor editing or automatic marker in the revised demo.
+
+Copy SignatureCanvas.tsx, signatureMath.ts and LICENSE. Dependencies: React, React Native, @shopify/react-native-skia. Example.tsx uses the showcase's Geist font.
 
 ```tsx
-const editor = useRef<MotionPathHandle>(null);
-<MotionPathEditor ref={editor} onChange={({anchors, svg, length}) => save(svg)} />
+const ref = useRef<SignatureHandle>(null);
+<SignatureCanvas ref={ref} onChange={({strokes, svg}) => keepLocally(strokes)} />
 ```
 
-Props: `initialAnchors`, `onChange`, `onChangeEnd`, `onStatus`, `slowMotion`, `reducedMotion` (system by default). Callbacks return deep-copied real coordinates, SVG cubic path data, approximate path length. Handles are relative to the anchor. Supply 2–12 valid finite anchors. Initial anchors are read at mount/reset, not a controlled value. Ref actions: select, split (selected outgoing segment, or last incoming segment), mode, undo, zoom, play, reset, value.
+Ref: replay(), undo(), clear(), value(). Props: onChange(value), onStatus({count,replaying}), slowMotion, reducedMotion. Stroke output is deep copied. Coordinates are logical340×320 units. Limited to64 strokes and2400 points per stroke; no storage/network request. The caller owns any later storage or use. This does not sign documents, verify identity or apply a legal signature. Do not treat a demo drawing as signing authorization.
 
-Drag anchors/handles; drag empty canvas to pan. Buttons offer point selection, smooth/corner constraints, exact split, undo, zoom, pause and reset. Canvas is 340×320 logical units. Zoom is .75–2×. Open paths only, maximum12 anchors, no SVG import or closed-path editing. Undo stores up to30 geometry changes. Reduce Motion freezes automatic marker motion and removes handle reveal. Pause does not stop editing. Slow motion changes preview travel and guide reveal only, not drag responsiveness or exported geometry.
-
-Web preview uses the same math/scene through Canvas2D; native uses Skia. Both animation loops currently run on the JS clock. Do not infer physical-device frame rate or iOS support from web/helper tests. Screen-reader coordinate editing and physical-device performance need separate coverage.
+Canvas2D reference and Skia share the interpolation/replay model. JS animation clock; physical-device performance, pressure-capable stylus behavior, iOS and screen readers require separate tests. A single dot and multiple pen lifts work. Undo removes the last whole stroke. Clear removes the drawing. New drawing interrupts a replay.

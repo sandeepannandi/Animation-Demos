@@ -3,7 +3,7 @@ import { join } from "node:path";
 import NativeletSite from "./components/nativelet-site";
 
 const components = {
-  path: { dir: "packages/ui/src/components/motion-path-editor", files: ["MotionPathEditor.tsx", "pathMath.ts", "pathScene.ts", "Example.tsx", "README.md", "LICENSE"] },
+  path: { dir: "packages/ui/src/components/motion-path-editor", files: ["SignatureCanvas.tsx", "signatureMath.ts", "Example.tsx", "README.md", "LICENSE"] },
   timeline: { dir: "packages/ui/src/components/timeline-trim", files: ["TimelineTrim.tsx", "timelineMath.ts", "timelineGesture.ts", "Example.tsx", "timelineFixture.ts", "README.md", "LICENSE"] },
   wheel: { dir: "packages/ui/src/components/wheel-time-picker", files: ["WheelTimePicker.tsx", "wheelMath.ts", "wheelDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
   range: { dir: "packages/ui/src/components/range-stack", files: ["RangeStack.tsx", "rangeMath.ts", "rangeDesign.ts", "Example.tsx", "README.md", "LICENSE"] },
