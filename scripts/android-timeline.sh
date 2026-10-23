@@ -7,6 +7,16 @@ adb shell am force-stop "$PKG"
 adb logcat -c
 adb shell am start -W -a android.intent.action.VIEW -d nativelet-showcase:///timeline "$PKG" > "$OUT/launch.txt"
 sleep 10
+# Pixel Launcher can show its own ANR dialog during emulator boot. Dismiss only
+# that system-app dialog, never a Nativelet error, before locating test controls.
+adb shell uiautomator dump /sdcard/boot-ui.xml >/dev/null 2>&1
+adb shell cat /sdcard/boot-ui.xml > "$OUT/boot-ui.xml"
+if grep -q "Pixel Launcher isn't responding" "$OUT/boot-ui.xml"; then
+ adb shell input keyevent KEYCODE_BACK
+ adb shell am force-stop com.google.android.apps.nexuslauncher
+ adb shell am start -W -a android.intent.action.VIEW -d nativelet-showcase:///timeline "$PKG" >/dev/null
+ sleep 3
+fi
 adb exec-out screencap -p > "$OUT/rest.png"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
 adb shell cat /sdcard/ui.xml > "$OUT/ui.xml"
