@@ -1,0 +1,58 @@
+name: Android Seat Selection verification
+on:
+  workflow_dispatch:
+    inputs:
+      apk_run:
+        description: Run ID of a build containing this exact Seat Selection source
+        required: true
+permissions:
+  contents: read
+  actions: read
+jobs:
+  emulator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: apk
+          path: apk
+          run-id: ${{ inputs.apk_run }}
+          github-token: ${{ github.token }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Build separate AndroidX gesture test APK
+        working-directory: scripts/pinch-instrumentation
+        run: gradle :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Seat selection gestures on Android
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          disable-animations: false
+          script: |
+            adb install -r apk/*.apk
+            bash scripts/android-seats.sh
+      - name: Fail closed on missing evidence or crashes
+        if: always()
+        run: python3 scripts/check-android-results.py smoke-out --require-summary seats
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seats-results
+          path: smoke-out
