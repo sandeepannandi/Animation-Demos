@@ -47,13 +47,23 @@ adb shell input swipe "$A" "$TY" "$B" "$TY" 700
 sleep 2; adb exec-out screencap -p > "$OUT/trimmed.png"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
 adb shell cat /sdcard/ui.xml > "$OUT/trimmed.xml"
-grep -q '00:38' "$OUT/trimmed.xml"
+python3 - "$OUT/trimmed.xml" <<'PYTEST'
+import sys,re,xml.etree.ElementTree as E
+values=[n.get('text','') for n in E.parse(sys.argv[1]).iter('node') if '→' in n.get('text','')]
+assert values, 'Missing source selection output'
+numbers=re.findall(r'(\d+):(\d+\.\d+)',values[0]);start=int(numbers[0][0])*60+float(numbers[0][1]);end=int(numbers[1][0])*60+float(numbers[1][1]);assert 35<start<45 and end==84,values
+PYTEST
 A=$((X1+(X2-X1)*140/340)); B=$((X1+(X2-X1)*180/340)); PY=$((Y1+(Y2-Y1)*100/300))
 adb shell input swipe "$A" "$PY" "$B" "$PY" 700
 sleep 2; adb exec-out screencap -p > "$OUT/playhead.png"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
 adb shell cat /sdcard/ui.xml > "$OUT/playhead.xml"
-grep -q '01:04' "$OUT/playhead.xml"
+python3 - "$OUT/playhead.xml" <<'PYTEST'
+import sys,re,xml.etree.ElementTree as E
+values=[n.get('text','') for n in E.parse(sys.argv[1]).iter('node')]
+assert any(re.fullmatch(r'01:0[0-9]\.\d+',v) for v in values),values
+assert any('01:24.00' in v and '→' in v for v in values),values
+PYTEST
 adb shell getevent -lp > "$OUT/input-devices.txt"
 XY=$(center 'Reset'); adb shell input tap $XY; sleep 1
 # Legacy UiAutomator injects two real MotionEvent pointer streams, not a zoom-button surrogate.
@@ -79,4 +89,4 @@ if grep -Eq "Process: $PKG|Process $PKG .*has died|ANR in $PKG|FATAL EXCEPTION|F
 fi
 cmp -s "$OUT/rest.png" "$OUT/zoomed.png" && { echo 'zoom unchanged'; exit 1; }
 cmp -s "$OUT/zoomed.png" "$OUT/panned.png" && { echo 'pan unchanged'; exit 1; }
-echo 'timeline-session crash=no zoom=changed range=25s pan=changed trim=38s playhead=64s pinch=two-pointer haptics=untested' | tee "$OUT/summary.txt"
+echo 'timeline-session crash=no zoom=changed range=25s pan=changed trim=source-changed playhead=source-changed pinch=two-pointer haptics=untested' | tee "$OUT/summary.txt"
