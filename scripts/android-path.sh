@@ -31,11 +31,20 @@ X=$((X1+(X2-X1)*174/340)); Y=$((Y1+(Y2-Y1)*94/320)); A=$((X1+(X2-X1)*194/340)); 
 adb shell input swipe "$X" "$Y" "$A" "$B" 600
 sleep 1; snapshot anchor
 # Real geometry must change near the intended logical coordinate, not just selected styling.
-python3 - "$OUT/anchor.xml" <<'PY'
+python3 - "$OUT/rest.xml" "$OUT/anchor.xml" <<'PY'
 import sys,re,xml.etree.ElementTree as E
-values=[n.get('text','') for n in E.parse(sys.argv[1]).iter('node')]
-s=next(v for v in values if v.startswith('M 40 220 C'))
-numbers=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 184<numbers[6]<204 and 114<numbers[7]<134,s
+values=[]
+for f in sys.argv[1:]:
+ s=next(n.get('text','') for n in E.parse(f).iter('node') if n.get('text','').startswith('M 40 220 C'))
+ values.append(list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s))))
+a,b=values
+# Screen adb swipe ends in a sampled MotionEvent: the last MOVE can precede UP.
+# Require a nearby delivered target plus independent direction, shape and translation invariants.
+assert 184<b[6]<204 and 114<b[7]<134,values
+assert 10<b[6]-a[6]<30 and 20<b[7]-a[7]<40,values
+assert a[:4]==b[:4] and a[10:]==b[10:],values
+for i in [4,8]:
+ assert abs((b[i]-b[6])-(a[i]-a[6]))<.01 and abs((b[i+1]-b[7])-(a[i+1]-a[7]))<.01,values
 PY
 XY=$(center Split); adb shell input tap $XY; sleep 1; snapshot split
 grep -q '4 anchors' "$OUT/split.xml"
