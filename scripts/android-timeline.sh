@@ -83,7 +83,7 @@ adb exec-out screencap -p > "$OUT/pinch-before.png"
 # Separate supported AndroidX instrumentation APK, never framework/JUnit3 shims.
 adb install -r scripts/pinch-instrumentation/app/build/outputs/apk/debug/app-debug.apk
 adb install -r scripts/pinch-instrumentation/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-adb shell am instrument -w -r -e class dev.nativelet.pinch.TimelinePinchTest dev.nativelet.pinch.test/androidx.test.runner.AndroidJUnitRunner > "$OUT/pinch-test.txt"
+adb shell am instrument -w -r dev.nativelet.pinch.test/androidx.test.runner.AndroidJUnitRunner > "$OUT/pinch-test.txt"
 grep -q 'OK (1 test)' "$OUT/pinch-test.txt"
 if grep -Eq 'FAILURES|INSTRUMENTATION_FAILED|Process crashed' "$OUT/pinch-test.txt"; then cat "$OUT/pinch-test.txt"; exit 1; fi
 sleep 2; adb exec-out screencap -p > "$OUT/pinched.png"
