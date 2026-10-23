@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 OUT=smoke-out/path; mkdir -p "$OUT"
+trap 'adb logcat -d > "$OUT/session.logcat.txt" 2>/dev/null || true' EXIT
 PKG=$(adb shell pm list packages | grep -i nativelet | sed 's/package://' | head -1 | tr -d '\r')
 [ -n "$PKG" ]; adb shell am force-stop "$PKG"; adb logcat -c
 adb shell am start -W -a android.intent.action.VIEW -d nativelet-showcase:///path "$PKG" > "$OUT/launch.txt"
@@ -53,7 +54,17 @@ XY=$(center Split); adb shell input tap $XY; sleep 1; snapshot split
 grep -q '4 anchors' "$OUT/split.xml"
 XY=$(center Undo); adb shell input tap $XY; sleep 1; snapshot undo
 grep -q '3 anchors' "$OUT/undo.xml"
+# Undo restores geometry, not selection: explicitly select the middle anchor.
+XY=$(center 'Point 2'); adb shell input tap $XY
 XY=$(center Corner); adb shell input tap $XY
+snapshot before-handle
+read X1 Y1 X2 Y2 < <(python3 - "$OUT/before-handle.xml" <<'PYBOUNDS'
+import sys,re,xml.etree.ElementTree as E
+for n in E.parse(sys.argv[1]).iter('node'):
+ if n.get('content-desc','').startswith('Motion path canvas'):
+  print(*re.findall(r'\d+',n.get('bounds')));break
+PYBOUNDS
+)
 # Outgoing handle has moved with the anchor to242,124.
 X=$((X1+(X2-X1)*242/340)); Y=$((Y1+(Y2-Y1)*124/320)); A=$((X1+(X2-X1)*255/340)); B=$((Y1+(Y2-Y1)*165/320))
 adb shell input swipe "$X" "$Y" "$A" "$B" 650; sleep 1; snapshot handle
