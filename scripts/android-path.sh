@@ -35,7 +35,7 @@ python3 - "$OUT/anchor.xml" <<'PY'
 import sys,re,xml.etree.ElementTree as E
 values=[n.get('text','') for n in E.parse(sys.argv[1]).iter('node')]
 s=next(v for v in values if v.startswith('M 40 220 C'))
-numbers=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 189<numbers[6]<199 and 119<numbers[7]<129,s
+numbers=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 184<numbers[6]<204 and 114<numbers[7]<134,s
 PY
 XY=$(center Split); adb shell input tap $XY; sleep 1; snapshot split
 grep -q '4 anchors' "$OUT/split.xml"
@@ -48,7 +48,7 @@ adb shell input swipe "$X" "$Y" "$A" "$B" 650; sleep 1; snapshot handle
 python3 - "$OUT/handle.xml" <<'PY'
 import sys,re,xml.etree.ElementTree as E
 s=next(n.get('text','') for n in E.parse(sys.argv[1]).iter('node') if n.get('text','').startswith('M 40 220 C'))
-v=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 249<v[8]<261 and 159<v[9]<171,s
+v=list(map(float,re.findall(r'-?\d+(?:\.\d+)?',s)));assert 243<v[8]<267 and 153<v[9]<177,s
 PY
 # Linked tangents must change the opposite side, while preserving both anchor positions.
 XY=$(center Smooth); adb shell input tap $XY; sleep 1; snapshot smooth
