@@ -132,6 +132,9 @@ export function seatScene(f: SeatFlow) {
       const nameSize = Math.min(13, (bw - 12) / (s.name.length * 0.62));
       const priceSize = Math.min(11, nameSize * 0.85);
       if (nameSize >= 6.5) {
+        const pillW = Math.max(s.name.length * 0.62 * nameSize, formatPrice(tier.price).length * 0.58 * priceSize) + 12;
+        const pillH = nameSize * 1.15 + priceSize * 1.3 + 6;
+        rect(bx + bw / 2 - pillW / 2, by + bh / 2 - pillH / 2 + priceSize * 0.3, pillW, pillH, '#f7f9f4', venueLabels * .88, 6);
         labels.push({ x: bx + bw / 2, y: by + bh / 2 - nameSize * 0.4, text: s.name, size: nameSize, color: '#2e3a30', opacity: venueLabels, align: 'center', weight: 700 });
         labels.push({ x: bx + bw / 2, y: by + bh / 2 + priceSize + nameSize * 0.15, text: formatPrice(tier.price), size: priceSize, color: '#5f6f60', opacity: venueLabels, align: 'center' });
       }
