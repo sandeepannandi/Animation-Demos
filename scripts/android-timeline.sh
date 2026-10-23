@@ -54,10 +54,29 @@ sleep 2; adb exec-out screencap -p > "$OUT/playhead.png"
 adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
 adb shell cat /sdcard/ui.xml > "$OUT/playhead.xml"
 grep -q '01:04' "$OUT/playhead.xml"
+adb shell getevent -lp > "$OUT/input-devices.txt"
+XY=$(center 'Reset'); adb shell input tap $XY; sleep 1
+# Legacy UiAutomator injects two real MotionEvent pointer streams, not a zoom-button surrogate.
+SDK=${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}
+ANDROID_JAR=$(find "$SDK/platforms" -name android.jar | sort -V | tail -1)
+UI_JAR=$(dirname "$ANDROID_JAR")/uiautomator.jar
+BUILD_TOOLS=$(find "$SDK/build-tools" -name d8 | sort -V | tail -1)
+mkdir -p /tmp/timeline-pinch/classes /tmp/timeline-pinch/dex
+javac -source 8 -target 8 -cp "$ANDROID_JAR:$UI_JAR" -d /tmp/timeline-pinch/classes scripts/TimelinePinch.java
+"$BUILD_TOOLS" --lib "$ANDROID_JAR" --lib "$UI_JAR" --output /tmp/timeline-pinch/dex /tmp/timeline-pinch/classes/TimelinePinch.class
+(cd /tmp/timeline-pinch/dex && jar cf ../timeline-pinch.jar classes.dex)
+adb push /tmp/timeline-pinch/timeline-pinch.jar /data/local/tmp/ >/dev/null
+adb shell uiautomator runtest timeline-pinch.jar -c TimelinePinch > "$OUT/pinch-test.txt"
+grep -q 'OK (1 test)' "$OUT/pinch-test.txt"
+sleep 2; adb exec-out screencap -p > "$OUT/pinched.png"
+adb shell uiautomator dump /sdcard/ui.xml >/dev/null 2>&1
+adb shell cat /sdcard/ui.xml > "$OUT/pinched.xml"
+# Require an actual zoom-level change away from fit after the two-pointer gesture.
+if grep -q 'text="1.0×"' "$OUT/pinched.xml"; then echo 'Pinch did not change zoom'; exit 1; fi
 adb logcat -d > "$OUT/session.logcat.txt"
 if grep -Eq "Process: $PKG|Process $PKG .*has died|ANR in $PKG|FATAL EXCEPTION|Fatal signal|JavascriptException" "$OUT/session.logcat.txt"; then
  echo 'timeline-session crash=yes' | tee "$OUT/summary.txt"; exit 1
 fi
 cmp -s "$OUT/rest.png" "$OUT/zoomed.png" && { echo 'zoom unchanged'; exit 1; }
 cmp -s "$OUT/zoomed.png" "$OUT/panned.png" && { echo 'pan unchanged'; exit 1; }
-echo 'timeline-session crash=no zoom=changed range=25s pan=changed trim=38s playhead=64s pinch=untested haptics=untested' | tee "$OUT/summary.txt"
+echo 'timeline-session crash=no zoom=changed range=25s pan=changed trim=38s playhead=64s pinch=two-pointer haptics=untested' | tee "$OUT/summary.txt"
