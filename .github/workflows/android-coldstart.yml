@@ -61,7 +61,7 @@ jobs:
             bash scripts/android-coldstart.sh
       - name: Fail closed on crash or missing evidence
         if: always()
-        run: python3 scripts/check-android-results.py smoke-out
+        run: python3 scripts/check-android-results.py smoke-out --coldstart
       - uses: actions/upload-artifact@v4
         if: always()
         with:

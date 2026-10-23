@@ -20,4 +20,12 @@ class Gate(unittest.TestCase):
   with tempfile.TemporaryDirectory() as d:
    pathlib.Path(d,'summary.txt').write_text('index crash=no jserr=0 alive=yes')
    self.assertNotEqual(subprocess.run(['python3',str(SCRIPT),d,'--routes','index'],capture_output=True).returncode,0)
+ def test_coldstart_incomplete(self):
+  with tempfile.TemporaryDirectory() as d:
+   pathlib.Path(d,'summary.txt').write_text('package=x rounds=40 screens=curl ripple\ncurl launches=40 crashes=0')
+   self.assertNotEqual(subprocess.run(['python3',str(SCRIPT),d,'--coldstart'],capture_output=True).returncode,0)
+ def test_coldstart_complete(self):
+  with tempfile.TemporaryDirectory() as d:
+   pathlib.Path(d,'summary.txt').write_text('package=x rounds=40 screens=curl ripple\ncurl launches=40 crashes=0\nripple launches=40 crashes=0')
+   self.assertEqual(subprocess.run(['python3',str(SCRIPT),d,'--coldstart'],capture_output=True).returncode,0)
 unittest.main()
