@@ -1,6 +1,6 @@
 # Motion Path Editor
 
-An original Skia cubic-path editor. Anchors and linked or independent tangent handles edit the real path. Split uses de Casteljau, so inserting an anchor does not change the curve. The marker travels at 48 logical units per second by numerically integrated arc length, rather than by Bezier parameter. It follows live edits. Handle guides unfold, but geometry always follows the pointer directly.
+An original Skia cubic-path editor. Anchors and linked or independent tangent handles edit the real path. Split uses de Casteljau, so inserting an anchor does not change the curve. The marker travels at 48 logical units per second by numerically integrated arc length, rather than by Bezier parameter. It follows live edits and reverses at open endpoints, rather than teleporting back to the start. Handle guides unfold, but geometry always follows the pointer directly.
 
 Copy all source files, retain LICENSE, and install React Native and `@shopify/react-native-skia`. See Example.tsx for the minimal buttons and Geist typography.
 

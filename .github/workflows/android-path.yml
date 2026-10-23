@@ -59,7 +59,11 @@ jobs:
             bash scripts/android-path.sh
       - name: Reject incomplete or crash evidence
         if: always()
-        run: python3 scripts/check-android-results.py smoke-out --require-summary path
+        run: |
+          python3 scripts/check-android-results.py smoke-out --require-summary path
+          for file in rest.png anchor.png anchor.xml split.png split.xml undo.png handle.png handle.xml motion-1.png motion-2.png session.logcat.txt; do
+            test -s "smoke-out/path/$file" || exit 1
+          done
       - uses: actions/upload-artifact@v4
         if: always()
         with:
