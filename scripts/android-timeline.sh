@@ -84,11 +84,11 @@ JUNIT_JAR=$(dirname "$ANDROID_JAR")/optional/android.test.base.jar
 RUNNER_JAR=$(dirname "$ANDROID_JAR")/optional/android.test.runner.jar
 BUILD_TOOLS=$(find "$SDK/build-tools" -name d8 | sort -V | tail -1)
 mkdir -p /tmp/timeline-pinch/classes /tmp/timeline-pinch/dex
-javac -source 8 -target 8 -cp "$ANDROID_JAR:$UI_JAR:$JUNIT_JAR" -d /tmp/timeline-pinch/classes scripts/TimelinePinch.java
-"$BUILD_TOOLS" --lib "$ANDROID_JAR" --lib "$UI_JAR" --lib "$JUNIT_JAR" --output /tmp/timeline-pinch/dex /tmp/timeline-pinch/classes/TimelinePinch.class "$RUNNER_JAR"
+javac -source 8 -target 8 -cp "$ANDROID_JAR:$UI_JAR:$JUNIT_JAR" -d /tmp/timeline-pinch/classes scripts/TimelinePinch.java scripts/android-test-compat/android/test/RepetitiveTest.java
+"$BUILD_TOOLS" --lib "$ANDROID_JAR" --lib "$UI_JAR" --lib "$JUNIT_JAR" --output /tmp/timeline-pinch/dex /tmp/timeline-pinch/classes/TimelinePinch.class /tmp/timeline-pinch/classes/android/test/RepetitiveTest.class
 (cd /tmp/timeline-pinch/dex && jar cf ../timeline-pinch.jar classes.dex)
 adb push /tmp/timeline-pinch/timeline-pinch.jar /data/local/tmp/ >/dev/null
-adb shell uiautomator runtest timeline-pinch.jar -c TimelinePinch > "$OUT/pinch-test.txt"
+adb shell app_process -Xbootclasspath/a:/data/local/tmp/timeline-pinch.jar -Djava.class.path=/system/framework/uiautomator.jar /system/bin com.android.commands.uiautomator.Launcher runtest timeline-pinch.jar -c TimelinePinch > "$OUT/pinch-test.txt"
 grep -q 'OK (1 test)' "$OUT/pinch-test.txt"
 if grep -Eq 'Exception|INSTRUMENTATION_STATUS_CODE: -1|FAILURES' "$OUT/pinch-test.txt"; then cat "$OUT/pinch-test.txt"; exit 1; fi
 sleep 2; adb exec-out screencap -p > "$OUT/pinched.png"
